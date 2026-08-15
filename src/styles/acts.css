@@ -1122,6 +1122,13 @@
     content-visibility: auto;
     contain-intrinsic-size: auto 600px;
   }
+  /* A 390px frame cannot carry two panes — split would mean two 170px columns
+     wrapping every line four times. On a phone the document is the star and
+     fills the frame; tapping to type gives the frame to the source instead. */
+  .app-window[data-view="split"] .app-window__body { grid-template-columns: minmax(0, 1fr); }
+  .app-window[data-view="split"][data-mode="read"] .app-window__source { display: none; }
+  .app-window[data-view="split"][data-mode="edit"] .app-window__read { display: none; }
+  .app-window[data-view="split"][data-mode="edit"] .app-window__source { border-right: 0; }
   .app-window__status-shortcut { display: none; }
   .conflict-bar button { min-height: 48px; flex: 1 1 auto; }
   .theme-showroom__list button { min-height: 52px; }

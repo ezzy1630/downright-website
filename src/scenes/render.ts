@@ -45,6 +45,12 @@ export function initRender(): void {
     const near = rect.top < window.innerHeight + 600 && rect.bottom > -600;
     if (!near) return false;
 
+    // The read layer belongs to the ONE travelling window, so this loop must
+    // only drive it while the window is actually parked in this act. Without
+    // the guard the stage kept scrolling the document after the window had
+    // flown on, and the agent act opened halfway down the file.
+    if (!viewport.contains(readLayer)) return true;
+
     // Exact proportion: stage progress drives document scroll 1:1. Applied
     // every frame — the read layer's scroll geometry can change independently
     // of progress (the window FLIPs in), so a change guard would stall it.
