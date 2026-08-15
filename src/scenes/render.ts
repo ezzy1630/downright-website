@@ -1,76 +1,89 @@
 /**
- * The render act: the living document pins while page scroll drives the
- * document's own scroll in exact proportion — offset tracks bidirectionally,
- * zero wheel interception. As each real capability passes (math, Mermaid,
- * tables, callouts, footnotes, code), a margin annotation blooms exactly
- * once, its hairline connector drawing on the structural curve. Reduced
+ * The render act: the living document (the traveling window) pins while page
+ * scroll drives the document's own scroll in exact proportion — offset tracks
+ * bidirectionally, zero wheel interception. As each real capability passes
+ * (math, Mermaid, tables, callouts, footnotes, code), a margin annotation
+ * blooms exactly once, its hairline connector drawing on the structural
+ * curve. A rAF loop runs only while the stage is near the viewport, so the
+ * sync survives the window's FLIP arrival and any late layout. Reduced
  * motion: full-length document, static annotations.
  */
 
 import { reducedMotion } from "../kernel/switchboard";
-import { repaintSurface } from "../shell/drop";
 import { doc } from "../kernel/store";
 
 interface Annotation {
-  target: HTMLElement;
+  selector: string;
   note: HTMLElement;
-  fired: boolean;
 }
 
 export function initRender(): void {
   const stage = document.querySelector<HTMLElement>("[data-render-stage]");
   const viewport = document.querySelector<HTMLElement>("[data-render-viewport]");
-  const scroller = document.querySelector<HTMLElement>("[data-render-scroller]");
-  if (!stage || !viewport || !scroller) return;
+  const readLayer = document.querySelector<HTMLElement>("[data-document-read]");
+  if (!stage || !viewport || !readLayer) return;
 
-  repaintSurface(scroller.querySelector("[data-static-document]"));
-  const surface = scroller.querySelector<HTMLElement>("[data-static-document]");
-  if (!surface) return;
-
-  const annotations: Annotation[] = [];
+  const notes: Annotation[] = [];
   for (const note of [...stage.querySelectorAll<HTMLElement>("[data-annotation]")]) {
     const selector = note.dataset.annotation;
-    const target = selector ? surface.querySelector<HTMLElement>(selector) : null;
-    if (target) annotations.push({ target, note, fired: false });
+    if (selector) notes.push({ selector, note });
   }
 
+  // The surface re-renders when the store changes, so resolve targets lazily.
+  const surface = (): HTMLElement | null => readLayer.querySelector<HTMLElement>("[data-static-document]");
+
   if (reducedMotion()) {
-    for (const { note } of annotations) note.classList.add("is-bloomed", "is-static");
+    for (const { note } of notes) note.classList.add("is-bloomed", "is-static");
     return;
   }
 
-  let lastProgress = -1;
+  const fired = new Set<string>();
+  let running = false;
 
-  const tick = (): void => {
+  const tick = (): boolean => {
     const rect = stage.getBoundingClientRect();
-    const travel = rect.height - window.innerHeight;
-    // Exact proportion: stage progress drives document scroll 1:1.
-    const progress = Math.min(1, Math.max(0, -rect.top / Math.max(1, travel)));
-    if (Math.abs(progress - lastProgress) < 0.0002) return;
-    lastProgress = progress;
+    const near = rect.top < window.innerHeight + 600 && rect.bottom > -600;
+    if (!near) return false;
 
-    const maxScroll = scroller.scrollHeight - viewport.clientHeight;
-    scroller.scrollTop = progress * maxScroll;
+    // Exact proportion: stage progress drives document scroll 1:1. Applied
+    // every frame — the read layer's scroll geometry can change independently
+    // of progress (the window FLIPs in), so a change guard would stall it.
+    const travel = rect.height - window.innerHeight;
+    const progress = Math.min(1, Math.max(0, -rect.top / Math.max(1, travel)));
+    const maxScroll = readLayer.scrollHeight - readLayer.clientHeight;
+    readLayer.scrollTop = progress * maxScroll;
     stage.style.setProperty("--stage-progress", progress.toFixed(4));
 
     // Annotations bloom once, when their target crosses the reading line.
-    const readingLine = viewport.getBoundingClientRect().top + viewport.clientHeight * 0.42;
-    for (const entry of annotations) {
-      if (entry.fired) continue;
-      const targetRect = entry.target.getBoundingClientRect();
-      if (targetRect.top < readingLine && targetRect.bottom > viewport.getBoundingClientRect().top) {
-        entry.fired = true;
+    const viewportRect = viewport.getBoundingClientRect();
+    const readingLine = viewportRect.top + viewportRect.height * 0.42;
+    for (const entry of notes) {
+      if (fired.has(entry.selector)) continue;
+      const target = surface()?.querySelector<HTMLElement>(entry.selector);
+      if (!target) continue;
+      const targetRect = target.getBoundingClientRect();
+      if (targetRect.top < readingLine && targetRect.bottom > viewportRect.top) {
+        fired.add(entry.selector);
         entry.note.classList.add("is-bloomed");
       }
     }
+    return true;
   };
 
-  window.addEventListener("scroll", () => requestAnimationFrame(tick), { passive: true });
-  window.addEventListener("resize", () => requestAnimationFrame(tick), { passive: true });
-  tick();
+  const loop = (): void => {
+    if (!running) return;
+    if (tick()) requestAnimationFrame(loop);
+    else running = false;
+  };
+  const start = (): void => {
+    if (!running) {
+      running = true;
+      loop();
+    }
+  };
 
-  doc.subscribe(() => {
-    lastProgress = -1;
-    tick();
-  });
+  window.addEventListener("scroll", start, { passive: true });
+  window.addEventListener("resize", start, { passive: true });
+  doc.subscribe(start);
+  start();
 }

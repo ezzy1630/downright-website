@@ -1,7 +1,9 @@
 /**
  * The hydration gate for the living document. The hero ships prerendered
  * (the LCP is DOM text); the CodeMirror chunk loads only on the first
- * pointer or key event aimed at a window. No editor JS before interaction.
+ * pointer or key event aimed at the hero window. No editor JS before
+ * interaction. The window is tabbable: Enter or Space opens the editor for
+ * keyboard users, pointerdown for everyone else.
  */
 
 import type { MountedWindow } from "./mount";
@@ -10,16 +12,21 @@ export function hydrateOnIntent(windowEl: HTMLElement, onMount?: (mounted: Mount
   const body = windowEl.querySelector<HTMLElement>("[data-window-body]");
   if (!body) return;
 
+  const isMounted = (): boolean => body.querySelector<HTMLElement>("[data-document-editor]")?.dataset.editorMounted === "true";
+
   let loading = false;
   const activate = (event: Event): void => {
-    if (body.dataset.editorMounted || loading) return;
-    if (event instanceof KeyboardEvent && document.activeElement !== windowEl && !windowEl.contains(document.activeElement)) {
-      return;
+    if (isMounted() || loading) return;
+    // Only the hero slot is editable — the window is read-only elsewhere.
+    if (windowEl.dataset.slot !== "hero") return;
+    if (event instanceof KeyboardEvent) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (document.activeElement !== windowEl && !windowEl.contains(document.activeElement)) return;
+      event.preventDefault();
     }
     loading = true;
     cleanup();
     import("./mount").then(({ mountEditor }) => {
-      body.replaceChildren();
       const mounted = mountEditor(windowEl, body);
       requestAnimationFrame(() => mounted.view.focus());
       onMount?.(mounted);

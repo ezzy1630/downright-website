@@ -1,9 +1,10 @@
 /**
- * Hydration for the living document windows. The hero window ships as
- * prerendered HTML (the LCP); the CM6 editor mounts on the first pointer or
- * key event aimed at it, and only then does editor JS cost anything. The
- * status bar carries the honesty meter: the decoration pass per keystroke,
- * measured with performance.now(), labeled "parse" — never paint latency.
+ * Hydration for the living document window. The hero window ships as
+ * prerendered HTML (the LCP); the CM6 editor mounts into a dedicated editor
+ * layer on the first pointer or key event aimed at it, and only then does
+ * editor JS cost anything. The status bar carries the honesty meter: the
+ * decoration pass per keystroke, measured with performance.now(), labeled
+ * "parse" — never paint latency.
  */
 
 import { EditorState } from "@codemirror/state";
@@ -63,8 +64,9 @@ function editorExtensions(onParse: (ms: number) => void): Extension[] {
 }
 
 /**
- * Mount a CM6 view inside a window's body element, replacing its static
- * markup. The static markup is remembered so a document reset can restore it.
+ * Mount a CM6 view into the window's editor layer. The read layer stays in
+ * the DOM (hidden in edit mode) so travel can swap back to it without losing
+ * the editor's undo stack or caret.
  */
 export function mountEditor(
   windowEl: HTMLElement,
@@ -78,49 +80,38 @@ export function mountEditor(
     options.onParse?.(ms);
   };
 
+  let editorLayer = bodyEl.querySelector<HTMLElement>("[data-document-editor]");
+  if (!editorLayer) {
+    editorLayer = document.createElement("div");
+    editorLayer.className = "app-window__editor";
+    editorLayer.dataset.documentEditor = "true";
+    bodyEl.append(editorLayer);
+  }
+  editorLayer.hidden = false;
+
   const view = new EditorView({
     state: EditorState.create({ doc: doc.current.text, extensions: editorExtensions(report) }),
-    parent: bodyEl,
+    parent: editorLayer,
   });
-  const staticHtml = bodyEl.innerHTML;
-  bodyEl.dataset.editorMounted = "true";
+  editorLayer.dataset.editorMounted = "true";
+  windowEl.dataset.mode = "edit";
   windowEl.dataset.dirty = String(doc.current.dirty);
-  doc.subscribe((state) => {
+
+  const unsubscribe = doc.subscribe((state) => {
     if (state.text === view.state.doc.toString()) return;
     // External changes (agent resolution, dropped file, reset) land here.
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: state.text } });
   });
+
   return {
     view,
     destroy: () => {
+      unsubscribe();
       view.destroy();
-      delete bodyEl.dataset.editorMounted;
-      bodyEl.innerHTML = staticHtml;
+      editorLayer.replaceChildren();
+      editorLayer.hidden = true;
+      delete editorLayer.dataset.editorMounted;
+      windowEl.dataset.mode = "read";
     },
   };
-}
-
-/**
- * The hero window hydration gate: static until the visitor means to type.
- * No editor JS executes before this fires.
- */
-export function hydrateOnIntent(windowEl: HTMLElement, onMount?: (mounted: MountedWindow) => void): void {
-  const body = windowEl.querySelector<HTMLElement>("[data-window-body]");
-  if (!body) return;
-
-  const activate = (): void => {
-    if (body.dataset.editorMounted) return;
-    body.replaceChildren();
-    const mounted = mountEditor(windowEl, body);
-    requestAnimationFrame(() => mounted.view.focus());
-    cleanup();
-    onMount?.(mounted);
-  };
-
-  const cleanup = (): void => {
-    windowEl.removeEventListener("pointerdown", activate);
-    windowEl.removeEventListener("keydown", activate);
-  };
-  windowEl.addEventListener("pointerdown", activate);
-  windowEl.addEventListener("keydown", activate);
 }

@@ -18,25 +18,18 @@ async function ingest(file: File): Promise<void> {
   repaintDocumentSurfaces();
 }
 
-/** Every rendered instance of the document follows the store. */
+/**
+ * Repaint the traveling window's read layer and the file labels. The zoom
+ * surface owns its own DOM (it classifies blocks), so it re-renders itself
+ * through the store subscription it already holds.
+ */
 export function repaintDocumentSurfaces(): void {
   const state = doc.current;
-  for (const surface of document.querySelectorAll<HTMLElement>("[data-static-document]")) {
-    surface.innerHTML = renderSampleMarkdown(state.text);
-  }
+  const surface = document.querySelector<HTMLElement>("[data-document-read] [data-static-document]");
+  if (surface) surface.innerHTML = renderSampleMarkdown(state.text);
   for (const label of document.querySelectorAll<HTMLElement>("[data-file-label]")) {
     label.textContent = state.fileName;
   }
-}
-
-/**
- * Repaint one scene's own surface. Scenes that classify the document into
- * blocks (zoom, agent) own their DOM; a global repaint would swap the nodes
- * out from under them, so they never call this — they re-render themselves.
- */
-export function repaintSurface(surface: HTMLElement | null | undefined): void {
-  if (!surface) return;
-  surface.innerHTML = renderSampleMarkdown(doc.current.text);
 }
 
 export function initDrop(): void {

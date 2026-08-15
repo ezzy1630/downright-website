@@ -48,7 +48,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <p class="hero__micro">{copy.hero.micro}</p>
       </div>
       <div class="hero__window">
-        <AppWindow variant="hero" editable clipped />
+        <AppWindow editable />
         <p class="hero__caption">This window is real. Type in it.</p>
         <div class="film-invite-row" aria-hidden="true">
           <span class="film-invite" data-film-invite></span>
@@ -85,9 +85,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
             <figcaption>Real Quick Look capture · qlmanage on {osVersion} · nothing retouched</figcaption>
           </figure>
         </div>
-        <div class="gap-pane gap-pane--app">
-          <AppWindow variant="render" flip={false} />
-        </div>
+        <div class="gap-pane gap-pane--app" aria-label="Downright renders the same file live"></div>
         <div class="gap-divider" data-divider role="separator" aria-label="Compare Quick Look with Downright" aria-valuemin="18" aria-valuemax="82" aria-valuenow="50" tabindex="0">
           <span aria-hidden="true"></span>
         </div>
@@ -118,7 +116,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         </div>
         <div class="render-stage__window" data-render-viewport>
           <div class="render-document-viewport" data-render-scroller>
-            <AppWindow variant="render" flip={false} />
+            <div class="window-slot window-slot--render" data-window-slot="render"></div>
           </div>
         </div>
       </div>
@@ -159,7 +157,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       </div>
       <div class="agent-stage" data-agent-stage>
         <div class="agent-stage__document" data-agent-document>
-          <AppWindow variant="agent" flip={false} />
+          <div class="window-slot window-slot--agent" data-window-slot="agent"></div>
         </div>
         <div class="conflict-bar" data-conflict-bar role="region" aria-label="External write needs review" hidden>
           <strong>An agent rewrote this file while you had it open.</strong>
@@ -272,7 +270,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           ))}
         </div>
         <div class="theme-showroom__document">
-          <AppWindow variant="theme" flip={false} />
+          <div class="window-slot window-slot--theme" data-window-slot="theme"></div>
         </div>
       </div>
       <div class="theme-token-table">

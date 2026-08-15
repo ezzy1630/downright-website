@@ -12,15 +12,12 @@ import { ticker } from "../kernel/ticker";
 import { PointerTracker } from "../kernel/pointer";
 import { reducedMotion } from "../kernel/switchboard";
 import { renderSampleMarkdown } from "../data/site";
-import { doc } from "../kernel/store";
 
 export function initGap(): void {
   initDivider();
   initWall();
-  // The right pane is the living document — the same file the hero edits.
-  const stage = document.querySelector<HTMLElement>("[data-gap-stage]");
-  const pane = stage?.querySelector<HTMLElement>(".gap-pane--app [data-static-document]");
-  if (pane) pane.innerHTML = renderSampleMarkdown(doc.current.text);
+  // The right pane is the traveling window itself — the same file the hero
+  // edits. Nothing to clone: the window flies in when the gap claims it.
 }
 
 function initDivider(): void {

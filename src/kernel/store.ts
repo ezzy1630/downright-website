@@ -56,11 +56,19 @@ class DocumentStore {
     this.commit({ text, dirty: true });
   }
 
+  /** Arm the streaming state so scenes stop repainting the read layer while
+   *  the rewrite is mid-flight (the agent owns it until it resolves). */
+  beginStreaming(): void {
+    if (this.state.agent === "idle") this.commit({ agent: "streaming" });
+  }
+
+  /** The external write always becomes the document; a dirty buffer only
+   *  decides whether it lands as a conflict (reviewable) or a plain apply. */
   stageExternalWrite(theirs: string): void {
     this.commit({
       revision: { mine: this.state.text, theirs },
       agent: this.state.dirty ? "conflict" : "streaming",
-      text: this.state.dirty ? this.state.text : theirs,
+      text: theirs,
     });
   }
 

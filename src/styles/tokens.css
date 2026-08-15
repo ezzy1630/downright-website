@@ -62,6 +62,10 @@
   --motion-breathe: 0.12s;
   --motion-preview-stagger: 0.04s;
   --motion-stagger: 0.04s;
+  --ease-decelerate: cubic-bezier(0.22, 0.82, 0.28, 1);
+  --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-structural: cubic-bezier(0.3, 0.3, 0.2, 1);
+  --ease-out: ease-out;
   --font-display: "New York", "Iowan Old Style", Newsreader, Georgia, serif;
   --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Inter, Arial, sans-serif;
   --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;

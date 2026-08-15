@@ -74,7 +74,7 @@ function initInsertEditChip(): void {
   document.querySelector<HTMLButtonElement>("[data-film-insert]")?.addEventListener("click", (event) => {
     const chip = event.currentTarget;
     doc.edit(`${doc.current.text}\n\n- [ ] tapped from the phone — the Mac gets the real thing`);
-    const surface = document.querySelector<HTMLElement>("[data-render-scroller] [data-static-document]");
+    const surface = document.querySelector<HTMLElement>("[data-document-read] [data-static-document]");
     if (surface) surface.innerHTML = renderSampleMarkdown(doc.current.text);
     const label = chip.textContent;
     chip.textContent = "inserted ✓";

@@ -50,6 +50,11 @@ export function initAgent(rail: RailController | null): void {
   const reviewPanel = stage.querySelector<HTMLElement>("[data-review-panel]");
   if (!documentHost || !toastEl || !conflictBar) return;
 
+  // The rewrite lands in the traveling window's read layer — the same
+  // document every act shows. Resolve lazily: the window teleports in.
+  const readLayer = (): HTMLElement | null => document.querySelector<HTMLElement>("[data-document-read]");
+  const surface = (): HTMLElement | null => document.querySelector<HTMLElement>("[data-document-read] [data-static-document]");
+
   let fired = false;
   let triggered = false;
   try {
@@ -78,7 +83,7 @@ export function initAgent(rail: RailController | null): void {
     if (reducedMotion()) {
       doc.stageExternalWrite(theirs);
       doc.markStreamed();
-      renderWithMarks(documentHost, theirs, tokens, true);
+      renderWithMarks(surface(), theirs, tokens, true);
       toastEl.querySelector("[data-change-summary]")!.textContent = `${summary.rewritten} rewritten · ${summary.added} added`;
       toastEl.classList.add("is-visible");
       if (doc.current.dirty) {
@@ -90,12 +95,15 @@ export function initAgent(rail: RailController | null): void {
     }
 
     // Streaming rewrite: rendered words carry word-level marks that surface
-    // on a per-word cadence; the reading position never moves.
-    const scrollAnchor = documentHost.parentElement?.scrollTop ?? 0;
-    renderWithMarks(documentHost, theirs, tokens, false);
-    documentHost.parentElement?.scrollTo(0, scrollAnchor);
+    // on a per-word cadence; the reading position never moves. Arm the store
+    // so the traveling window stops repainting under the rewrite.
+    doc.beginStreaming();
+    const scroller = readLayer();
+    const scrollAnchor = scroller?.scrollTop ?? 0;
+    renderWithMarks(surface(), theirs, tokens, false);
+    scroller?.scrollTo(0, scrollAnchor);
 
-    const marks = [...documentHost.querySelectorAll<HTMLElement>("mark[data-change-kind]")];
+    const marks = [...(surface()?.querySelectorAll<HTMLElement>("mark[data-change-kind]") ?? [])];
     const perWord = Math.max(12, 2200 / Math.max(1, marks.length));
     marks.forEach((changeMark, index) => {
       window.setTimeout(() => changeMark.classList.add("is-live"), 300 + index * perWord);
@@ -105,18 +113,20 @@ export function initAgent(rail: RailController | null): void {
     window.setTimeout(() => {
       toastEl.querySelector("[data-change-summary]")!.textContent = `${summary.rewritten} rewritten · ${summary.added} added`;
       toastEl.classList.add("is-visible");
-      // Marks dim after dwell, exactly like the app.
+      // The rewrite lands in the store; the read layer holds the marks until
+      // the conflict resolves or the dwell elapses, exactly like the app.
+      doc.stageExternalWrite(theirs);
       window.setTimeout(() => documentHost.classList.add("marks-dimmed"), DWELL_MS);
       if (doc.current.dirty) {
         // The unforgettable branch: they typed, the buffer is dirty.
-        doc.stageExternalWrite(theirs);
         conflictBar.removeAttribute("hidden");
         conflictBar.classList.add("is-open");
         conflictBar.querySelector<HTMLButtonElement>("[data-conflict-focus]")?.focus();
       } else {
-        doc.stageExternalWrite(theirs);
-        doc.markStreamed();
-        finish();
+        window.setTimeout(() => {
+          doc.markStreamed();
+          finish();
+        }, DWELL_MS + 400);
       }
     }, streamEnd);
   };
@@ -182,11 +192,11 @@ export function initAgent(rail: RailController | null): void {
     if (!revision) return;
     if (action === "mine") {
       doc.resolveMine();
-      repaintHost(documentHost);
+      repaintHost(surface());
       toast("<strong>Your buffer kept.</strong><span>The agent's words stay marked, never applied.</span>");
     } else {
       doc.resolveTheirs();
-      repaintHost(documentHost);
+      repaintHost(surface());
       toast("<strong>External write accepted.</strong><span>The rendered document is current.</span>");
     }
     conflictBar.classList.remove("is-open");
@@ -205,8 +215,7 @@ export function initAgent(rail: RailController | null): void {
   });
 }
 
-function repaintHost(host: HTMLElement): void {
-  const surface = host.querySelector<HTMLElement>("[data-static-document]");
+function repaintHost(surface: HTMLElement | null): void {
   if (surface) surface.innerHTML = renderSampleMarkdown(doc.current.text);
 }
 
@@ -214,8 +223,7 @@ function repaintHost(host: HTMLElement): void {
  * Renders `theirs` with word-level change marks. Modified words carry
  * changeModified; words that only exist in theirs carry changeAdded.
  */
-function renderWithMarks(host: HTMLElement, theirs: string, tokens: DiffToken[], staticMarks: boolean): void {
-  const surface = host.querySelector<HTMLElement>("[data-static-document]");
+function renderWithMarks(surface: HTMLElement | null, theirs: string, tokens: DiffToken[], staticMarks: boolean): void {
   if (!surface) return;
   surface.innerHTML = renderSampleMarkdown(theirs);
 

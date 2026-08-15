@@ -1,31 +1,33 @@
 ---
 /**
- * The living document window: the app's real chrome (traffic lights,
+ * The living document window — the app's real chrome (traffic lights,
  * Document/Source segmented control with a sprung indicator, status bar with
- * the honesty meter) around the document surface. The body ships prerendered
- * — it is the LCP — and the editor hydrates on intent. ⌘⇧E flips the window
- * to its raw source with line numbers; the source face mirrors the document
- * byte-for-byte.
+ * the honesty meter) around one document surface. The body ships prerendered
+ * (the LCP is DOM text); the editor hydrates on intent in the hero only. The
+ * window is a single node that travels between acts — read mode everywhere,
+ * editor mode in the hero. ⌘⇧E flips the window to its raw source.
  */
 import { sampleHtml } from "../data/site";
 
 interface Props {
-  variant?: "hero" | "render" | "zoom" | "agent" | "theme";
   editable?: boolean;
   flip?: boolean;
-  clipped?: boolean;
   label?: string;
 }
 
-const { variant = "render", editable = false, flip = true, clipped = false, label = "sample.md" } = Astro.props;
+const { editable = false, flip = true, label = "sample.md" } = Astro.props;
 ---
 
 <div
-  class={`app-window app-window--${variant}${clipped ? " is-clipped" : ""}`}
+  class="app-window"
   data-window
+  data-face="document"
+  data-mode="read"
+  tabindex="0"
+  role="group"
+  aria-label="The living document — press Enter to edit"
   data-flip-window={flip ? "" : undefined}
   data-editor-window={editable ? "" : undefined}
-  data-face="document"
 >
   <div class="app-window__inner" data-theme-zone>
     <div class="app-window__face app-window__face--document">
@@ -42,7 +44,10 @@ const { variant = "render", editable = false, flip = true, clipped = false, labe
         <span class="app-window__hint" aria-hidden="true">⌘⇧E</span>
       </div>
       <div class="app-window__body" data-window-body>
-        <div class="document-content" data-static-document set:html={sampleHtml} />
+        <div class="app-window__read" data-document-read>
+          <div class="document-content" data-static-document set:html={sampleHtml} />
+        </div>
+        <div class="app-window__editor" data-document-editor hidden></div>
       </div>
       <div class="app-window__status">
         <span class="app-window__status-item app-window__status-file"><i aria-hidden="true">●</i><span data-file-label>{label}</span></span>

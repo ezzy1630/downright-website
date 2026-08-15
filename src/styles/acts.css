@@ -62,8 +62,9 @@
 
 .app-window__inner {
   position: relative;
+  height: 100%;
   transform-style: preserve-3d;
-  transition: transform var(--motion-liquid) var(--ease-snap);
+  transition: transform var(--motion-deliberate) var(--ease-snap);
 }
 
 .app-window[data-face="source"] .app-window__inner {
@@ -75,6 +76,9 @@
 }
 
 .app-window__face {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
@@ -91,10 +95,27 @@
   background: var(--code-bg);
 }
 
-.app-window--hero { height: min(728px, calc(100dvh - 112px)); min-height: 540px; }
-.app-window--render, .app-window--agent { height: 100%; }
-.app-window--theme { height: 620px; }
-.app-window--hero.is-clipped { mask-image: linear-gradient(to bottom, #000 82%, transparent); }
+/* The window is one node; each act's slot sizes it. */
+.app-window { width: 100%; height: 100%; }
+.hero__window .app-window { height: min(728px, calc(100dvh - 112px)); min-height: 540px; }
+.window-slot { width: 100%; height: 100%; }
+.window-slot--render { height: 100%; }
+.window-slot--agent { height: 100%; }
+.window-slot--theme { height: 620px; }
+.hero__window .app-window__face--document { mask-image: linear-gradient(to bottom, #000 84%, transparent 98%); }
+
+/* Read vs editor: one document, two faces of the same layer. */
+.app-window__read { height: 100%; overflow-y: auto; scrollbar-width: thin; }
+.app-window__editor { height: 100%; }
+.app-window[data-mode="edit"] .app-window__read { display: none; }
+.app-window[data-mode="read"] .app-window__editor { display: none; }
+
+/* Keyboard entry: the window is tabbable, Enter opens the editor. */
+.app-window[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: var(--radius-window);
+}
 
 .app-window__bar {
   display: flex;
@@ -156,7 +177,8 @@
 
 .app-window__body {
   position: relative;
-  height: calc(100% - 50px - 30px);
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
   background: var(--bg);
 }
