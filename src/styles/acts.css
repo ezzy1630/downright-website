@@ -410,6 +410,8 @@
 /* ── Structural zoom ──────────────────────────────────────────────────── */
 
 .zoom-stage {
+  position: sticky;
+  top: 72px;
   margin-top: 52px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
