@@ -33,15 +33,17 @@ const { editable = false, flip = true, label = "sample.md" } = Astro.props;
     <div class="app-window__face app-window__face--document">
       <div class="app-window__bar">
         <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="app-window__file"><b data-file-label>{label}</b><small>Downright · Live</small></span>
-        {flip && (
-          <div class="app-window__segmented" role="tablist" aria-label="Window mode">
-            <button type="button" role="tab" aria-selected="true" data-face-button="document">Document</button>
-            <button type="button" role="tab" aria-selected="false" data-face-button="source">Source</button>
-            <i class="app-window__segmented-indicator" aria-hidden="true"></i>
-          </div>
-        )}
-        <span class="app-window__hint" aria-hidden="true">⌘⇧E</span>
+        <span class="app-window__file"><b data-file-label>{label}</b><small>Live</small></span>
+        <div class="app-window__bar-controls">
+          {flip && (
+            <div class="app-window__segmented" role="tablist" aria-label="Window mode">
+              <button type="button" role="tab" aria-selected="true" data-face-button="document">Document</button>
+              <button type="button" role="tab" aria-selected="false" data-face-button="source">Source</button>
+              <i class="app-window__segmented-indicator" aria-hidden="true"></i>
+            </div>
+          )}
+          <span class="app-window__hint" aria-hidden="true">⌘⇧E</span>
+        </div>
       </div>
       <div class="app-window__body" data-window-body>
         <div class="app-window__read" data-document-read>

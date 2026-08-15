@@ -75,11 +75,12 @@ export function ensureGlassFilter(): void {
 
   const dataUrl = canvas.toDataURL();
 
-  // One filter graph: the precomputed map feeds the displacement, the
-  // specular lighting reads the source alpha as a lens height for the rim,
-  // and the composite masks it back to the surface shape. All primitives
-  // must live inside the SAME filter — feDisplacementMap's `in2` resolves
-  // within its own filter only, so a sibling filter's `result` is invisible.
+  // One filter graph: the precomputed map bends the backdrop at the rim and
+  // nothing else. There is deliberately no specular pass — a point light on a
+  // 1440px header renders as an off-centre bright blob, which is a decorative
+  // gradient by another name (§3). The specular edge is a CSS inset hairline.
+  // All primitives must live inside the SAME filter: feDisplacementMap's `in2`
+  // resolves within its own filter only.
   const apply = document.createElementNS("http://www.w3.org/2000/svg", "filter");
   apply.id = "glass";
   apply.setAttribute("x", "-20%");
@@ -99,45 +100,18 @@ export function ensureGlassFilter(): void {
   refraction.setAttribute("xChannelSelector", "R");
   refraction.setAttribute("yChannelSelector", "G");
 
-  const specular = document.createElementNS("http://www.w3.org/2000/svg", "feSpecularLighting");
-  specular.setAttribute("in", "SourceAlpha");
-  specular.setAttribute("surfaceScale", "1.4");
-  specular.setAttribute("specularConstant", "0.55");
-  specular.setAttribute("specularExponent", "20");
-  specular.setAttribute("lighting-color", "#ffffff");
-  specular.setAttribute("result", "specular");
-  const light = document.createElementNS("http://www.w3.org/2000/svg", "fePointLight");
-  light.setAttribute("x", "120");
-  light.setAttribute("y", "60");
-  light.setAttribute("z", "140");
-  specular.append(light);
+  // Clip the bent backdrop back to the surface's own shape so the filter
+  // region (-20%/140%) can never paint outside the glass.
+  const clip = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+  clip.setAttribute("in", "refracted");
+  clip.setAttribute("in2", "SourceAlpha");
+  clip.setAttribute("operator", "in");
 
-  const compose = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
-  compose.setAttribute("in", "specular");
-  compose.setAttribute("in2", "SourceAlpha");
-  compose.setAttribute("operator", "in");
+  refraction.setAttribute("result", "refracted");
 
-  apply.append(feImage, refraction, specular, compose);
+  apply.append(feImage, refraction, clip);
 
-  // T2 owned-backdrop: the window chrome sits over content we render
-  // ourselves, so it refracts with a regular filter (no backdrop sampling).
-  // A gentler scale keeps the title bar's labels legible; specular only.
-  const chrome = document.createElementNS("http://www.w3.org/2000/svg", "filter");
-  chrome.id = "glass-chrome";
-  chrome.setAttribute("x", "-20%");
-  chrome.setAttribute("y", "-20%");
-  chrome.setAttribute("width", "140%");
-  chrome.setAttribute("height", "140%");
-  chrome.setAttribute("color-interpolation-filters", "sRGB");
-  const chromeImage = feImage.cloneNode(true) as SVGElement;
-  const chromeRefract = refraction.cloneNode(true) as SVGElement;
-  chromeRefract.setAttribute("scale", "7");
-  const chromeSpecular = specular.cloneNode(true) as SVGElement;
-  chromeSpecular.setAttribute("specularConstant", "0.35");
-  const chromeCompose = compose.cloneNode(true) as SVGElement;
-  chrome.append(chromeImage, chromeRefract, chromeSpecular, chromeCompose);
-
-  svg.append(apply, chrome);
+  svg.append(apply);
   document.body.append(svg);
   document.documentElement.dataset.glass = "t1";
 }

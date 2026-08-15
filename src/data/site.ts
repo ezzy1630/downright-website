@@ -88,13 +88,115 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
+/* ── Math ───────────────────────────────────────────────────────────────
+   A TeX subset renderer, ~70 lines, no library. The app draws real math; a
+   marketing page that shows `$\sqrt{x^2+y^2}$` as literal backslashes is
+   advertising the opposite of the product. Variables italic serif, operators
+   and function names upright, real superscripts, and a radical whose vinculum
+   is a border-top over the radicand — which is how one is actually drawn. */
+
+const MATH_LETTERS: Record<string, string> = {
+  alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", theta: "θ",
+  lambda: "λ", mu: "μ", pi: "π", rho: "ρ", sigma: "σ", tau: "τ", phi: "φ",
+  omega: "ω", Delta: "Δ", Sigma: "Σ", Omega: "Ω", Pi: "Π",
+};
+
+const MATH_SYMBOLS: Record<string, string> = {
+  longrightarrow: "⟶", rightarrow: "→", to: "→", mapsto: "↦",
+  times: "×", cdot: "·", div: "÷", pm: "±", leq: "≤", geq: "≥", neq: "≠",
+  approx: "≈", equiv: "≡", infty: "∞", partial: "∂", sum: "∑", int: "∫",
+};
+
+export function renderMath(tex: string): string {
+  const source = tex;
+  let index = 0;
+
+  const readGroup = (): string => {
+    if (source[index] === "{") {
+      const groupStart = index + 1;
+      let depth = 1;
+      index += 1;
+      while (index < source.length) {
+        if (source[index] === "{") depth += 1;
+        else if (source[index] === "}") {
+          depth -= 1;
+          if (depth === 0) break;
+        }
+        index += 1;
+      }
+      const inner = source.slice(groupStart, index);
+      index += 1;
+      return renderMath(inner);
+    }
+    return readAtom();
+  };
+
+  const readCommand = (): string => {
+    index += 1;
+    let name = "";
+    while (index < source.length && /[a-zA-Z]/.test(source[index])) name += source[index++];
+    if (name === "sqrt") {
+      return `<span class="math-sqrt"><span class="math-radical" aria-hidden="true">√</span><span class="math-radicand">${readGroup()}</span></span>`;
+    }
+    if (name === "frac") {
+      const over = readGroup();
+      const under = readGroup();
+      return `<span class="math-frac"><span>${over}</span><span>${under}</span></span>`;
+    }
+    // \mathrm / \mathop / \operatorname / \text — upright, never italic.
+    if (name === "mathrm" || name === "mathop" || name === "operatorname" || name === "text") {
+      return `<span class="math-up">${readGroup()}</span>`;
+    }
+    if (MATH_LETTERS[name]) return `<i class="math-var">${MATH_LETTERS[name]}</i>`;
+    if (MATH_SYMBOLS[name]) return `<span class="math-op">${MATH_SYMBOLS[name]}</span>`;
+    if (!name) {
+      index += 1;
+      return "";
+    }
+    return `<span class="math-up">${escapeHtml(name)}</span>`;
+  };
+
+  const readAtom = (): string => {
+    const character = source[index];
+    if (character === "\\") return readCommand();
+    if (character === "{") return readGroup();
+    index += 1;
+    if (/[A-Za-z]/.test(character)) return `<i class="math-var">${character}</i>`;
+    if (/[0-9.]/.test(character)) return `<span class="math-num">${character}</span>`;
+    if (/\s/.test(character)) return " ";
+    if (character === "-") return '<span class="math-op">−</span>';
+    if ("+=<>".includes(character)) return `<span class="math-op">${escapeHtml(character)}</span>`;
+    return `<span class="math-punct">${escapeHtml(character)}</span>`;
+  };
+
+  let out = "";
+  while (index < source.length) {
+    const character = source[index];
+    if (character === "^" || character === "_") {
+      index += 1;
+      const body = readGroup();
+      out += character === "^" ? `<sup>${body}</sup>` : `<sub>${body}</sub>`;
+      continue;
+    }
+    out += readAtom();
+  }
+  return out;
+}
+
 function inlineMarkup(value: string): string {
-  const codeSpans: string[] = [];
-  let html = escapeHtml(value).replace(/`([^`]+)`/g, (_, code) => {
-    const index = codeSpans.push(`<code>${code}</code>`) - 1;
-    return `\u0000${index}\u0000`;
-  });
-  html = html
+  const stashed: string[] = [];
+  const stash = (html: string): string => `\u0000${stashed.push(html) - 1}\u0000`;
+
+  // Code spans, math, and wiki links are lifted out BEFORE escaping: their
+  // bytes are literal, and entity-escaping LaTeX mangles every backslash group.
+  let text = value.replace(/`([^`]+)`/g, (_, code: string) => stash(`<code>${escapeHtml(code)}</code>`));
+  text = text.replace(/\$([^$\n]+)\$/g, (_, tex: string) =>
+    stash(`<span class="doc-math doc-math--inline">${renderMath(tex)}</span>`));
+  // [[wiki]] — the brackets are markup, so they recede; the name is the link.
+  text = text.replace(/\[\[([^\]]+)\]\]/g, (_, name: string) =>
+    stash(`<span class="doc-wikilink"><i aria-hidden="true">[[</i>${escapeHtml(name)}<i aria-hidden="true">]]</i></span>`));
+
+  const html = escapeHtml(text)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
     .replace(/&lt;(https?:\/\/[^&]+)&gt;/g, '<a href="$1">$1</a>')
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
@@ -102,7 +204,7 @@ function inlineMarkup(value: string): string {
     .replace(/\*([^*]+)\*/g, "<em>$1</em>")
     .replace(/_([^_]+)_/g, "<em>$1</em>")
     .replace(/\[\^([^\]]+)\]/g, '<sup class="doc-footnote-mark">$1</sup>');
-  return html.replace(/\u0000(\d+)\u0000/g, (_, index) => codeSpans[Number(index)]);
+  return html.replace(/\u0000(\d+)\u0000/g, (_, index: string) => stashed[Number(index)]);
 }
 
 function syntaxMarkup(value: string): string {
@@ -147,7 +249,7 @@ export function renderSampleMarkdown(source = sampleMarkdown): string {
       index += 1;
       while (index < lines.length && lines[index] !== "$$") block.push(lines[index++]);
       index += 1;
-      html.push(`<div class="doc-math doc-math--block" aria-label="Rendered math">${inlineMarkup(block.join(" "))}</div>`);
+      html.push(`<div class="doc-math doc-math--block" role="math" aria-label="read of source maps to render of surface">${renderMath(block.join(" "))}</div>`);
       continue;
     }
     if (/^#{1,6} /.test(line)) {
