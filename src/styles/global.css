@@ -1312,6 +1312,7 @@ ol {
   .render-document-viewport { height: 620px; }
   .annotation-list { margin-top: 26px; }
   .zoom-stage__bar { align-items: flex-start; gap: 16px; }
+  .zoom-stage__hint { display: none; }
   .zoom-surface { padding: 30px 18px 40px; }
   .zoom-surface h3 { max-width: 15ch; font-size: 38px; }
   .zoom-surface__blocks,
