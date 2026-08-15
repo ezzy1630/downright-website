@@ -12,7 +12,7 @@ import { sound } from "../kernel/sound";
 import { setInPageReduce } from "../kernel/switchboard";
 import { doc } from "../kernel/store";
 import { repaintDocumentSurfaces } from "./drop";
-import { setFace } from "./flip";
+import { setWindowView, windowView } from "./flip";
 import { springScrollTo } from "../motion/scroll";
 
 interface Action {
@@ -69,13 +69,13 @@ export function buildActions(): Action[] {
     ...acts,
     {
       id: "flip",
-      label: "Flip to source",
+      label: "Show the source",
       hint: "⌘⇧E",
       group: "Document",
       run: (close) => {
         close();
-        const windowEl = document.querySelector<HTMLElement>("[data-flip-window]");
-        if (windowEl) setFace(windowEl, windowEl.dataset.face === "source" ? "document" : "source");
+        const windowEl = document.querySelector<HTMLElement>("[data-window]");
+        if (windowEl) setWindowView(windowEl, windowView(windowEl) === "source" ? "split" : "source");
       },
     },
     {
@@ -171,7 +171,7 @@ export function buildActions(): Action[] {
 
 const SHORTCUTS: [keys: string, action: string][] = [
   ["⌘K", "This palette"],
-  ["⌘⇧E", "Flip the window to its source"],
+  ["⌘⇧E", "Show the window's source"],
   ["Space", "Quick Look the focused file card"],
   ["← → ↑ ↓", "Move the divider, the rail, the palette"],
   ["Esc", "Close whatever opened"],

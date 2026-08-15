@@ -144,7 +144,7 @@ export class WindowDirector {
 
     // The hero is the only split slot; every other act receives the same
     // window as a document-only surface, so no two acts repeat a composition.
-    this.window.dataset.view = target === "hero" ? "split" : "read";
+    this.window.dataset.view = target === "hero" ? "split" : "document";
 
     // The render act drives the read pane's scrollTop directly. Leaving it
     // where the last frame left it made every later act open on the middle of

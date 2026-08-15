@@ -1,74 +1,68 @@
 /**
- * ⌘⇧E flip to source: the app window 3D-flips (two faces, preserve-3d,
- * compositor-only transforms) to its own raw Markdown with line numbers.
- * Also driven by the window's Document/Source segmented control. The source
- * face always mirrors the living document byte-for-byte.
+ * Window modes — the app's real adaptive surface, stated visibly.
+ *
+ *   Document · Split · Source
+ *
+ * One segmented control, three labelled segments, and ⌘⇧E as a shortcut to
+ * Source. There is deliberately no hidden gesture: the old build toggled the
+ * source face on double-click, which no visitor would ever discover and which
+ * was the only path to a headline feature. Standing rule — every affordance
+ * is visibly labelled, and a shortcut is never the sole route to a behaviour.
  */
 
 import { doc } from "../kernel/store";
 import { sound } from "../kernel/sound";
-import { reducedMotion } from "../kernel/switchboard";
 
-function renderSourceFace(target: HTMLElement, text: string): void {
-  const lines = text.split("\n");
-  const fragment = document.createDocumentFragment();
-  lines.forEach((line, index) => {
-    const row = document.createElement("div");
-    row.className = "source-row";
-    const number = document.createElement("span");
-    number.className = "source-row__number";
-    number.textContent = String(index + 1).padStart(3, " ");
-    const content = document.createElement("span");
-    content.className = "source-row__text";
-    content.textContent = line || " ";
-    row.append(number, content);
-    fragment.append(row);
-  });
-  target.replaceChildren(fragment);
+export type WindowView = "document" | "split" | "source";
+
+const ORDER: WindowView[] = ["document", "split", "source"];
+
+export function windowView(windowEl: HTMLElement): WindowView {
+  const value = windowEl.dataset.view;
+  return ORDER.includes(value as WindowView) ? (value as WindowView) : "document";
 }
 
-export function initFlip(): void {
-  const flipKeys = (event: KeyboardEvent): void => {
-    if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "e") {
-      event.preventDefault();
-      toggleAnyWindow();
-    }
-  };
-  window.addEventListener("keydown", flipKeys);
-
-  const unsubscribe = doc.subscribe(() => {
-    for (const source of document.querySelectorAll<HTMLElement>("[data-source-face]")) {
-      if (source.closest<HTMLElement>("[data-window]")?.dataset.face === "source") renderSourceFace(source, doc.current.text);
-    }
-  });
-  void unsubscribe;
-}
-
-function toggleAnyWindow(): void {
-  const windowEl = document.querySelector<HTMLElement>("[data-flip-window]");
-  if (windowEl) setFace(windowEl, windowEl.dataset.face === "source" ? "document" : "source");
-}
-
-export function setFace(windowEl: HTMLElement, face: "document" | "source"): void {
-  if (windowEl.dataset.face === face) return;
-  const source = windowEl.querySelector<HTMLElement>("[data-source-face]");
-  if (face === "source" && source) renderSourceFace(source, doc.current.text);
-  windowEl.dataset.face = face;
-  if (reducedMotion() && source) renderSourceFace(source, doc.current.text);
+export function setWindowView(windowEl: HTMLElement, view: WindowView): void {
+  if (windowView(windowEl) === view) return;
+  windowEl.dataset.view = view;
+  const index = ORDER.indexOf(view);
+  windowEl.style.setProperty("--segment-index", String(index));
+  for (const button of windowEl.querySelectorAll<HTMLButtonElement>("[data-view-button]")) {
+    button.setAttribute("aria-selected", String(button.dataset.viewButton === view));
+  }
   sound.whoosh();
-  const segmented = windowEl.querySelectorAll<HTMLButtonElement>("[data-face-button]");
-  for (const button of segmented) button.setAttribute("aria-selected", String(button.dataset.faceButton === face));
 }
 
-/** Wire the segmented Document/Source control with its sprung indicator. */
-export function initWindowControls(): void {
-  for (const windowEl of document.querySelectorAll<HTMLElement>("[data-flip-window]")) {
-    for (const button of windowEl.querySelectorAll<HTMLButtonElement>("[data-face-button]")) {
-      button.addEventListener("click", () => setFace(windowEl, button.dataset.faceButton === "source" ? "source" : "document"));
+/** ⌘⇧E toggles Source against whatever mode the window was showing. */
+export function initFlip(): void {
+  let previous: WindowView = "split";
+  window.addEventListener("keydown", (event) => {
+    if (!(event.metaKey || event.ctrlKey) || !event.shiftKey) return;
+    if (event.key.toLowerCase() !== "e") return;
+    const windowEl = document.querySelector<HTMLElement>("[data-window]");
+    if (!windowEl) return;
+    event.preventDefault();
+    const current = windowView(windowEl);
+    if (current === "source") setWindowView(windowEl, previous);
+    else {
+      previous = current;
+      setWindowView(windowEl, "source");
     }
-    windowEl.addEventListener("dblclick", (event) => {
-      if ((event.target as HTMLElement).closest("[data-face-button]")) return;
-      setFace(windowEl, windowEl.dataset.face === "source" ? "document" : "source");
-    });
+  });
+
+  // The source pane is prerendered; once the editor mounts, CM6 owns it and
+  // the store keeps the two in step. Nothing else to mirror.
+  void doc;
+}
+
+export function initWindowControls(): void {
+  for (const windowEl of document.querySelectorAll<HTMLElement>("[data-window]")) {
+    windowEl.style.setProperty("--segment-index", String(ORDER.indexOf(windowView(windowEl))));
+    for (const button of windowEl.querySelectorAll<HTMLButtonElement>("[data-view-button]")) {
+      button.addEventListener("click", () => {
+        const view = button.dataset.viewButton as WindowView;
+        if (ORDER.includes(view)) setWindowView(windowEl, view);
+      });
+    }
   }
 }

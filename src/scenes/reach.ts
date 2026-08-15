@@ -200,7 +200,7 @@ function initVerlet(): void {
     card.py = card.y - velocity.y / 60;
     wake();
     // Dropped on a document window: the file becomes the living document.
-    const overWindow = (event.target as Element | null)?.closest("[data-flip-window], [data-static-document]");
+    const overWindow = (event.target as Element | null)?.closest("[data-window], [data-static-document]");
     if (overWindow) {
       doc.replaceFile(sourceFor(card), card.name);
       repaintDocumentSurfaces();

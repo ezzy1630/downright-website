@@ -40,13 +40,12 @@ export const copy = {
   },
   gap: {
     eyebrow: "The difference",
-    beatOneHeading: "Quick Look vs Downright.",
-    beatOneBody: "Default previews are limited. Downright is built to render Markdown the way it should be — the same file, the same bytes, opened twice.",
-    quickLookLabel: "Quick Look",
-    quickLookLine: "Truncated. Collapsed. Hard to scan.",
-    downrightLabel: "Downright",
-    downrightLine: "Complete. Styled. Built for comprehension.",
-    beatTwoLine: "Your agents wrote 3,000 words while you read this sentence. Somewhere in there is the one claim that matters.",
+    lede: "Press Space on a Markdown file today. This is what macOS shows you.",
+    capture: "Real capture · qlmanage on macOS 26 · nothing retouched. The lines above are the same bytes, live.",
+    closing: "Same file. Same bytes. Downright just renders them.",
+    annotation: "same bytes ↑",
+    beatTwoHeading: "And there is more of it every day.",
+    beatTwoLine: "Your agents wrote 3,000 words while you read this sentence. One of them matters. Good luck finding it.",
   },
   render: {
     heading: "It reads finished.",
@@ -226,42 +225,63 @@ function mermaidMarkup(): string {
   return `<div class="mermaid-figure" role="img" aria-label="Markdown flows to a decision, then either stays as source or renders as a document"><div class="mermaid-node">MD</div><span class="mermaid-arrow" aria-hidden="true">→</span><div class="mermaid-node mermaid-node--decision">?</div><div class="mermaid-branches"><div><span class="mermaid-label">no</span><span class="mermaid-arrow" aria-hidden="true">→</span><div class="mermaid-node">Keep</div></div><div><span class="mermaid-label">yes</span><span class="mermaid-arrow" aria-hidden="true">→</span><div class="mermaid-node">Render</div></div></div></div>`;
 }
 
-export function renderSampleMarkdown(source = sampleMarkdown): string {
+/**
+ * A document block: the exact source bytes that produced it, and the HTML
+ * they render to. The gap act's sweep crossfades one into the other in
+ * place, which only reads honestly if both halves come from the same walk of
+ * the same string — so the renderer emits pairs and the string join is the
+ * derived form, not the other way round.
+ */
+export interface DocumentBlock {
+  raw: string;
+  html: string;
+}
+
+export function renderSampleBlocks(source = sampleMarkdown): DocumentBlock[] {
   const lines = source.trim().split(/\r?\n/);
-  const html: string[] = [];
+  const blocks: DocumentBlock[] = [];
   let index = 0;
+  let origin = 0;
+  const emit = (html: string): void => {
+    blocks.push({ raw: lines.slice(origin, index).join("\n"), html });
+  };
+
   while (index < lines.length) {
+    origin = index;
     const line = lines[index];
-    if (!line.trim()) { index += 1; continue; }
-    if (line.startsWith("```")) {
+    if (!line.trim()) {
+      index += 1;
+      continue;
+    }
+    if (line.startsWith("\`\`\`")) {
       const language = line.slice(3).trim();
-      const block: string[] = [];
+      const body: string[] = [];
       index += 1;
-      while (index < lines.length && !lines[index].startsWith("```")) block.push(lines[index++]);
+      while (index < lines.length && !lines[index].startsWith("\`\`\`")) body.push(lines[index++]);
       index += 1;
-      html.push(language === "mermaid"
+      emit(language === "mermaid"
         ? mermaidMarkup()
-        : `<pre class="doc-code"><span class="code-language">${escapeHtml(language || "text")}</span><code>${syntaxMarkup(block.join("\n"))}</code></pre>`);
+        : `<pre class="doc-code"><span class="code-language">${escapeHtml(language || "text")}</span><code>${syntaxMarkup(body.join("\n"))}</code></pre>`);
       continue;
     }
     if (line === "$$") {
-      const block: string[] = [];
+      const body: string[] = [];
       index += 1;
-      while (index < lines.length && lines[index] !== "$$") block.push(lines[index++]);
+      while (index < lines.length && lines[index] !== "$$") body.push(lines[index++]);
       index += 1;
-      html.push(`<div class="doc-math doc-math--block" role="math" aria-label="read of source maps to render of surface">${renderMath(block.join(" "))}</div>`);
+      emit(`<div class="doc-math doc-math--block" role="math" aria-label="read of source maps to render of surface">${renderMath(body.join(" "))}</div>`);
       continue;
     }
     if (/^#{1,6} /.test(line)) {
       const match = line.match(/^(#+) (.+)$/);
-      if (match) html.push(`<h${match[1].length}>${inlineMarkup(match[2])}</h${match[1].length}>`);
       index += 1;
+      if (match) emit(`<h${match[1].length}>${inlineMarkup(match[2])}</h${match[1].length}>`);
       continue;
     }
     if (line.startsWith("> [!NOTE]")) {
       const body = lines[index + 1]?.replace(/^> /, "") ?? "";
-      html.push(`<aside class="doc-callout"><span class="doc-callout__rule" aria-hidden="true"></span><div><strong>Note</strong><p>${inlineMarkup(body)}</p></div></aside>`);
       index += 2;
+      emit(`<aside class="doc-callout"><span class="doc-callout__rule" aria-hidden="true"></span><div><strong>Note</strong><p>${inlineMarkup(body)}</p></div></aside>`);
       continue;
     }
     if (line.startsWith("|") && lines[index + 1]?.startsWith("|")) {
@@ -270,30 +290,36 @@ export function renderSampleMarkdown(source = sampleMarkdown): string {
       const cells = (row: string) => row.split("|").slice(1, -1).map((cell) => cell.trim());
       const header = cells(tableRows[0]);
       const bodyRows = tableRows.slice(2).map(cells);
-      html.push(`<table class="doc-table"><thead><tr>${header.map((cell) => `<th>${inlineMarkup(cell)}</th>`).join("")}</tr></thead><tbody>${bodyRows.map((row) => `<tr>${row.map((cell) => `<td>${inlineMarkup(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table>`);
+      emit(`<table class="doc-table"><thead><tr>${header.map((cell) => `<th>${inlineMarkup(cell)}</th>`).join("")}</tr></thead><tbody>${bodyRows.map((row) => `<tr>${row.map((cell) => `<td>${inlineMarkup(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table>`);
       continue;
     }
     if (/^- \[[ x]\] /.test(line)) {
       const checked = line.startsWith("- [x]");
-      html.push(`<p class="doc-task"><span class="doc-task__check${checked ? " is-checked" : ""}" aria-hidden="true">${checked ? "✓" : ""}</span>${inlineMarkup(line.slice(6))}</p>`);
+      const text = line.slice(6);
       index += 1;
+      emit(`<p class="doc-task"><span class="doc-task__check${checked ? " is-checked" : ""}" aria-hidden="true">${checked ? "✓" : ""}</span>${inlineMarkup(text)}</p>`);
       continue;
     }
     if (line.startsWith("- ")) {
       const items: string[] = [];
       while (index < lines.length && lines[index].startsWith("- ")) items.push(`<li>${inlineMarkup(lines[index++].slice(2))}</li>`);
-      html.push(`<ul class="doc-list">${items.join("")}</ul>`);
+      emit(`<ul class="doc-list">${items.join("")}</ul>`);
       continue;
     }
     if (line.startsWith("[^1]:")) {
-      html.push(`<aside class="doc-footnote"><span>1</span><p>${inlineMarkup(line.slice(5).trim())}</p></aside>`);
+      const text = line.slice(5).trim();
       index += 1;
+      emit(`<aside class="doc-footnote"><span>1</span><p>${inlineMarkup(text)}</p></aside>`);
       continue;
     }
-    html.push(`<p>${inlineMarkup(line)}</p>`);
     index += 1;
+    emit(`<p>${inlineMarkup(line)}</p>`);
   }
-  return html.join("\n");
+  return blocks;
+}
+
+export function renderSampleMarkdown(source = sampleMarkdown): string {
+  return renderSampleBlocks(source).map((block) => block.html).join("\n");
 }
 
 /* ── The source pane ────────────────────────────────────────────────────

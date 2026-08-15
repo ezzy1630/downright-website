@@ -63,41 +63,39 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
     </section>
 
     {/* 8.2 — The gap, doubled */}
-    <section class="page-section gap-section section-anchor" id="gap" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
-      <div class="gap-layout">
-        <div class="section-intro">
-          <p class="eyebrow">{copy.gap.eyebrow}</p>
-          <h2>{copy.gap.beatOneHeading}</h2>
-          <p>{copy.gap.beatOneBody}</p>
+    <section class="gap-section section-anchor" id="gap" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
+      {/* The sweep: one pinned stage where the raw bytes become the page.
+          Both halves of every block are live DOM from the same store. The
+          stage owns its own scroll length so beat two never overlaps it. */}
+      <div class="sweep-stage" data-sweep-stage>
+      <div class="sweep" data-sweep>
+        <p class="eyebrow">{copy.gap.eyebrow}</p>
+        <p class="sweep__lede" data-sweep-lede>{copy.gap.lede}</p>
+        <p class="sweep__closing" data-sweep-closing aria-hidden="true">{copy.gap.closing}</p>
+
+        <div class="sweep__window" data-sweep-window>
+          <div class="sweep__bar">
+            <span class="traffic-lights traffic-lights--ql" aria-hidden="true"><i></i></span>
+            <span class="traffic-lights traffic-lights--app" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="sweep__title">sample.md</span>
+            <span class="sweep__action sweep__action--ql">Open with…</span>
+            <span class="sweep__action sweep__action--app">Downright · Live</span>
+          </div>
+          <div class="sweep__surface" data-sweep-surface>
+            <i class="sweep__line" data-sweep-line aria-hidden="true"></i>
+          </div>
         </div>
-        <div class="compare">
-          <article class="compare-card">
-            <h3>{copy.gap.quickLookLabel}</h3>
-            <p>{copy.gap.quickLookLine}</p>
-            <figure class="compare-card__figure">
-              <img
-                src="/assets/native/quicklook-sample.webp"
-                alt="macOS Quick Look opening sample.md as a plain text sheet with no rendering"
-                width="1470"
-                height="1470"
-                loading="lazy"
-                decoding="async"
-              />
-              <figcaption>Real capture · qlmanage on {osVersion} · nothing retouched</figcaption>
-            </figure>
-          </article>
-          <article class="compare-card compare-card--app">
-            <h3>{copy.gap.downrightLabel}</h3>
-            <p>{copy.gap.downrightLine}</p>
-            <figure class="compare-card__figure">
-              <div class="compare-card__live document-content" data-gap-render aria-label="The same file rendered by Downright"></div>
-              <figcaption>Live DOM · the same bytes, decorated</figcaption>
-            </figure>
-          </article>
-        </div>
+
+        <p class="sweep__capture">
+          <span>{copy.gap.capture}</span>{" "}
+          <a href="/assets/native/quicklook-sample.webp" target="_blank" rel="noreferrer">See the capture ↗</a>
+        </p>
+        <p class="sweep__annotation" data-sweep-annotation aria-hidden="true">{copy.gap.annotation}</p>
+      </div>
       </div>
 
       <div class="gap-wall" aria-label="An agent's Markdown output">
+        <h3 class="gap-wall__heading">{copy.gap.beatTwoHeading}</h3>
         <p class="gap-wall__line">{copy.gap.beatTwoLine}</p>
         <div class="gap-wall__scroller" data-agent-wall data-agent-wall-scroll tabindex="0" aria-label="Real agent-generated Markdown from a refactoring session"></div>
       </div>

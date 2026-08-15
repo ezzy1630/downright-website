@@ -17,23 +17,22 @@ interface Props {
   editable?: boolean;
   flip?: boolean;
   label?: string;
-  /** "split" shows source + document; "read" is document only. */
-  view?: "split" | "read";
+  /** The app's three real modes. Split is the hero default. */
+  view?: "document" | "split" | "source";
 }
 
-const { editable = false, flip = true, label = "sample.md", view = "read" } = Astro.props;
+const { editable = false, flip = true, label = "sample.md", view = "document" } = Astro.props;
 ---
 
 <div
   class="app-window"
   data-window
-  data-face="document"
   data-view={view}
+  style={`--segment-index:${["document", "split", "source"].indexOf(view)}`}
   data-mode="read"
   tabindex="0"
   role="group"
   aria-label="The living document — press Enter to edit the source"
-  data-flip-window={flip ? "" : undefined}
   data-editor-window={editable ? "" : undefined}
 >
   <div class="app-window__inner" data-theme-zone>
@@ -47,8 +46,9 @@ const { editable = false, flip = true, label = "sample.md", view = "read" } = As
         <div class="app-window__bar-controls">
           {flip && (
             <div class="app-window__segmented" role="tablist" aria-label="Window mode">
-              <button type="button" role="tab" aria-selected="true" data-face-button="document">Document</button>
-              <button type="button" role="tab" aria-selected="false" data-face-button="source">Source</button>
+              <button type="button" role="tab" aria-selected={view === "document" ? "true" : "false"} data-view-button="document">Document</button>
+              <button type="button" role="tab" aria-selected={view === "split" ? "true" : "false"} data-view-button="split">Split</button>
+              <button type="button" role="tab" aria-selected={view === "source" ? "true" : "false"} data-view-button="source">Source</button>
               <i class="app-window__segmented-indicator" aria-hidden="true"></i>
             </div>
           )}
@@ -78,6 +78,5 @@ const { editable = false, flip = true, label = "sample.md", view = "read" } = As
         </span>
       </div>
     </div>
-    <div class="app-window__face app-window__face--source" data-source-face aria-hidden="true"></div>
   </div>
 </div>

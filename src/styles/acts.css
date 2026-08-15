@@ -1,6 +1,6 @@
 /* ────────────────────────────────────────────────────────────────────────
    The acts. Everything the experience layer needs beyond the v1 skeleton:
-   the app window and its two faces, the living editor, glass tiers, the
+   the app window and its three modes, the living editor, glass tiers, the
    gap, annotations, the agent visit, file cards, palette, toasts.
    Every duration/curve/radius traces to tokens.css ← Motion.swift.
    ──────────────────────────────────────────────────────────────────────── */
@@ -78,25 +78,8 @@
 
 /* ── The app window: two faces, one document ──────────────────────────── */
 
-.app-window {
-  position: relative;
-  perspective: 2200px;
-}
-
-.app-window__inner {
-  position: relative;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform var(--motion-deliberate) var(--ease-snap);
-}
-
-.app-window[data-face="source"] .app-window__inner {
-  transform: rotateY(-180deg);
-}
-
-[data-reduced-motion="true"] .app-window__inner {
-  transition: none;
-}
+.app-window { position: relative; }
+.app-window__inner { position: relative; height: 100%; }
 
 .app-window__face {
   display: flex;
@@ -107,15 +90,6 @@
   border-radius: var(--radius-window);
   background: var(--surface);
   box-shadow: var(--window-shadow);
-  backface-visibility: hidden;
-}
-
-.app-window__face--source {
-  position: absolute;
-  inset: 0;
-  display: block;
-  transform: rotateY(180deg);
-  background: var(--code-bg);
 }
 
 /* The window is one node; each act's slot sizes it. */
@@ -140,7 +114,9 @@
    present the same composition. */
 .app-window__body { display: grid; grid-template-columns: minmax(0, 1fr); }
 .app-window[data-view="split"] .app-window__body { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr); }
-.app-window[data-view="read"] .app-window__source { display: none; }
+.app-window[data-view="document"] .app-window__source { display: none; }
+.app-window[data-view="source"] .app-window__read { display: none; }
+.app-window[data-view="source"] .app-window__source { border-right: 0; }
 
 .app-window__source {
   position: relative;
@@ -241,7 +217,7 @@
 .app-window__segmented {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   border: 0.5px solid var(--rule);
   border-radius: var(--radius-chip);
 }
@@ -249,7 +225,7 @@
 .app-window__segmented button {
   position: relative;
   z-index: 1;
-  min-width: 64px;
+  min-width: 58px;
   padding: 5px 11px;
   border: 0;
   background: transparent;
@@ -266,14 +242,14 @@
   top: -1px;
   bottom: -1px;
   left: 0;
-  width: 50%;
+  width: calc(100% / 3);
+  translate: calc(var(--segment-index, 0) * 100%) 0;
   border-radius: var(--radius-chip);
   background: var(--bg);
   box-shadow: inset 0 0 0 1px var(--rule);
   transition: translate var(--motion-selection) var(--ease-snap);
 }
 
-.app-window[data-face="source"] .app-window__segmented-indicator { translate: 100% 0; }
 
 .app-window__hint {
   color: var(--text-faint);
@@ -420,103 +396,174 @@
   text-transform: uppercase;
 }
 
-/* ── The gap: two cards, one file, opened twice ───────────────────────── */
+/* ── The gap: the sweep ───────────────────────────────────────────────
+   A pinned stage where the raw bytes become the page under the reader's own
+   scroll. Both halves of every block are in the DOM from first paint, stacked
+   in one grid cell — the surface's height never changes, so the scrub writes
+   only opacity and translate and never triggers layout. */
 
-.gap-layout {
+.gap-section { position: relative; padding: 0 48px; }
+
+/* The stage owns the scroll length the scrub reads. Beat two lives after it,
+   so the wall can never paint over the pinned sweep. */
+.sweep-stage { position: relative; height: 240svh; }
+
+.sweep {
+  position: sticky;
+  top: 56px;
   display: grid;
-  grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
-  gap: clamp(32px, 5vw, 72px);
-  align-items: start;
+  width: min(100%, 1080px);
+  height: calc(100svh - 56px);
+  margin: 0 auto;
+  grid-template-rows: auto auto 1fr auto;
+  align-content: center;
+  padding: 24px 0 30px;
 }
 
-.gap-layout .section-intro { margin: 0; max-width: 40ch; }
-
-.compare {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.compare-card {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  padding: 22px 22px 0;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-panel);
-  background: color-mix(in oklab, var(--surface) 55%, var(--bg));
-}
-
-/* The one that wins is the one the accent hairline marks. */
-.compare-card--app { border-color: color-mix(in oklab, var(--accent) 55%, var(--rule)); }
-
-.compare-card h3 {
-  margin: 0;
-  color: var(--heading);
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.compare-card > p {
-  margin: 6px 0 20px;
+/* The lede hands over to the closing line at the end of the sweep. Both sit
+   in the same grid cell so nothing moves when they trade places. */
+.sweep__lede,
+.sweep__closing {
+  grid-row: 2;
+  grid-column: 1;
+  max-width: 62ch;
+  margin: 0 0 20px;
   color: var(--text-secondary);
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-family: var(--font-display);
+  font-size: clamp(21px, 2vw, 27px);
+  line-height: 1.32;
 }
 
-.compare-card__figure {
+.sweep__lede { opacity: clamp(0, calc((0.62 - var(--sweep-progress, 0)) * 5), 1); }
+.sweep__closing {
+  color: var(--heading);
+  opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.72) * 5), 1);
+}
+
+.sweep__window {
+  grid-row: 3;
   display: flex;
   min-height: 0;
-  flex: 1 1 auto;
   flex-direction: column;
-  margin: 0;
   overflow: hidden;
-  border-top: 1px solid var(--rule);
-  border-left: 1px solid var(--rule);
-  border-top-left-radius: var(--radius-chip);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-window);
+  background: var(--surface);
+  box-shadow: var(--window-shadow);
+  transition: background-color var(--motion-deliberate) var(--ease-decelerate),
+    border-color var(--motion-deliberate) var(--ease-decelerate);
 }
 
-/* The capture is a 1470px-wide sheet; fitted to the card it becomes grey
-   mush and reads as a broken image. Shown at ~2× and cropped, the raw
-   `**bold**` and `$\sqrt{...}$` are legible — which is the entire argument. */
-.compare-card__figure img {
-  display: block;
-  width: 205%;
-  max-width: none;
-  height: 300px;
-  object-fit: cover;
-  object-position: top left;
+/* Quick Look's sheet is flat, cool and unstyled — no warmth, no paper. */
+.sweep__window[data-chrome="ql"] { background: color-mix(in oklab, var(--surface) 62%, var(--bg)); }
+
+.sweep__bar {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-bottom: 0.5px solid var(--rule);
+  background: color-mix(in oklab, var(--surface) 94%, var(--text));
+  font-size: 12px;
 }
 
-/* The live half: real DOM from the store, at reading scale, cropped by the
-   card. Not the app window — exactly one of those exists on the page. */
-.compare-card__live {
+/* Quick Look shows one close button; Downright shows the full three. They
+   trade places as the chrome changes hands. */
+.sweep__bar .traffic-lights { grid-column: 1; grid-row: 1; transition: opacity var(--motion-standard) var(--ease-decelerate); }
+.sweep__window[data-chrome="ql"] .traffic-lights--app,
+.sweep__window[data-chrome="app"] .traffic-lights--ql { opacity: 0; pointer-events: none; }
+
+.sweep__title { grid-column: 2; color: var(--heading); font-weight: 600; text-align: center; }
+
+.sweep__action {
+  grid-column: 3;
+  grid-row: 1;
+  color: var(--text-secondary);
+  font-size: 11px;
+  transition: opacity var(--motion-standard) var(--ease-decelerate);
+}
+
+.sweep__action--ql { padding: 4px 10px; border: 1px solid var(--rule); border-radius: var(--radius-chip); }
+.sweep__action--app { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; }
+.sweep__window[data-chrome="ql"] .sweep__action--app,
+.sweep__window[data-chrome="app"] .sweep__action--ql { opacity: 0; pointer-events: none; }
+
+.sweep__surface {
+  position: relative;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  padding: 26px clamp(20px, 4vw, 54px) 0;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 72px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 72px), transparent 100%);
+}
+
+/* The render line: one hairline travelling the surface, accent-tinted, no
+   glow. Position is a transform, so it never costs a layout. */
+.sweep__line {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 300px;
-  overflow: hidden;
-  padding: 18px 20px 0;
-  margin: 0;
-  background: var(--bg);
-  font-size: 13px;
-  line-height: 1.55;
-  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.3) * 12), 0.75);
+  translate: 0 calc(var(--sweep-progress, 0) * 100cqh);
+  container-type: size;
 }
 
-.compare-card__live h1 { font-size: 21px; margin-bottom: 12px; }
-.compare-card__live h2 { font-size: 17px; margin: 18px 0 8px; }
-.compare-card__live p,
-.compare-card__live table,
-.compare-card__live .doc-callout { margin-top: 10px; }
+.sweep__surface { container-type: size; }
 
-.compare-card figcaption {
-  padding: 10px 0 12px;
+/* One block, two states, one cell: the height is max(raw, rendered) and is
+   fixed from first paint, so nothing reflows mid-scrub. */
+.sweep-block { display: grid; }
+.sweep-block > * { grid-area: 1 / 1; }
+
+.sweep-block__raw {
+  margin: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sweep-block__rendered { width: 100%; min-height: 0; padding: 0; }
+.sweep-block__rendered > :first-child { margin-top: 0; }
+.sweep-block + .sweep-block { margin-top: 14px; }
+
+.sweep__capture {
+  grid-row: 4;
+  max-width: 74ch;
+  margin: 16px 0 0;
   color: var(--text-faint);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 10.5px;
+  line-height: 1.7;
 }
+
+.sweep__capture a { color: var(--link); text-decoration: none; }
+.sweep__capture a:hover { text-decoration: underline; }
+
+/* The page's second and last handwritten aside. */
+.sweep__annotation {
+  grid-row: 4;
+  justify-self: end;
+  margin: 10px 0 0;
+  color: var(--text-faint);
+  font-family: "Caveat Subset", "Snell Roundhand", cursive;
+  font-size: 20px;
+  opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.8) * 6), 1);
+}
+
+[data-sweep-static="true"] .sweep__lede,
+[data-sweep-static="true"] .sweep__closing,
+[data-sweep-static="true"] .sweep__annotation { opacity: 1; }
+[data-sweep-static="true"] .sweep__line { display: none; }
 
 .gap-wall { margin-top: 110px; border-top: 1px solid var(--rule); padding-top: 34px; }
 .gap-wall__line {
@@ -1129,6 +1176,7 @@
   .app-window[data-view="split"][data-mode="read"] .app-window__source { display: none; }
   .app-window[data-view="split"][data-mode="edit"] .app-window__read { display: none; }
   .app-window[data-view="split"][data-mode="edit"] .app-window__source { border-right: 0; }
+  .app-window__segmented button { min-width: 0; padding: 5px 7px; font-size: 10px; }
   .app-window__status-shortcut { display: none; }
   .conflict-bar button { min-height: 48px; flex: 1 1 auto; }
   .theme-showroom__list button { min-height: 52px; }

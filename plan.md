@@ -44,6 +44,36 @@ work. It is the look-and-feel bar for the hero and the page's voice.
    visually distinct surface. No two acts may present the same visual
    composition. This is the standing fix for the owner's "same UI element
    every scroll" complaint — treat any regression as a P0.
+10. **Gap act = THE RENDER LINE** (cinematic, replaces the two-card
+    comparison). Pinned ~2 viewport heights. Beat 1: a large, fully legible
+    live recreation of the macOS Quick Look plain-text preview — real QL
+    chrome, the actual sample.md as a raw wall of `#`/`**`/pipes/`$` at
+    14–15px mono. Instantly recognizable ("I stare at that every day").
+    Copy: "Press Space on a Markdown file today. This is what macOS shows
+    you." Real capture stays linked in the honesty caption. Beat 2: a sweep
+    line travels down with scroll; every line it passes transforms in place
+    from raw to rendered (heading elides its #, pipes snap to a table, math
+    typesets, checkboxes appear); QL chrome cross-fades to the Downright
+    window (the traveling window takes over here). Reversible on back-scrub;
+    reduced-motion = static before/after. Close: "Same file. Same bytes.
+    Downright just renders them." This sweep is the page's signature scroll
+    mechanic and its quality bar.
+11. **Rail fidelity** (supersedes §5 above): a faithful miniature of the
+    app's density rail — ticks with depth-encoded lengths, leading-edge
+    change marks, hover outline HUD, per-tick springs. Not dots.
+12. **Plain-English standard, sitewide:** short sentences. One idea per
+    sentence. No cleverness that costs clarity (ASD-STE100 spirit). Each
+    act's first line answers "what am I looking at."
+13. **/themes redesign:** one live typeable window + six theme controls that
+    re-theme the whole page in place + the token table. No stacked
+    screenshot parade; nothing non-interactive that looks interactive.
+14. **No hidden gestures:** the double-click flip is removed. Window modes
+    are a visible segmented control mirroring the app (Document | Split |
+    Source; Split default in hero); ⌘⇧E is the keyboard path to Source.
+    Every affordance is visibly labeled; a gesture may never be the only
+    path to a behavior.
+15. **Content dedup:** the sample.md showcase renders exactly once on the
+    homepage — inside the window. Every other act uses different content.
 
 ---
 
