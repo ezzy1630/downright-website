@@ -483,11 +483,19 @@
   font-size: 12px;
 }
 
-/* Quick Look shows one close button; Downright shows the full three. They
-   trade places as the chrome changes hands. */
-.sweep__bar .traffic-lights { grid-column: 1; grid-row: 1; transition: opacity var(--motion-standard) var(--ease-decelerate); }
+/* Quick Look shows one close button; Downright shows the full three. The
+   switch is a hard cut, not a crossfade — mid-fade the two sets read as a
+   stray single light, which looked like a glitch. Chrome is always coherent:
+   the disappearing set snaps out instantly, the new one arrives one beat
+   later on the quick curve. */
+.sweep__bar .traffic-lights { grid-column: 1; grid-row: 1; transition: none; }
 .sweep__window[data-chrome="ql"] .traffic-lights--app,
-.sweep__window[data-chrome="app"] .traffic-lights--ql { opacity: 0; pointer-events: none; }
+.sweep__window[data-chrome="app"] .traffic-lights--ql { display: none; }
+.sweep__window[data-chrome="app"] .traffic-lights--app,
+.sweep__window[data-chrome="ql"] .traffic-lights--ql {
+  animation: chrome-in var(--motion-quick) var(--ease-decelerate) both;
+}
+@keyframes chrome-in { from { opacity: 0; } to { opacity: 1; } }
 
 .sweep__title { grid-column: 2; color: var(--heading); font-weight: 600; text-align: center; }
 
@@ -499,10 +507,13 @@
   transition: opacity var(--motion-standard) var(--ease-decelerate);
 }
 
+.sweep__action { transition: none; }
 .sweep__action--ql { padding: 4px 10px; border: 1px solid var(--rule); border-radius: var(--radius-chip); }
 .sweep__action--app { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; }
 .sweep__window[data-chrome="ql"] .sweep__action--app,
-.sweep__window[data-chrome="app"] .sweep__action--ql { opacity: 0; pointer-events: none; }
+.sweep__window[data-chrome="app"] .sweep__action--ql { display: none; }
+.sweep__window[data-chrome="app"] .sweep__action--app,
+.sweep__window[data-chrome="ql"] .sweep__action--ql { animation: chrome-in var(--motion-quick) var(--ease-decelerate) both; }
 
 .sweep__surface {
   position: relative;
@@ -615,6 +626,9 @@
 
 .annotation-rail { display: grid; gap: 0; margin-top: 40px; list-style: none; padding: 0; }
 
+/* Resting notes sit at a reduced but readable secondary tone (the lower
+   alpha is state, not a dimmer of the ink); bloomed notes read at heading /
+   secondary weight. Faint-on-dark here was a verified sub-AA reading. */
 .annotation-rail li {
   display: grid;
   grid-template-columns: 20px 96px 1fr;
@@ -622,20 +636,20 @@
   align-items: baseline;
   padding: 11px 0;
   border-top: 1px solid var(--rule);
-  color: var(--text-faint);
+  color: var(--text-secondary);
   font-size: 12px;
-  opacity: 0.38;
+  opacity: 0.62;
   transform: translateX(-6px);
   transition: opacity var(--motion-deliberate) var(--ease-structural), transform var(--motion-deliberate) var(--ease-structural);
 }
 
-.annotation-rail li strong { color: var(--text-secondary); font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
-.annotation-rail li span { color: var(--text-faint); font-size: 11px; }
+.annotation-rail li strong { color: var(--text); font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
+.annotation-rail li span { color: var(--text-secondary); font-size: 11px; }
 
 .annotation-rail li.is-bloomed, .annotation-rail li.is-static {
   opacity: 1;
   transform: none;
-  color: var(--text-secondary);
+  color: var(--text);
 }
 
 .annotation-rail li.is-bloomed strong { color: var(--heading); }
@@ -896,7 +910,10 @@
 
 /* ── Density rail (canvas) ────────────────────────────────────────────── */
 
-.density-rail { position: fixed; z-index: 30; top: 50%; right: 18px; width: 44px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
+/* The act number sits above the ticks and must clear the right viewport edge
+   — it was clipping there. The rail is inset far enough for the centred
+   number plus the HUD that opens to its left. */
+.density-rail { position: fixed; z-index: 30; top: 50%; right: 28px; width: 44px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
 .density-rail canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
 /* The act number rides above the dot column — the reader's place in the
@@ -904,9 +921,10 @@
 .density-rail__number {
   position: absolute;
   top: 34px;
+  right: 0;
   left: 0;
   width: 100%;
-  color: var(--text-faint);
+  color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
