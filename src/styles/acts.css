@@ -110,6 +110,13 @@
 .app-window[data-mode="edit"] .app-window__read { display: none; }
 .app-window[data-mode="read"] .app-window__editor { display: none; }
 
+/* In the render act the document scrolls against the page, so it needs
+   bottom room for the last capability (the footnote) to rise to the reading
+   line instead of stalling at the viewport floor. */
+.app-window[data-slot="render"] .app-window__read .document-content {
+  padding-bottom: 52vh;
+}
+
 /* Keyboard entry: the window is tabbable, Enter opens the editor. */
 .app-window[tabindex="0"]:focus-visible {
   outline: 2px solid var(--focus-ring);
