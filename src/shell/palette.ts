@@ -173,8 +173,7 @@ const SHORTCUTS: [keys: string, action: string][] = [
   ["⌘K", "This palette"],
   ["⌘⇧E", "Flip the window to its source"],
   ["Space", "Quick Look the focused file card"],
-  ["1–5", "Structural zoom level"],
-  ["← → ↑ ↓", "Move the divider, zoom, rail, palette"],
+  ["← → ↑ ↓", "Move the divider, the rail, the palette"],
   ["Esc", "Close whatever opened"],
 ];
 

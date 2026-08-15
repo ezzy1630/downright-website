@@ -46,7 +46,11 @@ function zones(): HTMLElement[] {
   return found.length ? found : [document.documentElement];
 }
 
-let currentId = "system";
+/** Warm Dark is the house ground — the default for every first visit. A
+ *  chosen theme persists; "system" is one of the six choices, not the fallback. */
+const DEFAULT_THEME = "warm-dark";
+
+let currentId = DEFAULT_THEME;
 
 export function currentTheme(): string {
   return currentId;
@@ -171,8 +175,11 @@ export function initThemeEngine(): void {
   } catch {
     saved = null;
   }
-  currentId = saved ?? "system";
+  currentId = saved ?? DEFAULT_THEME;
   applyInstant(effectiveTheme(currentId));
+  for (const control of document.querySelectorAll<HTMLElement>("[data-theme-option]")) {
+    control.setAttribute("aria-selected", String(control.dataset.themeOption === currentId));
+  }
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     if (currentId === "system") applyInstant(effectiveTheme("system"));
   });

@@ -126,19 +126,73 @@
 .window-slot--agent { height: 100%; }
 .window-slot--theme { height: 620px; }
 /* The fold crops the DOCUMENT, not the window. Masking the whole face also
-   erased the status bar — which is where the "type in it" invitation lives.
-   The document runs past the visible slice and fades out over the last 96px,
-   so the crop lands on a soft edge instead of half a code line. */
-.hero__window .app-window__read {
+   erased the status bar. Both panes run past the visible slice and fade over
+   the last 96px, so the crop lands on a soft edge, not half a code line. */
+.hero__window .app-window__read,
+.hero__window .app-window__source {
   mask-image: linear-gradient(to bottom, #000 calc(100% - 96px), transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 96px), transparent 100%);
 }
 
-/* Read vs editor: one document, two faces of the same layer. */
-.app-window__read { height: 100%; overflow-y: auto; scrollbar-width: thin; }
+/* ── The split: raw bytes | rendered document ──────────────────────────
+   data-view="split" is the hero (both panes). Every other act receives the
+   same window in data-view="read" — document only — so no two acts ever
+   present the same composition. */
+.app-window__body { display: grid; grid-template-columns: minmax(0, 1fr); }
+.app-window[data-view="split"] .app-window__body { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr); }
+.app-window[data-view="read"] .app-window__source { display: none; }
+
+.app-window__source {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border-right: 1px solid var(--rule);
+  background: color-mix(in oklab, var(--bg) 88%, var(--code-bg));
+}
+
+.app-window__read { min-width: 0; height: 100%; overflow-y: auto; scrollbar-width: thin; }
 .app-window__editor { height: 100%; }
-.app-window[data-mode="edit"] .app-window__read { display: none; }
+.app-window[data-mode="edit"] [data-static-source] { display: none; }
 .app-window[data-mode="read"] .app-window__editor { display: none; }
+
+/* The prerendered source pane. Line numbers sit in their own column so the
+   text wraps against a stable gutter, exactly like the app's editor. */
+.source-pane {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 18px 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-ligatures: none;
+  line-height: 1.85;
+}
+
+.source-line { display: grid; grid-template-columns: 42px minmax(0, 1fr); }
+
+.source-line__n {
+  padding-right: 12px;
+  color: color-mix(in oklab, var(--text-faint) 62%, transparent);
+  font-size: 11px;
+  text-align: right;
+  user-select: none;
+}
+
+.source-line__t { color: var(--syntax-variable); white-space: pre-wrap; word-break: break-word; }
+
+.source-pane .s-hash,
+.source-pane .s-marker,
+.source-pane .s-fence { color: var(--marker); }
+.source-pane .s-heading { color: var(--link); font-weight: 600; }
+.source-pane .s-code,
+.source-pane .s-fenced { color: var(--syntax-string); }
+.source-pane .s-strong { color: var(--heading); font-weight: 600; }
+.source-pane .s-math { color: var(--syntax-number); }
+.source-pane .s-link { color: var(--link); }
+.source-pane .s-task { color: var(--accent); }
+.source-pane .s-table { color: var(--syntax-operator); }
+.source-pane .s-quote { color: var(--text-secondary); }
 
 /* In the render act the document scrolls against the page, so it needs
    bottom room for the last capability (the footnote) to rise to the reading
@@ -247,14 +301,13 @@
   font-size: 10px;
 }
 
-.app-window__status-file { display: inline-flex; gap: 6px; align-items: center; color: var(--text-secondary); }
-.app-window__status-file i { color: var(--change-added); font-style: normal; font-size: 8px; }
-
-.app-window__status-honesty { display: inline-flex; gap: 8px; align-items: baseline; }
+.app-window__status-item { display: inline-flex; gap: 6px; align-items: baseline; }
+.app-window__status-syntax { color: var(--text-secondary); }
+.app-window__status-rate { align-items: center; margin-left: auto; }
+.app-window__status-rate i { color: var(--change-added); font-style: normal; font-size: 7px; }
 .app-window__status-honesty [data-honesty-meter] { color: var(--heading); font-variant-numeric: tabular-nums; }
 .app-window__status-honesty small { font-size: 9px; letter-spacing: 0.02em; }
-
-.app-window__status-shortcut { margin-left: auto; color: var(--text-secondary); font-family: var(--font-body); font-size: 11px; }
+[data-caret-position] { font-variant-numeric: tabular-nums; }
 
 /* The source face: line numbers, raw bytes */
 .source-row { display: grid; grid-template-columns: 44px 1fr; min-height: 22px; }
@@ -298,12 +351,41 @@
 
 /* ── Hero extras ──────────────────────────────────────────────────────── */
 
-.hero__caption {
-  margin-top: 12px;
+/* The one handwritten aside on the page (the voice is used at most twice).
+   Subset Caveat — 8KB, exactly the glyphs this sentence needs, nothing more. */
+@font-face {
+  font-family: "Caveat Subset";
+  src: url("/fonts/caveat-subset.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 118%;
+}
+
+.hero__annotation {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 18px auto 0;
+  padding-right: 6%;
   color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-align: right;
+  font-family: "Caveat Subset", "Snell Roundhand", cursive;
+  font-size: 21px;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+.hero__annotation-arrow {
+  width: 46px;
+  height: 33px;
+  flex: none;
+  margin-top: -2px;
+  fill: none;
+  stroke: var(--text-faint);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .brew-chip {
@@ -325,42 +407,116 @@
 .brew-chip:hover { color: var(--heading); border-color: var(--accent); }
 .brew-chip span { color: var(--link); }
 
-/* ── The gap ──────────────────────────────────────────────────────────── */
+/* ── Eyebrows ─────────────────────────────────────────────────────────
+   Muted mono, uppercase, wide. Never the accent — an accent eyebrow is on
+   the ban list and this one has to stay furniture, not signal. */
+.eyebrow {
+  margin: 0 0 18px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
-.gap-stage {
-  position: relative;
+/* ── The gap: two cards, one file, opened twice ───────────────────────── */
+
+.gap-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+}
+
+.gap-layout .section-intro { margin: 0; max-width: 40ch; }
+
+.compare {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-top: 56px;
+  gap: 20px;
 }
 
-.gap-pane--plain .preview-window { height: 100%; }
-.gap-pane--plain .preview-window__body { display: grid; place-items: start center; padding: 0; min-height: 0; }
-.gap-pane--plain img { width: 100%; max-height: 560px; object-fit: cover; object-position: top; }
-.gap-pane--plain figcaption { padding: 10px 17px; border-top: 1px solid var(--rule); color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
-
-.gap-pane--app { position: absolute; inset: 0; z-index: 1; overflow: hidden; border-left: 1px solid var(--rule); }
-.gap-pane--app .app-window { height: 100%; }
-.gap-pane--app .app-window__status-shortcut { visibility: hidden; }
-
-.gap-divider {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  bottom: 0;
-  left: var(--divider-position);
-  display: grid;
-  width: 44px;
-  place-items: center;
-  transform: translateX(-50%);
-  cursor: ew-resize;
+.compare-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 22px 22px 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  background: color-mix(in oklab, var(--surface) 55%, var(--bg));
 }
 
-.gap-divider span { display: block; width: 2px; height: 100%; background: var(--heading); }
-.gap-divider::after { content: ""; position: absolute; width: 34px; height: 48px; border: 1px solid var(--heading); border-radius: 17px; background: var(--surface); box-shadow: 0 6px 18px -8px color-mix(in oklab, var(--text) 40%, transparent); }
-.gap-divider::before { content: "↔"; position: absolute; z-index: 1; color: var(--heading); font-family: var(--font-mono); font-size: 13px; }
-.gap-divider:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* The one that wins is the one the accent hairline marks. */
+.compare-card--app { border-color: color-mix(in oklab, var(--accent) 55%, var(--rule)); }
+
+.compare-card h3 {
+  margin: 0;
+  color: var(--heading);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.compare-card > p {
+  margin: 6px 0 20px;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.compare-card__figure {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  margin: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+  border-top-left-radius: var(--radius-chip);
+}
+
+/* The capture is a 1470px-wide sheet; fitted to the card it becomes grey
+   mush and reads as a broken image. Shown at ~2× and cropped, the raw
+   `**bold**` and `$\sqrt{...}$` are legible — which is the entire argument. */
+.compare-card__figure img {
+  display: block;
+  width: 205%;
+  max-width: none;
+  height: 300px;
+  object-fit: cover;
+  object-position: top left;
+}
+
+/* The live half: real DOM from the store, at reading scale, cropped by the
+   card. Not the app window — exactly one of those exists on the page. */
+.compare-card__live {
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  padding: 18px 20px 0;
+  margin: 0;
+  background: var(--bg);
+  font-size: 13px;
+  line-height: 1.55;
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+
+.compare-card__live h1 { font-size: 21px; margin-bottom: 12px; }
+.compare-card__live h2 { font-size: 17px; margin: 18px 0 8px; }
+.compare-card__live p,
+.compare-card__live table,
+.compare-card__live .doc-callout { margin-top: 10px; }
+
+.compare-card figcaption {
+  padding: 10px 0 12px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
 
 .gap-wall { margin-top: 110px; border-top: 1px solid var(--rule); padding-top: 34px; }
 .gap-wall__line {

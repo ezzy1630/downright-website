@@ -1,31 +1,38 @@
 ---
 /**
- * The living document window — the app's real chrome (traffic lights,
- * Document/Source segmented control with a sprung indicator, status bar with
- * the honesty meter) around one document surface. The body ships prerendered
- * (the LCP is DOM text); the editor hydrates on intent in the hero only. The
- * window is a single node that travels between acts — read mode everywhere,
- * editor mode in the hero. ⌘⇧E flips the window to its raw source.
+ * The living document window — the app's real chrome around one document,
+ * shown the way the app actually ships it: split. The left pane is the raw
+ * bytes (line numbers, Markdown syntax colour) and is the CM6 editable
+ * surface; the right pane is the rendered document. Both read the same store,
+ * so typing in the source re-renders the document beside it, live.
+ *
+ * Both panes ship prerendered (the LCP is DOM text); CM6 hydrates into the
+ * source pane on intent, in the hero only. The window is a single node that
+ * travels between acts — split in the hero, document-only everywhere else.
+ * ⌘⇧E flips the whole window to its raw source face.
  */
-import { sampleHtml } from "../data/site";
+import { sampleHtml, sourceHtml } from "../data/site";
 
 interface Props {
   editable?: boolean;
   flip?: boolean;
   label?: string;
+  /** "split" shows source + document; "read" is document only. */
+  view?: "split" | "read";
 }
 
-const { editable = false, flip = true, label = "sample.md" } = Astro.props;
+const { editable = false, flip = true, label = "sample.md", view = "read" } = Astro.props;
 ---
 
 <div
   class="app-window"
   data-window
   data-face="document"
+  data-view={view}
   data-mode="read"
   tabindex="0"
   role="group"
-  aria-label="The living document — press Enter to edit"
+  aria-label="The living document — press Enter to edit the source"
   data-flip-window={flip ? "" : undefined}
   data-editor-window={editable ? "" : undefined}
 >
@@ -33,7 +40,10 @@ const { editable = false, flip = true, label = "sample.md" } = Astro.props;
     <div class="app-window__face app-window__face--document">
       <div class="app-window__bar">
         <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="app-window__file"><b data-file-label>{label}</b><small>Live</small></span>
+        <span class="app-window__file">
+          <b data-file-label>{label}</b>
+          <small data-dirty-label hidden>— Edited</small>
+        </span>
         <div class="app-window__bar-controls">
           {flip && (
             <div class="app-window__segmented" role="tablist" aria-label="Window mode">
@@ -45,19 +55,27 @@ const { editable = false, flip = true, label = "sample.md" } = Astro.props;
           <span class="app-window__hint" aria-hidden="true">⌘⇧E</span>
         </div>
       </div>
+
       <div class="app-window__body" data-window-body>
+        <div class="app-window__source" data-document-source>
+          <pre class="source-pane" data-static-source set:html={sourceHtml}></pre>
+          <div class="app-window__editor" data-document-editor hidden></div>
+        </div>
         <div class="app-window__read" data-document-read>
           <div class="document-content" data-static-document set:html={sampleHtml} />
         </div>
-        <div class="app-window__editor" data-document-editor hidden></div>
       </div>
+
       <div class="app-window__status">
-        <span class="app-window__status-item app-window__status-file"><i aria-hidden="true">●</i><span data-file-label>{label}</span></span>
+        <span class="app-window__status-item" data-caret-position>Line 1, Column 1</span>
+        <span class="app-window__status-item app-window__status-syntax">Markdown</span>
+        <span class="app-window__status-item app-window__status-rate">
+          <i aria-hidden="true">●</i><span data-wps-meter>— wpm</span>
+        </span>
         <span class="app-window__status-item app-window__status-honesty">
           <span data-honesty-meter>parse —</span>
-          <small>measured per keystroke · frame floor 16 ms</small>
+          <small>frame floor 16 ms</small>
         </span>
-        <span class="app-window__status-item app-window__status-shortcut">This window is real. Type in it.</span>
       </div>
     </div>
     <div class="app-window__face app-window__face--source" data-source-face aria-hidden="true"></div>

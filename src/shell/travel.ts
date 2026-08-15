@@ -23,7 +23,7 @@ import { reducedMotion } from "../kernel/switchboard";
 import { doc } from "../kernel/store";
 import { renderSampleMarkdown } from "../data/site";
 
-export type SlotId = "hero" | "gap" | "render" | "agent" | "theme";
+export type SlotId = "hero" | "render" | "agent" | "theme";
 
 interface Slot {
   id: SlotId;
@@ -55,12 +55,7 @@ export class WindowDirector {
         id: "hero",
         section: "hero",
         host: () => document.querySelector<HTMLElement>(".hero__window"),
-        before: () => document.querySelector<HTMLElement>(".hero__caption"),
-      },
-      {
-        id: "gap",
-        section: "gap",
-        host: () => document.querySelector<HTMLElement>(".gap-pane--app"),
+        before: () => document.querySelector<HTMLElement>(".hero__annotation"),
       },
       {
         id: "render",
@@ -97,14 +92,19 @@ export class WindowDirector {
     // While the agent is streaming or a conflict is open, the agent scene
     // owns the read layer (it is mid-rewrite with live change marks); a
     // repaint here would wipe them.
+    // In the hero the window is SPLIT: the source pane is the editor and the
+    // document pane sits beside it, so it must repaint on every keystroke —
+    // that live coupling is the whole demonstration.
     const agentOwns = doc.current.agent === "streaming" || doc.current.agent === "conflict";
-    if (!agentOwns && this.window.dataset.mode !== "edit") {
+    if (!agentOwns) {
       const surface = this.readLayer();
       if (surface) surface.innerHTML = renderSampleMarkdown(doc.current.text);
     }
     for (const label of document.querySelectorAll<HTMLElement>("[data-file-label]")) {
       label.textContent = doc.current.fileName;
     }
+    const dirtyLabel = this.window.querySelector<HTMLElement>("[data-dirty-label]");
+    if (dirtyLabel) dirtyLabel.hidden = !doc.current.dirty;
   }
 
   /** Determine which slot the viewport currently claims. */
@@ -134,6 +134,10 @@ export class WindowDirector {
     const slot = this.slots.find((candidate) => candidate.id === target);
     const host = slot?.host();
     if (!slot || !host) return;
+
+    // The hero is the only split slot; every other act receives the same
+    // window as a document-only surface, so no two acts repeat a composition.
+    this.window.dataset.view = target === "hero" ? "split" : "read";
 
     // A fresh document arrival always shows read mode unless it is the hero
     // and the visitor already mounted the editor there.
@@ -166,7 +170,7 @@ export class WindowDirector {
     }
 
     // Lift the slot's clip so the window is never clipped mid-flight.
-    const clipped = host.closest<HTMLElement>(".render-document-viewport, .agent-stage__document, .gap-pane--app");
+    const clipped = host.closest<HTMLElement>(".render-document-viewport, .agent-stage__document");
     const previousOverflow = clipped?.style.overflow ?? "";
     if (clipped) clipped.style.overflow = "visible";
 

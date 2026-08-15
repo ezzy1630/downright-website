@@ -42,14 +42,13 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
   └─────────────────────────────────────────────────────────────────────┘
 -->
 <!doctype html>
-<html lang="en" data-theme="system">
+<html lang="en" data-theme="warm-dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#171614" />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" type="text/markdown" href={new URL(markdownPath, Astro.site ?? "https://downright.app")} title="Markdown version" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -68,10 +67,17 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
     <meta name="twitter:image" content={new URL(imagePath, Astro.site ?? "https://downright.app")} />
     <title>{title}</title>
     <script is:inline>
+      // Warm Dark is the house ground: every first visit lands on #171614.
+      // A chosen theme persists and wins; "system" is one of the choices,
+      // not the default. Runs before first paint so there is never a flash.
       (() => {
         try {
           const saved = localStorage.getItem("downright-theme");
-          document.documentElement.dataset.theme = saved || "system";
+          const theme = saved || "warm-dark";
+          document.documentElement.dataset.theme = theme;
+          const light = theme === "paper-light" || theme === "solarized-light" || theme === "high-contrast"
+            || (theme === "system" && !window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.style.colorScheme = light ? "light" : "dark";
         } catch {}
       })();
     </script>

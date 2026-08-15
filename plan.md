@@ -1,11 +1,49 @@
-# Downright website — the plan, v2.1: THE LIVING DOCUMENT
+# Downright website — the plan, v2.2: THE LIVING DOCUMENT
 
-**Status:** v2.1 — current. Supersedes v1 and v2. Adds: goals/funnel
-architecture, audience doctrine, the hybrid lead story (acts reordered), the
-purpose-built mobile film, and the brand identity workstream. Source of
-truth for every token, claim, and motion value remains the native app at
-`/Volumes/Neural/Downright`. **Launch is timed to a signed, notarized DMG at
-a verified URL — every CTA is hot from day one.**
+**Status:** v2.2 — current. Supersedes v1/v2/v2.1 where they conflict; the
+v2.2 addendum below wins over any contradicting line later in this file.
+Source of truth for every token, claim, and motion value remains the native
+app at `/Volumes/Neural/Downright`. **Launch is timed to a signed, notarized
+DMG at a verified URL — every CTA is hot from day one.**
+
+---
+
+## v2.2 addendum (2026-08-15, owner-directed — binding)
+
+Visual reference: `design/hero-reference.png` — Read it before any visual
+work. It is the look-and-feel bar for the hero and the page's voice.
+
+1. **Warm Dark is the site default** for all first visits (follow-system
+   dropped). `#171614` warm ground, never navy. Light themes remain a
+   persisted choice in the switcher.
+2. **The structural zoom act is CUT** from the homepage (§8.4 void; rail,
+   film beat, and palette entries go with it). Structural Zoom survives
+   only as a line of copy in render/reach. `scenes/zoom.ts` stays on disk,
+   unwired.
+3. **Hero window = split-pane** (the app honestly ships split view): left
+   pane raw source with line numbers + syntax color — this is the CM6
+   editable surface; right pane the live render, same store, updating live
+   as you type. Titlebar "sample.md — Edited"; status bar "Line N, Column N
+   · Markdown · live wps · parse ms"; view-mode glyphs in the toolbar.
+4. **Handwritten annotation voice**: one handwriting font (subset), used at
+   most twice per page, with small hand-drawn SVG arrows — first use: "This
+   window is real. Type in it." under the hero window.
+5. **Rail simplified** to the reference's right-edge form: current act
+   number ("01") + spring dot column, hover reveals act names.
+6. **Eyebrow amendment**: muted mono uppercase eyebrows permitted
+   (text-faint, +0.08em tracking, never accent-colored).
+7. **Gap act** adopts the reference's two-card comparison, copy rhythm:
+   "Truncated. Collapsed. Hard to scan." / "Complete. Styled. Built for
+   comprehension." Downright card carries the hairline accent border.
+8. **Hero subhead (final draft):** "Your coding agents write too much
+   Markdown. Downright renders it exactly, reviews rewrites live, and never
+   touches your bytes."
+9. **One-window mandate, hardened:** exactly ONE app-window instance exists
+   in the DOM. Acts either receive THE window (FLIP-morphing between act
+   slots as the reader scrolls — the page's connective tissue) or use a
+   visually distinct surface. No two acts may present the same visual
+   composition. This is the standing fix for the owner's "same UI element
+   every scroll" complaint — treat any regression as a P0.
 
 ---
 

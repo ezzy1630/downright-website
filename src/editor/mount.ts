@@ -21,7 +21,11 @@ export interface MountedWindow {
   destroy: () => void;
 }
 
-function editorExtensions(onParse: (ms: number) => void): Extension[] {
+function editorExtensions(
+  onParse: (ms: number) => void,
+  onSelection: (view: EditorView) => void,
+  onStroke: () => void,
+): Extension[] {
   return [
     history(),
     // Native contenteditable carries caret motion and select-all; the keymap
@@ -48,9 +52,11 @@ function editorExtensions(onParse: (ms: number) => void): Extension[] {
     ]),
     livedown(),
     EditorView.updateListener.of((update) => {
+      if (update.selectionSet || update.docChanged) onSelection(update.view);
       if (!update.docChanged) return;
       // The honest measure: one full decoration pass on the resulting doc.
       onParse(decorateState(update.view.state).ms);
+      onStroke();
       doc.edit(update.state.doc.toString());
       sound.thock();
     }),
@@ -80,24 +86,56 @@ export function mountEditor(
     options.onParse?.(ms);
   };
 
+  // The status bar's live readouts. Both are measured, never decorative: the
+  // caret position comes from the document itself, and the rate is the
+  // visitor's own typing over a trailing 6s window — it reads "— wpm" until
+  // there is enough of a sample to report honestly.
+  const caretReadout = windowEl.querySelector<HTMLElement>("[data-caret-position]");
+  const rateReadout = windowEl.querySelector<HTMLElement>("[data-wps-meter]");
+  const dirtyLabel = windowEl.querySelector<HTMLElement>("[data-dirty-label]");
+  const strokes: number[] = [];
+
+  const reportCaret = (view: EditorView): void => {
+    if (!caretReadout) return;
+    const head = view.state.selection.main.head;
+    const line = view.state.doc.lineAt(head);
+    caretReadout.textContent = `Line ${line.number}, Column ${head - line.from + 1}`;
+  };
+
+  const reportRate = (): void => {
+    if (!rateReadout) return;
+    const now = performance.now();
+    strokes.push(now);
+    while (strokes.length && now - strokes[0] > 6000) strokes.shift();
+    const span = (now - strokes[0]) / 1000;
+    if (strokes.length < 8 || span < 1) {
+      rateReadout.textContent = "— wpm";
+      return;
+    }
+    // Five characters to a word is the standard typing-rate convention.
+    rateReadout.textContent = `${Math.round((strokes.length / 5 / span) * 60)} wpm`;
+  };
+
   let editorLayer = bodyEl.querySelector<HTMLElement>("[data-document-editor]");
   if (!editorLayer) {
     editorLayer = document.createElement("div");
     editorLayer.className = "app-window__editor";
     editorLayer.dataset.documentEditor = "true";
-    bodyEl.append(editorLayer);
+    (bodyEl.querySelector<HTMLElement>("[data-document-source]") ?? bodyEl).append(editorLayer);
   }
   editorLayer.hidden = false;
 
   const view = new EditorView({
-    state: EditorState.create({ doc: doc.current.text, extensions: editorExtensions(report) }),
+    state: EditorState.create({ doc: doc.current.text, extensions: editorExtensions(report, reportCaret, reportRate) }),
     parent: editorLayer,
   });
   editorLayer.dataset.editorMounted = "true";
   windowEl.dataset.mode = "edit";
   windowEl.dataset.dirty = String(doc.current.dirty);
+  reportCaret(view);
 
   const unsubscribe = doc.subscribe((state) => {
+    if (dirtyLabel) dirtyLabel.hidden = !state.dirty;
     if (state.text === view.state.doc.toString()) return;
     // External changes (agent resolution, dropped file, reset) land here.
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: state.text } });

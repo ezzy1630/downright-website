@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import DensityRail from "../components/DensityRail.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import AppWindow from "../components/AppWindow.astro";
-import { benchmarks, copy, facts, themes, sampleHtml } from "../data/site";
+import { benchmarks, copy, facts, themes } from "../data/site";
 
 const osVersion = "macOS 26";
 const benchmarkNames = ["Parse 100 KB", "Source edit and paragraph map", "Text diff, external rewrite", "End-to-end semantic convergence", "Syntax highlight, 10 KB Swift"];
@@ -25,8 +25,6 @@ const annotations: [selector: string, label: string, detail: string][] = [
   [".doc-footnote", "Footnotes", "Numbered, linked, and honest at the bottom"],
   [".doc-code", "Code", "True theme syntax from the app's token set"],
 ];
-const zoomLevels = [1, 2, 3, 4, 5] as const;
-const zoomLevelNames = ["Headings", "Leads", "Artifacts", "Full text", "Everything"];
 const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target) || 8));
 ---
 
@@ -48,7 +46,14 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <p class="hero__micro">{copy.hero.micro}</p>
       </div>
       <div class="hero__window">
-        <AppWindow editable />
+        <AppWindow editable view="split" />
+        <p class="hero__annotation">
+          <svg class="hero__annotation-arrow" viewBox="0 0 60 40" aria-hidden="true" focusable="false">
+            <path d="M56 35C43 36 23 33 13 12" />
+            <path d="M13 12l1.5 13.5M13 12l13.5 2" />
+          </svg>
+          <span>This window is real. Type in it.</span>
+        </p>
         <div class="film-invite-row" aria-hidden="true">
           <span class="film-invite" data-film-invite></span>
           <button type="button" class="film-chip" data-film-type>tap to type</button>
@@ -59,19 +64,17 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
 
     {/* 8.2 — The gap, doubled */}
     <section class="page-section gap-section section-anchor" id="gap" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
-      <div class="section-intro">
-        <h2>{copy.gap.beatOneHeading}</h2>
-        <p>{copy.gap.beatOneBody}</p>
-      </div>
-      <div class="gap-stage" data-gap-stage style="--divider-position: 50%">
-        <div class="gap-pane gap-pane--plain">
-          <figure class="preview-window">
-            <div class="preview-window__bar">
-              <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
-              <span class="preview-window__title">sample.md — Quick Look</span>
-              <span class="preview-window__file">macOS default</span>
-            </div>
-            <div class="preview-window__body">
+      <div class="gap-layout">
+        <div class="section-intro">
+          <p class="eyebrow">{copy.gap.eyebrow}</p>
+          <h2>{copy.gap.beatOneHeading}</h2>
+          <p>{copy.gap.beatOneBody}</p>
+        </div>
+        <div class="compare">
+          <article class="compare-card">
+            <h3>{copy.gap.quickLookLabel}</h3>
+            <p>{copy.gap.quickLookLine}</p>
+            <figure class="compare-card__figure">
               <img
                 src="/assets/native/quicklook-sample.webp"
                 alt="macOS Quick Look opening sample.md as a plain text sheet with no rendering"
@@ -80,13 +83,17 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
                 loading="lazy"
                 decoding="async"
               />
-            </div>
-            <figcaption>Real Quick Look capture · qlmanage on {osVersion} · nothing retouched</figcaption>
-          </figure>
-        </div>
-        <div class="gap-pane gap-pane--app" aria-label="Downright renders the same file live"></div>
-        <div class="gap-divider" data-divider role="separator" aria-label="Compare Quick Look with Downright" aria-valuemin="18" aria-valuemax="82" aria-valuenow="50" tabindex="0">
-          <span aria-hidden="true"></span>
+              <figcaption>Real capture · qlmanage on {osVersion} · nothing retouched</figcaption>
+            </figure>
+          </article>
+          <article class="compare-card compare-card--app">
+            <h3>{copy.gap.downrightLabel}</h3>
+            <p>{copy.gap.downrightLine}</p>
+            <figure class="compare-card__figure">
+              <div class="compare-card__live document-content" data-gap-render aria-label="The same file rendered by Downright"></div>
+              <figcaption>Live DOM · the same bytes, decorated</figcaption>
+            </figure>
+          </article>
         </div>
       </div>
 
@@ -112,38 +119,12 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
             ))}
           </ul>
           <p class="render-stage__closing">{copy.render.closing}</p>
+          <p class="render-stage__aside">{copy.render.aside}</p>
         </div>
         <div class="render-stage__window" data-render-viewport>
           <div class="render-document-viewport" data-render-scroller>
             <div class="window-slot window-slot--render" data-window-slot="render"></div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    {/* 8.4 — Structural zoom: operable */}
-    <section class="page-section zoom-section section-anchor" id="zoom" data-rail-section data-section-label="Structural zoom" data-section-detail="Five resolutions, one anchor" data-theme-zone>
-      <div class="section-intro">
-        <h2>{copy.zoom.heading}</h2>
-        <p>{copy.zoom.body}</p>
-      </div>
-      <div class="zoom-stage" data-zoom-stage data-zoom-level="5" tabindex="0" role="group" aria-label="Structural zoom — keys 1 to 5, arrows, or pinch">
-        <div class="zoom-stage__bar">
-          <span class="zoom-stage__name">Structural zoom</span>
-          <div class="zoom-levels" aria-label="Zoom level">
-            {zoomLevels.map((level) => (
-              <button type="button" data-zoom-level={level} aria-pressed={level === 5 ? "true" : "false"}>{level}</button>
-            ))}
-          </div>
-          <span class="zoom-stage__hint">⌃⌥⌘1–5 · pinch the document</span>
-        </div>
-        <div class="zoom-surface" data-zoom-surface>
-          <div class="document-content" data-static-document set:html={sampleHtml}></div>
-        </div>
-        <p class="zoom-stage__closing">{copy.zoom.closing}</p>
-        <div class="zoom-stage__meta">
-          <p class="zoom-stage__level-name" aria-live="polite">{zoomLevelNames[4]}</p>
-          <span class="film-level-pill" data-film-level aria-hidden="true">Everything</span>
         </div>
       </div>
     </section>
@@ -261,7 +242,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       <div class="theme-showroom">
         <div class="theme-showroom__list" role="listbox" aria-label="Theme showroom">
           {themes.map((theme) => (
-            <button type="button" role="option" aria-selected={theme.id === "paper-light" ? "true" : "false"} data-theme-option={theme.id} data-magnet>
+            <button type="button" role="option" aria-selected={theme.id === "warm-dark" ? "true" : "false"} data-theme-option={theme.id} data-magnet>
               <span class="theme-option__dot" style={`--dot: ${theme.palette.background}; --dot-ink: ${theme.palette.accent}`} aria-hidden="true"></span>
               <strong>{theme.name}</strong>
               <small>{theme.appearance}</small>

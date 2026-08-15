@@ -22,7 +22,6 @@ export const sections = [
   { id: "hero", label: "Start", detail: "The native Markdown app" },
   { id: "gap", label: "The gap", detail: "It opens badly, and there is more of it than ever" },
   { id: "render", label: "The render", detail: "Your bytes, decorated — never rewritten" },
-  { id: "zoom", label: "Structural zoom", detail: "The 3,000 words, at the altitude you need" },
   { id: "agent", label: "The agent visit", detail: "Review the write, win the conflict" },
   { id: "speed", label: "Speed", detail: "Measured with a budget beside it" },
   { id: "architecture", label: "Architecture", detail: "Raw text stays in charge" },
@@ -36,23 +35,24 @@ export const copy = {
   description: "Downright is a native Markdown reader and editor for macOS. Your coding agents write more Markdown than you'll ever read — Downright renders it exactly, reviews it live, and never touches your bytes.",
   hero: {
     heading: "The native Markdown app for macOS.",
-    body: "Your coding agents write more Markdown than you'll ever read — and macOS opens it badly. Downright renders it exactly, reviews it live, and never touches your bytes.",
+    body: "Your coding agents write too much Markdown. Downright renders it exactly, reviews rewrites live, and never touches your bytes.",
     micro: "Free · MIT · macOS 14+ · no WebView",
   },
   gap: {
-    beatOneHeading: "It opens badly.",
-    beatOneBody: "The same file, in macOS Quick Look and in Downright. Drag the divider. One of these is a finished page; the other is the file.",
+    eyebrow: "The difference",
+    beatOneHeading: "Quick Look vs Downright.",
+    beatOneBody: "Default previews are limited. Downright is built to render Markdown the way it should be — the same file, the same bytes, opened twice.",
+    quickLookLabel: "Quick Look",
+    quickLookLine: "Truncated. Collapsed. Hard to scan.",
+    downrightLabel: "Downright",
+    downrightLine: "Complete. Styled. Built for comprehension.",
     beatTwoLine: "Your agents wrote 3,000 words while you read this sentence. Somewhere in there is the one claim that matters.",
   },
   render: {
     heading: "It reads finished.",
     body: "Scroll. The page drives the document in exact proportion, and every capability passes your eyes: math, Mermaid, tables, callouts, tasks, footnotes, code in true theme syntax.",
     closing: "Exact-source rendering. Your bytes, decorated — never rewritten.",
-  },
-  zoom: {
-    heading: "Read at any altitude.",
-    body: "The same document, five resolutions: headings, first sentences, artifacts, full text, everything. The anchor under your eyes never moves.",
-    closing: "Structural Zoom · ⌃⌥⌘1–5. The 3,000 words, at the altitude you need.",
+    aside: "And when there is too much of it, Structural Zoom collapses the document through five semantic levels — ⌃⌥⌘1–5, in the app.",
   },
   speed: {
     heading: "The limit belongs beside the number.",
@@ -295,6 +295,59 @@ export function renderSampleMarkdown(source = sampleMarkdown): string {
   }
   return html.join("\n");
 }
+
+/* ── The source pane ────────────────────────────────────────────────────
+   The hero window ships split: raw bytes on the left, the rendered document
+   on the right, both from the same store. This prerenders the left half —
+   line numbers and Markdown syntax colour from the app's own token set — so
+   the split is real at first paint and CM6 can hydrate straight into it. */
+
+function inlineSource(value: string): string {
+  return escapeHtml(value)
+    // Math before code: `$PATH` holds a lone $ that would otherwise pair
+    // with the closing delimiter of the preceding expression.
+    .replace(/(\$[^$]+\$)/g, '<span class="s-math">$1</span>')
+    .replace(/(`[^`]+`)/g, '<span class="s-code">$1</span>')
+    .replace(/(\*\*[^*]+\*\*)/g, '<span class="s-strong">$1</span>')
+    .replace(/(\[\[[^\]]+\]\])/g, '<span class="s-link">$1</span>')
+    .replace(/(\[[^\]]+\]\([^)]+\))/g, '<span class="s-link">$1</span>');
+}
+
+export function renderSourceMarkdown(source = sampleMarkdown): string {
+  const lines = source.replace(/\s+$/, "").split(/\r?\n/);
+  let fenced = false;
+  return lines
+    .map((line, position) => {
+      let body: string;
+      if (/^```/.test(line)) {
+        fenced = !fenced;
+        body = `<span class="s-fence">${escapeHtml(line)}</span>`;
+      } else if (fenced) {
+        body = `<span class="s-fenced">${escapeHtml(line)}</span>`;
+      } else if (/^#{1,6} /.test(line)) {
+        const heading = line.match(/^(#{1,6}) (.*)$/)!;
+        body = `<span class="s-hash">${heading[1]}</span> <span class="s-heading">${escapeHtml(heading[2])}</span>`;
+      } else if (line.startsWith("|")) {
+        body = `<span class="s-table">${escapeHtml(line)}</span>`;
+      } else if (line.startsWith("> ")) {
+        body = `<span class="s-quote">${escapeHtml(line)}</span>`;
+      } else if (line.startsWith("- ")) {
+        const rest = line.slice(2);
+        const task = rest.match(/^\[([ x])\] (.*)$/);
+        body = task
+          ? `<span class="s-marker">-</span> <span class="s-task">[${task[1]}]</span> ${inlineSource(task[2])}`
+          : `<span class="s-marker">-</span> ${inlineSource(rest)}`;
+      } else if (line.startsWith("[^")) {
+        body = `<span class="s-link">${escapeHtml(line)}</span>`;
+      } else {
+        body = inlineSource(line);
+      }
+      return `<span class="source-line"><span class="source-line__n" aria-hidden="true">${position + 1}</span><span class="source-line__t">${body || "&#8203;"}</span></span>`;
+    })
+    .join("");
+}
+
+export const sourceHtml = renderSourceMarkdown();
 
 export const sampleHtml = renderSampleMarkdown();
 export const themeColorEntries = (theme: AppTheme) => Object.entries(theme.palette);

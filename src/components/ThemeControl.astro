@@ -11,7 +11,7 @@ import { themes } from "../data/site";
     <p class="theme-panel__title">Choose a theme</p>
     <div class="theme-panel__options" role="listbox" aria-label="Site theme">
       {themes.map((theme) => (
-        <button type="button" role="option" aria-selected={theme.id === "system" ? "true" : "false"} data-theme-option={theme.id}>
+        <button type="button" role="option" aria-selected={theme.id === "warm-dark" ? "true" : "false"} data-theme-option={theme.id}>
           <span class="theme-option__dot" aria-hidden="true"></span><span>{theme.name}</span>
         </button>
       ))}

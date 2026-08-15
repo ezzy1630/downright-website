@@ -17,7 +17,6 @@ import { setInPageReduce } from "../kernel/switchboard";
 import { initRail, type RailController } from "../scenes/rail";
 import { initGap } from "../scenes/gap";
 import { initRender } from "../scenes/render";
-import { initZoom } from "../scenes/zoom";
 import { initAgent } from "../scenes/agent";
 import { initReach } from "../scenes/reach";
 import { initSpeed } from "../scenes/speed";
@@ -97,7 +96,6 @@ requestAnimationFrame(drivePendingSections);
 
 whenNear("gap", initGap);
 whenNear("render", initRender);
-whenNear("zoom", initZoom);
 whenNear("agent", () => initAgent(rail));
 whenNear("reach", initReach);
 whenNear("speed", initSpeed);
