@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import DensityRail from "../components/DensityRail.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import AppWindow from "../components/AppWindow.astro";
-import { benchmarks, copy, facts, themes } from "../data/site";
+import { benchmarks, copy, facts, themes, sampleHtml } from "../data/site";
 
 const osVersion = "macOS 26";
 const benchmarkNames = ["Parse 100 KB", "Source edit and paragraph map", "Text diff, external rewrite", "End-to-end semantic convergence", "Syntax highlight, 10 KB Swift"];
@@ -139,7 +139,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <span class="zoom-stage__hint">⌃⌥⌘1–5 · pinch the document</span>
         </div>
         <div class="zoom-surface" data-zoom-surface>
-          <div class="document-content" data-static-document></div>
+          <div class="document-content" data-static-document set:html={sampleHtml}></div>
         </div>
         <p class="zoom-stage__closing">{copy.zoom.closing}</p>
         <div class="zoom-stage__meta">
