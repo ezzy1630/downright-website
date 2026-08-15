@@ -839,22 +839,43 @@
   font-size: 13px;
 }
 
-/* ── System reach: verlet cards + Quick Look ──────────────────────────── */
+/* ── System reach: a Finder surface of live file cards ────────────────────*/
 
+/* The surface reads as a Finder window: the app's own chrome on top, a quiet
+   paper interior, and cards that carry real weight. No icon grid, no glow. */
 .file-surface {
   position: relative;
   width: min(100%, 940px);
-  height: 340px;
   margin: 55px auto 0;
   overflow: hidden;
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
-  background:
-    linear-gradient(color-mix(in oklab, var(--rule) 34%, transparent) 0.5px, transparent 0.5px),
-    linear-gradient(90deg, color-mix(in oklab, var(--rule) 34%, transparent) 0.5px, transparent 0.5px);
-  background-size: 44px 44px;
-  background-color: color-mix(in oklab, var(--surface) 55%, var(--bg));
+  background: var(--surface);
+  box-shadow: var(--window-shadow);
   touch-action: none;
+}
+
+.file-surface__bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in oklab, var(--surface) 92%, var(--text));
+  font-size: 12px;
+}
+.file-surface__bar strong { color: var(--heading); font-weight: 650; }
+.file-surface__bar span { color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
+
+.file-surface__field {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  background:
+    linear-gradient(color-mix(in oklab, var(--rule) 30%, transparent) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, color-mix(in oklab, var(--rule) 30%, transparent) 0.5px, transparent 0.5px);
+  background-size: 44px 44px;
 }
 
 .file-card {
@@ -1075,20 +1096,90 @@
 .site-footer__bottom button { border: 0; background: none; padding: 0; color: var(--text-secondary); cursor: pointer; font: inherit; font-size: 10px; font-family: var(--font-mono); }
 .site-footer__bottom button:hover { color: var(--heading); }
 
-/* ── The mobile film (below 900px, coarse pointer) ────────────────────── */
+/* ── The mobile film (below 900px, coarse pointer, or ?film) ─────────────
+   Six vertical beats, each ~100svh, native scroll, no hover anywhere. The
+   living document is the star and stays full-width; the set pieces are
+   re-choreographed for the thumb. Nothing here is a second app window — the
+   beats are scenes on the same shared document, so the one-window rule holds.
+   Physics and magnetism stay off; springs are reserved for the set pieces. */
 
 .film-invite-row,
 .film-level-pill,
-.film-handoff {
+.film-handoff,
+.film-beat {
   display: none;
 }
+
+/* The beats only exist when the film choreography is active. */
+[data-film="true"] .film-beat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 76px 0 40px;
+}
+
+.film-beat__kicker {
+  margin: 0 0 12px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.film-beat__title {
+  margin: 0;
+  color: var(--heading);
+  font-family: var(--font-display);
+  font-size: clamp(30px, 8.6vw, 44px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.film-beat__line {
+  max-width: 34ch;
+  margin: 14px 0 0;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.film-beat__stage { margin-top: 24px; }
+
+/* A quiet tap hint: one line, never a bouncing arrow. */
+.film-beat__hint {
+  margin-top: 16px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+/* ── Beat 1 · hero: the document fills the frame ────────────────────────── */
+[data-film="true"] .hero {
+  grid-template-columns: 1fr;
+  gap: 18px;
+  min-height: auto;
+  padding-top: 92px;
+}
+[data-film="true"] .hero__copy { width: 100%; }
+[data-film="true"] .hero h1 { max-width: 12ch; font-size: clamp(38px, 10.6vw, 54px); }
+[data-film="true"] .hero__copy > p:not(.hero__micro) { max-width: 34ch; margin-top: 14px; font-size: 15px; }
+[data-film="true"] .hero__actions { margin-top: 18px; }
+[data-film="true"] .hero__micro { margin-top: 12px; }
+[data-film="true"] .hero__window { width: 100%; margin-left: 0; }
+[data-film="true"] .hero__window .app-window { height: 66svh; min-height: 480px; }
+[data-film="true"] .hero__annotation { display: none; }
 
 [data-film="true"] .film-invite-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .film-invite {
@@ -1097,7 +1188,13 @@
   font-family: var(--font-mono);
   font-size: 12px;
 }
-
+.film-invite::after {
+  content: "▍";
+  color: var(--accent);
+  animation: film-caret 1s steps(1) infinite;
+}
+.film-invite.is-settled::after { content: ""; }
+@keyframes film-caret { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0; } }
 .film-invite.is-settled {
   color: var(--text-faint);
   transition: color var(--motion-deliberate) var(--ease-decelerate);
@@ -1114,7 +1211,106 @@
   font-size: 13px;
   font-weight: 600;
 }
+.film-chip:active { background: var(--code-bg); }
 
+/* ── Beat 2 · the gap, by thumb: a scrubber the reader drags ──────────────
+   On the film the pinned scrub collapses; the reader drives the render line
+   with a full-width thumb track instead. Same surface, same store. */
+[data-film="true"] .sweep-stage { height: auto; }
+[data-film="true"] .sweep {
+  position: relative;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  padding: 8px 0 0;
+}
+/* The surface is the window the blocks pass through. On the film it gets a
+   real height (the desktop grid row that sized it is gone) and a fixed window
+   so the scrub reads as "the bytes become the page" inside one frame. */
+[data-film="true"] .sweep__window { flex: none; }
+[data-film="true"] .sweep__surface {
+  flex: none;
+  height: 46svh;
+  max-height: 46svh;
+  overflow: hidden;
+}
+.film-scrub { display: grid; gap: 8px; margin-top: 18px; }
+.film-scrub__track {
+  position: relative;
+  height: 44px;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  touch-action: none;
+}
+.film-scrub__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--scrub, 0) * 100%);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+}
+.film-scrub__thumb {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--scrub, 0) * 100%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--text) 40%, transparent);
+}
+.film-scrub__label {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+/* ── Beat 3 · zoom: pinch the document ──────────────────────────────────── */
+.film-zoom {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-window);
+  background: var(--surface);
+  height: 58svh;
+  touch-action: pinch-zoom;
+}
+.film-zoom__doc {
+  height: 100%;
+  overflow: hidden;
+  transform-origin: 50% 40%;
+}
+.film-zoom__doc .document-content { padding-top: 30px; }
+.film-zoom__levels {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 6px;
+}
+.film-zoom__levels button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--surface) 88%, transparent);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+.film-zoom__levels button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 [data-film="true"] .film-level-pill {
   display: inline-grid;
   place-items: center;
@@ -1128,7 +1324,53 @@
   font-weight: 600;
 }
 
-/* On the film, the close is the handoff — the Mac gets the download. */
+/* ── Beat 4 · the agent visit: thumb-sized conflict ─────────────────────── */
+[data-film="true"] .conflict-bar { gap: 8px; padding: 14px; }
+[data-film="true"] .conflict-bar strong { width: 100%; margin: 0 0 4px; }
+[data-film="true"] .conflict-bar button {
+  flex: 1 1 30%;
+  min-height: 52px;
+  font-size: 14px;
+}
+
+/* On the film the change toast must never sit on the conflict bar — it parks
+   at the top of the document, clear of the thumb targets. */
+[data-film="true"] .change-toast {
+  top: 12px;
+  right: 12px;
+  bottom: auto;
+  left: 12px;
+  min-width: 0;
+}
+
+/* ── Beat 5 · theme spill: tap a swatch, re-ink the film ────────────────── */
+.film-spill {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.film-spill button {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  min-height: 76px;
+  padding: 12px 6px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+}
+.film-spill button[aria-pressed="true"] { border-color: var(--accent); color: var(--heading); }
+.film-spill .swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+}
+
+/* ── Beat 6 · the handoff close ─────────────────────────────────────────── */
 [data-film="true"] .close-section .download-button,
 [data-film="true"] .close-section small {
   display: none;
@@ -1138,7 +1380,7 @@
   display: grid;
   gap: 14px;
   justify-items: center;
-  margin-top: 56px;
+  margin-top: 40px;
   padding: 26px 20px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
@@ -1149,33 +1391,38 @@
   color: var(--heading);
   font-family: var(--font-display);
   font-size: 21px;
+  text-align: center;
   text-wrap: balance;
 }
 
 .film-handoff__primary {
-  min-height: 52px;
+  min-height: 54px;
+  width: 100%;
   padding: 0 26px;
   border: 0;
-  border-radius: 26px;
+  border-radius: 27px;
   background: var(--accent);
   color: #fff;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 650;
 }
+.film-handoff__primary:active { background: color-mix(in oklab, var(--accent) 84%, #fff); }
 
 .film-handoff__row {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+  width: 100%;
 }
 
 .film-handoff__row button,
 .film-handoff__row a {
   display: inline-grid;
   place-items: center;
-  min-height: 44px;
+  flex: 1 1 44%;
+  min-height: 48px;
   padding: 0 16px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-button);
@@ -1188,6 +1435,7 @@
 .film-handoff__note {
   color: var(--text-faint);
   font-size: 11px;
+  text-align: center;
   text-wrap: balance;
 }
 
@@ -1241,7 +1489,7 @@
   .app-window--hero { height: 620px; }
   .agent-stage__document { height: 640px; }
   .review-diff__panes { grid-template-columns: 1fr; }
-  .file-surface { height: 340px; }
+  .file-surface__field { height: 300px; }
 }
 
 @media (max-width: 680px) {

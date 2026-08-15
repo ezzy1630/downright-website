@@ -51,7 +51,10 @@ export function initReach(): void {
 }
 
 function initVerlet(): void {
-  const surfaceElement = document.querySelector<HTMLElement>("[data-file-surface]");
+  // The cards live in the Finder surface's field (the chrome bar sits above
+  // it). Bounds, pointer geometry, and layout all measure the field.
+  const field = document.querySelector<HTMLElement>("[data-file-field]");
+  const surfaceElement = field ?? document.querySelector<HTMLElement>("[data-file-surface]");
   if (!surfaceElement) return;
   // Local non-null binding so closures keep the narrowing.
   const surface = surfaceElement;

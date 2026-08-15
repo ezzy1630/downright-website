@@ -54,10 +54,10 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           </svg>
           <span>This window is real. Type in it.</span>
         </p>
-        <div class="film-invite-row" aria-hidden="true">
-          <span class="film-invite" data-film-invite></span>
-          <button type="button" class="film-chip" data-film-type>tap to type</button>
-          <button type="button" class="film-chip" data-film-insert>insert an edit</button>
+        <div class="film-invite-row">
+          <span class="film-invite" data-film-invite aria-hidden="true"></span>
+          <button type="button" class="film-chip" data-film-type>Tap to type</button>
+          <button type="button" class="film-chip" data-film-insert>Insert an edit</button>
         </div>
       </div>
     </section>
@@ -197,7 +197,14 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <h2>{copy.reach.heading}</h2>
         <p>{copy.reach.body}</p>
       </div>
-      <div class="file-surface" data-file-surface aria-label="Markdown files — flick them, press Space to Quick Look, drag one onto the document"></div>
+      <div class="file-surface" data-file-surface aria-label="Markdown files — flick them, press Space to Quick Look, drag one onto the document">
+        <div class="file-surface__bar">
+          <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+          <strong>Markdown</strong>
+          <span>4 files · flick one, press Space to Quick Look</span>
+        </div>
+        <div class="file-surface__field" data-file-field></div>
+      </div>
       <div class="quick-look" data-quick-look hidden>
         <div class="quick-look__panel" role="dialog" aria-modal="false" aria-label="Quick Look">
           <div class="quick-look__bar">

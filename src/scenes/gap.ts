@@ -32,6 +32,14 @@ const BLOCK_RAMP = 0.05;
 const CHROME_AT = 0.86;
 
 export function initGap(): void {
+  // The film (§9) re-choreographs this act for the thumb: it builds the same
+  // two-state blocks but drives the render line with a scrubber instead of
+  // the pinned scroll. Building both would stack two sets of blocks on one
+  // surface, so the desktop sweep stands down when the film is active.
+  if (document.documentElement.dataset.film === "true") {
+    initWall();
+    return;
+  }
   initSweep();
   initWall();
 }
