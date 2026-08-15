@@ -41,6 +41,8 @@
   --syntax-diff-added: #2b7440;
   --syntax-diff-removed: #b03a34;
   --syntax-diff-header: #6b6259;
+  --cta-fill: #307afe;
+  --cta-ink: #181513;
   --band-bg: #171614;
   --band-surface: #24211e;
   --band-text: #e3ddd5;
@@ -122,6 +124,8 @@
   --syntax-diff-added: #2b7440;
   --syntax-diff-removed: #b03a34;
   --syntax-diff-header: #6b6259;
+  --cta-fill: #307afe;
+  --cta-ink: #181513;
 }
 
 [data-theme="warm-dark"] {
@@ -166,6 +170,8 @@
   --syntax-diff-added: #7fb77e;
   --syntax-diff-removed: #d98a80;
   --syntax-diff-header: #a29a90;
+  --cta-fill: #6ea8ff;
+  --cta-ink: #171614;
 }
 
 [data-theme="nord"] {
@@ -210,6 +216,8 @@
   --syntax-diff-added: #a3be8c;
   --syntax-diff-removed: #cd848b;
   --syntax-diff-header: #88c0d0;
+  --cta-fill: #88c0d0;
+  --cta-ink: #2e3440;
 }
 
 [data-theme="solarized-light"] {
@@ -254,6 +262,8 @@
   --syntax-diff-added: #606e00;
   --syntax-diff-removed: #c42d2a;
   --syntax-diff-header: #1e6ca4;
+  --cta-fill: #006d9c;
+  --cta-ink: #fdf6e3;
 }
 
 [data-theme="high-contrast"] {
@@ -298,6 +308,8 @@
   --syntax-diff-added: #006600;
   --syntax-diff-removed: #cc0000;
   --syntax-diff-header: #333333;
+  --cta-fill: #0000cc;
+  --cta-ink: #ffffff;
 }
 
 [data-theme="system"] {
@@ -342,6 +354,8 @@
   --syntax-diff-added: #2b7440;
   --syntax-diff-removed: #b03a34;
   --syntax-diff-header: #6b6259;
+  --cta-fill: #307afe;
+  --cta-ink: #181513;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -387,5 +401,7 @@
     --syntax-diff-added: #7fb77e;
     --syntax-diff-removed: #d98a80;
     --syntax-diff-header: #a29a90;
+    --cta-fill: #6ea8ff;
+    --cta-ink: #171614;
   }
 }

@@ -250,27 +250,33 @@ ol {
   background: color-mix(in oklab, var(--accent) 9%, var(--bg));
 }
 
-.button:active {
-  transform: translateY(1px) scale(0.985);
-  transition-duration: var(--motion-press-in);
-}
-
+/* The primary CTA is the theme's accent, filled. --cta-fill/--cta-ink are
+   generated per theme from the app's own JSON and are guaranteed to clear
+   AA — the accent itself where it can carry a label, the link colour where
+   it cannot (Solarized). The old rule was scoped to [data-theme="paper-light"],
+   which never matches on a first visit, so the CTA rendered plain ink. */
 .button--primary {
-  border-color: var(--heading);
-  background: var(--heading);
-  color: var(--bg);
-}
-
-[data-theme="paper-light"] .button--primary {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--heading);
+  border-color: transparent;
+  background: var(--cta-fill);
+  color: var(--cta-ink);
 }
 
 .button--primary:hover {
-  border-color: var(--heading);
-  background: var(--heading);
-  color: var(--bg);
+  border-color: transparent;
+  background: color-mix(in oklab, var(--cta-fill) 88%, var(--cta-ink));
+  color: var(--cta-ink);
+}
+
+/* "free · direct DMG" is the promise, not part of the label: a quiet suffix
+   behind a hairline so the two never read as one run-on string. */
+.download-button__micro {
+  padding-left: 10px;
+  border-left: 1px solid color-mix(in oklab, var(--cta-ink) 26%, transparent);
+  color: color-mix(in oklab, var(--cta-ink) 74%, var(--cta-fill));
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 
 .button--quiet {
@@ -784,6 +790,7 @@ ol {
 /* Hairline rules, not boxes: one under the header, one between rows. */
 .doc-table thead th { border-bottom: 1px solid var(--rule); }
 .doc-table tbody tr + tr td { border-top: 0.5px solid color-mix(in oklab, var(--rule) 70%, transparent); }
+.doc-table tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
 
 .doc-table th {
   color: var(--text-secondary);

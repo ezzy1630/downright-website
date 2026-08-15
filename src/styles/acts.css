@@ -35,22 +35,45 @@
 
 [data-magnet] {
   translate: var(--magnet-x, 0px) var(--magnet-y, 0px);
-  transition: box-shadow var(--motion-hover) var(--ease-decelerate);
+  scale: var(--lift-scale, 1);
+  transition: box-shadow var(--motion-hover) var(--ease-decelerate),
+    scale var(--motion-hover) var(--ease-decelerate);
   will-change: translate;
 }
 
+/* The lift is a custom property, not a bare `scale`, so pop() can multiply
+   into it. As a flat declaration it out-specified the pop and the site's one
+   squash-stretch was invisible to anyone pressing with a mouse (the pointer
+   is by definition hovering, so the element is always lifted at press time). */
 [data-magnet].is-lifted {
-  scale: 1.02;
-  box-shadow: 0 10px 26px -12px color-mix(in oklab, var(--text) 30%, transparent);
-  transition: scale var(--motion-hover) var(--ease-decelerate),
-    box-shadow var(--motion-hover) var(--ease-decelerate);
+  --lift-scale: 1.02;
+  box-shadow: 0 10px 26px -12px color-mix(in oklab, #1a1512 46%, transparent);
 }
 
-/* pop(): the download press — the site's one squash-stretch */
+/* Press states, straight off Motion.swift: 0.985 down in pressIn 0.07s,
+   back up over pressOut 0.11s. The scale composes lift × pop × press so the
+   three never fight over one property. */
+.button {
+  scale: calc(var(--lift-scale, 1) * var(--press-scale, 1));
+  transition: background-color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate),
+    color var(--motion-hover) var(--ease-decelerate),
+    scale var(--motion-press-out) var(--ease-decelerate);
+}
+
+.button:active {
+  --press-scale: 0.985;
+  transition-duration: var(--motion-press-in);
+}
+
+/* pop(): the download press — the site's one squash-stretch, with the
+   radius swelling ×1.15 on the same press. */
 .download-button {
-  scale: var(--pop-scale, 1);
+  scale: calc(var(--lift-scale, 1) * var(--pop-scale, 1) * var(--press-scale, 1));
   border-radius: calc(var(--radius-button) * var(--pop-radius, 1));
-  transition: scale 0.07s var(--ease-snap), border-radius 0.11s var(--ease-decelerate);
+  transition: background-color var(--motion-hover) var(--ease-decelerate),
+    scale var(--motion-press-out) var(--ease-snap),
+    border-radius var(--motion-press-out) var(--ease-decelerate);
 }
 
 /* ── The app window: two faces, one document ──────────────────────────── */
@@ -159,9 +182,12 @@
 
 .app-window__bar-controls { display: inline-flex; gap: 10px; align-items: center; justify-content: flex-end; }
 
+/* Equal columns, because the sprung indicator is a flat 50% — with
+   flex-sized labels the pill lands off the word it is supposed to select. */
 .app-window__segmented {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   border: 0.5px solid var(--rule);
   border-radius: var(--radius-chip);
 }
@@ -988,6 +1014,12 @@
 @media (max-width: 680px) {
   .app-window--hero { height: 560px; min-height: 0; }
   .app-window__status-shortcut { display: none; }
+  /* No hardware keyboard, and the titlebar has 390px to spend: the shortcut
+     hint goes, and the mode control tightens rather than overflowing. */
+  .app-window__hint { display: none; }
+  .app-window__bar { gap: 8px; padding: 0 10px; }
+  .app-window__segmented button { min-width: 0; padding: 5px 9px; }
+  .app-window__file small { display: none; }
   .hero__caption { text-align: left; }
   .gap-wall__scroller { height: 280px; }
   .render-document-viewport { height: 560px; }

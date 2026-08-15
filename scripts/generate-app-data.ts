@@ -130,11 +130,40 @@ function tokenCss(themes, motion) {
     ["calloutNote", "callout-note"], ["calloutWarning", "callout-warning"], ["calloutSuccess", "callout-success"], ["calloutDanger", "callout-danger"],
   ];
   const codeNames = ["keyword", "string", "number", "comment", "type", "function", "variable", "constant", "operator", "punctuation", "attribute", "diffAdded", "diffRemoved", "diffHeader"];
+  // The primary CTA is a filled accent chip, so its label needs a guaranteed
+  // AA pair. Both halves come from the theme's own JSON — accent first, and
+  // the link colour only where accent cannot carry legible text (Solarized).
+  const luminance = (hex) => {
+    const channels = [1, 3, 5].map((offset) => {
+      const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;
+      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  };
+  const contrast = (a, b) => {
+    const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (high + 0.05) / (low + 0.05);
+  };
+  const ctaPair = (palette) => {
+    const candidates = [];
+    for (const fill of [palette.accent, palette.link]) {
+      for (const ink of [palette.background, palette.surface, palette.heading, palette.text]) {
+        candidates.push({ fill, ink, ratio: contrast(fill, ink) });
+      }
+    }
+    // Prefer the accent whenever it clears AA; otherwise take the best pair.
+    const onAccent = candidates.filter((entry) => entry.fill === palette.accent && entry.ratio >= 4.5);
+    const pool = onAccent.length ? onAccent : candidates;
+    return pool.sort((a, b) => b.ratio - a.ratio)[0];
+  };
+
   const cssFor = (theme, fallback) => {
     const palette = theme.name === "System" ? fallback.palette : theme.palette;
     const code = theme.name === "System" ? fallback.code : theme.code;
     const lines = paletteNames.map(([source, target]) => `  --${target}: ${palette[source]};`);
     lines.push(...codeNames.map((source) => `  --syntax-${source.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}: ${code[source]};`));
+    const cta = ctaPair(palette);
+    lines.push(`  --cta-fill: ${cta.fill};`, `  --cta-ink: ${cta.ink};`);
     return lines.join("\n");
   };
   const lightFallback = themes.find((theme) => theme.name === "Paper Light");
