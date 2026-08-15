@@ -54,17 +54,37 @@ function push(tokens: DiffToken[], text: string, kind: DiffToken["kind"]): void 
   else tokens.push({ text, kind });
 }
 
-/** Human summary in the app's voice: "2 rewritten · 1 added". */
+/**
+ * Human summary in the app's voice: "2 rewritten · 1 added". Counts hunks,
+ * not tokens: whitespace is a boundary of nothing, so a three-word phrase
+ * replaced by a three-word phrase is ONE rewrite, not three. A replacement
+ * (removed + added in one hunk) is a rewrite; added-only is an addition.
+ */
 export function summarizeDiff(tokens: DiffToken[]): { rewritten: number; added: number } {
   let rewritten = 0;
   let added = 0;
-  let previousKind: DiffToken["kind"] | null = null;
+  let inHunk = false;
+  let hunkHasRemoved = false;
+  let hunkHasAdded = false;
+  const flush = (): void => {
+    if (hunkHasRemoved && hunkHasAdded) rewritten += 1;
+    else if (hunkHasAdded && !hunkHasRemoved) added += 1;
+    // Pure deletions aren't surfaced in the "rewritten · added" voice.
+    inHunk = false;
+    hunkHasRemoved = false;
+    hunkHasAdded = false;
+  };
   for (const token of tokens) {
-    // A removed-run is one rewrite; an added-run with no removed-run before
-    // it is one addition.
-    if (token.kind === "removed" && previousKind !== "removed") rewritten += 1;
-    if (token.kind === "added" && previousKind !== "removed" && previousKind !== "added") added += 1;
-    previousKind = token.kind;
+    const whitespace = token.text.trim().length === 0;
+    if (token.kind === "equal" && !whitespace) {
+      flush();
+      continue;
+    }
+    if (token.kind === "equal") continue; // whitespace doesn't split a hunk
+    inHunk = true;
+    if (token.kind === "removed") hunkHasRemoved = true;
+    if (token.kind === "added") hunkHasAdded = true;
   }
+  flush();
   return { rewritten, added };
 }

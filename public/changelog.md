@@ -258,4 +258,4 @@ Clicking a link, footnote, task, or heading teleported the camera. Every in-docu
 
 Stray shading blocks beside and below code blocks. TextKit 2 composites each layout fragment as an independent, lazily-rendered surface, and the code block's closing fence claimed a tinted surface taller than its own band (to make room for its copy control) - a fill that reached past the block's edge and wasn't always painted over when the neighbouring fragment didn't redraw in the same pass. The band now paints exactly its own frame: header and footer round only their *outer* corners, the edges they share with code lines are square and butt flush, and the footer's copy control collapses to fit its thin band instead of forcing the fill to overhang (geometry regression-pinned).
 
-Source commit: f3726b1c67f1e03f4d8e6525ac0faef1ce3f3558
+Source commit: 63d5c90fca32893fef571904b4d6e438db6800d3

@@ -1,7 +1,7 @@
 {
-  "sourceCommit": "f3726b1c67f1e03f4d8e6525ac0faef1ce3f3558",
-  "generatedAt": "2026-08-15T18:44:16.852Z",
-  "sourceWorkingTreeDirty": true,
+  "sourceCommit": "63d5c90fca32893fef571904b4d6e438db6800d3",
+  "generatedAt": "2026-08-15T19:08:02.252Z",
+  "sourceWorkingTreeDirty": false,
   "version": "1.0.16",
   "minimumMacOS": "14.0",
   "license": "MIT",

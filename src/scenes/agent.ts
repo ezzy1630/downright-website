@@ -51,6 +51,7 @@ export function initAgent(rail: RailController | null): void {
   if (!documentHost || !toastEl || !conflictBar) return;
 
   let fired = false;
+  let triggered = false;
   try {
     fired = sessionStorage.getItem(SESSION_KEY) === "1";
   } catch {
@@ -64,11 +65,6 @@ export function initAgent(rail: RailController | null): void {
   };
 
   const finish = (): void => {
-    try {
-      sessionStorage.setItem(SESSION_KEY, "1");
-    } catch {
-      /* this visit only */
-    }
     if (rail) rail.markChanged();
     window.setTimeout(revealContextual, 600);
   };
@@ -82,7 +78,6 @@ export function initAgent(rail: RailController | null): void {
     if (reducedMotion()) {
       doc.stageExternalWrite(theirs);
       doc.markStreamed();
-      documentHost.querySelector<HTMLElement>("[data-static-document]")?.replaceChildren();
       renderWithMarks(documentHost, theirs, tokens, true);
       toastEl.querySelector("[data-change-summary]")!.textContent = `${summary.rewritten} rewritten · ${summary.added} added`;
       toastEl.classList.add("is-visible");
@@ -126,20 +121,42 @@ export function initAgent(rail: RailController | null): void {
     }, streamEnd);
   };
 
+  /**
+   * Arming is redundant on purpose (§18.4 "fires exactly once"): an
+   * IntersectionObserver on the document host fires the moment the document
+   * is ≥50% visible, AND a geometry check on the shared scroll read is the
+   * fallback for engines or scroll jumps where the observer misses. Both
+   * funnel into trigger(), which is idempotent.
+   */
   const observer = new IntersectionObserver(
     (entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      trigger();
+      if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.5)) trigger();
     },
-    { threshold: 0.35 },
+    { threshold: [0.5] },
   );
-  observer.observe(stage);
+  observer.observe(documentHost);
 
-  /** The moment arms on approach — IO when it delivers, geometry when not. */
+  /** The document host must be ≥50% visible before the moment lands. */
+  const hostVisible = (): boolean => {
+    const rect = documentHost.getBoundingClientRect();
+    const visibleTop = Math.max(rect.top, 0);
+    const visibleBottom = Math.min(rect.bottom, window.innerHeight);
+    const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+    return visibleHeight >= rect.height * 0.5;
+  };
+
   function trigger(): void {
+    if (triggered) return;
+    triggered = true;
     observer.disconnect();
     window.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", onScroll);
     window.removeEventListener("load", onScroll);
+    try {
+      sessionStorage.setItem(SESSION_KEY, "1"); // once per session, ever
+    } catch {
+      /* this visit only */
+    }
     if (fired) {
       // Already seen this session: hold the final state, no replay.
       stage.dataset.agentReplay = "held";
@@ -149,16 +166,15 @@ export function initAgent(rail: RailController | null): void {
     fired = true;
     fire();
   }
-  const stageVisible = (): boolean => {
-    const rect = stage.getBoundingClientRect();
-    return rect.top < window.innerHeight * 0.65 && rect.bottom > window.innerHeight * 0.35;
-  };
   const onScroll = (): void => {
-    if (stageVisible()) trigger();
+    if (hostVisible()) trigger();
   };
   window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
   // Late-binding for hash jumps that land before listeners attach.
   window.addEventListener("load", onScroll);
+  // One rAF sweep covers deep-link jumps that land before any scroll event.
+  requestAnimationFrame(onScroll);
 
   // Conflict bar: all three genuinely working.
   const resolve = (action: "mine" | "theirs"): void => {
