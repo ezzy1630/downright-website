@@ -142,11 +142,16 @@ function tokenCss(themes, motion) {
   const blocks = themes.filter((theme) => theme.name !== "System").map((theme) => `[data-theme="${theme.id}"] {\n${cssFor(theme, theme)}\n}`);
   blocks.push(`[data-theme="system"] {\n${cssFor(themes.find((theme) => theme.name === "System"), lightFallback)}\n}\n\n@media (prefers-color-scheme: dark) {\n  [data-theme="system"] {\n${cssFor(themes.find((theme) => theme.name === "System"), darkFallback).split("\n").map((line) => `    ${line.trimStart()}`).join("\n")}\n  }\n}`);
   const motionLines = Object.entries(motion.durations).map(([name, value]) => `  --motion-${name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}: ${name === "jumpPunchKick" ? `${value}px` : `${value}s`};`);
+  const curveLines = Object.entries(motion.curves).map(([name, value]) => {
+    const ease = Array.isArray(value) ? `cubic-bezier(${value.join(", ")})` : value;
+    const cssName = name === "easeOut" ? "out" : name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+    return `  --ease-${cssName}: ${ease};`;
+  });
   const bandLines = [
     `  --band-bg: ${darkFallback.palette.background};`, `  --band-surface: ${darkFallback.palette.surface};`, `  --band-text: ${darkFallback.palette.text};`,
     `  --band-text-secondary: ${darkFallback.palette.textSecondary};`, `  --band-heading: ${darkFallback.palette.heading};`, `  --band-rule: ${darkFallback.palette.rule};`,
   ];
-  return `/* Generated from /Volumes/Neural/Downright/Sources/MarkdownRender/Themes and Motion.swift. */\n:root {\n${cssFor(lightFallback, lightFallback)}\n${bandLines.join("\n")}\n${motionLines.join("\n")}\n  --font-display: "New York", "Iowan Old Style", Newsreader, Georgia, serif;\n  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Inter, Arial, sans-serif;\n  --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;\n  --measure: 70ch;\n  --page-max: 1800px;\n  --content-max: 1120px;\n  --radius-chip: 4px;\n  --radius-button: 8px;\n  --radius-panel: 10px;\n  --radius-window: 12px;\n  --focus-ring: color-mix(in oklab, var(--accent) 40%, transparent);\n  --window-shadow: 0 1px 2px color-mix(in srgb, var(--text) 5%, transparent), 0 12px 32px color-mix(in srgb, var(--text) 10%, transparent);\n}\n\n${blocks.join("\n\n")}\n`;
+  return `/* Generated from /Volumes/Neural/Downright/Sources/MarkdownRender/Themes and Motion.swift. */\n:root {\n${cssFor(lightFallback, lightFallback)}\n${bandLines.join("\n")}\n${motionLines.join("\n")}\n${curveLines.join("\n")}\n  --font-display: "New York", "Iowan Old Style", Newsreader, Georgia, serif;\n  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Inter, Arial, sans-serif;\n  --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;\n  --measure: 70ch;\n  --page-max: 1800px;\n  --content-max: 1120px;\n  --radius-chip: 4px;\n  --radius-button: 8px;\n  --radius-panel: 10px;\n  --radius-window: 12px;\n  --focus-ring: color-mix(in oklab, var(--accent) 40%, transparent);\n  --window-shadow: 0 1px 2px color-mix(in srgb, var(--text) 5%, transparent), 0 12px 32px color-mix(in srgb, var(--text) 10%, transparent);\n}\n\n${blocks.join("\n\n")}\n`;
 }
 
 async function main() {

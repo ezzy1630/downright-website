@@ -19,8 +19,8 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 ## Source and evidence
 
 - Native source: /Volumes/Neural/Downright
-- App payload commit: fbe53e56200e3b29f6f176b675c4db3466836b83
-- Payload generated: 2026-08-15T20:06:21.032Z
+- App payload commit: 5abc2b68a356dc04f13ae647300efd0b86899342
+- Payload generated: 2026-08-15T20:09:17.243Z
 - Benchmark corpus: 120,825 characters / 4,885 lines
 - Benchmark date: 2026-08-06
 - Benchmark qualification: Baseline only. Not a cross-machine claim.
