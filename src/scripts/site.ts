@@ -16,7 +16,6 @@ import { sound } from "../kernel/sound";
 import { setInPageReduce } from "../kernel/switchboard";
 import { initRail, type RailController } from "../scenes/rail";
 import { initGap } from "../scenes/gap";
-import { initRender } from "../scenes/render";
 import { initAgent } from "../scenes/agent";
 import { initReach } from "../scenes/reach";
 import { initSpeed } from "../scenes/speed";
@@ -95,7 +94,6 @@ function drivePendingSections(): void {
 requestAnimationFrame(drivePendingSections);
 
 whenNear("gap", initGap);
-whenNear("render", initRender);
 whenNear("agent", () => initAgent(rail));
 whenNear("reach", initReach);
 whenNear("speed", initSpeed);

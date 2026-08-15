@@ -12,7 +12,7 @@ This is the current launch record for the approved site plan. The site does not 
 
 ## Native capture set
 
-The current native evidence stills are from the installed /Applications/Downright.app bundle on macOS 26 at version 1.0.13, build 173, source commit b178f7d. The payload now follows the newer 1.0.16 source commit 5abc2b6. Its committed diff changes version, release, CLI, and project plumbing, not themes, motion, docs, or the rendered sample. A fresh capture refresh for that newer commit was attempted but the native window provider became unavailable; the stills remain explicitly versioned:
+The current native evidence stills are from the installed /Applications/Downright.app bundle on macOS 26 at version 1.0.13, build 173, source commit b178f7d. The payload now follows the newer 1.0.16 source commit 93bc7fe. Its committed diff changes version, release, CLI, and project plumbing, not themes, motion, docs, or the rendered sample. A fresh capture refresh for that newer commit was attempted but the native window provider became unavailable; the stills remain explicitly versioned:
 
 - render-warm-dark.jpg - the real app rendering sample.md in Warm Dark.
 - source-warm-dark.jpg - the same document in Source Focus.
@@ -23,8 +23,8 @@ The approved Quick Look before/after pair, Finder thumbnails folder, conflict an
 
 ## Payload provenance
 
-- Native source commit: 5abc2b68a356dc04f13ae647300efd0b86899342
-- Payload generated: 2026-08-15T21:07:51.728Z
+- Native source commit: 93bc7fe5f4ee9c0377d09c233ed1823b66bcc7da
+- Payload generated: 2026-08-15T21:24:51.379Z
 - Native working tree dirty at generation: yes; unrelated source changes were preserved
 
 The technical site budgets, accessibility audits, Markdown mirrors, llms.txt, RSS, and social OG images are generated and verified locally. Clean-machine download and install verification remains pending the artifact URL.

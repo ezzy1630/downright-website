@@ -48,6 +48,13 @@ interface SweepBlock {
   at: number;
 }
 
+interface Annotation {
+  note: HTMLElement;
+  /** Progress at which this capability has finished rendering. */
+  at: number;
+  fired: boolean;
+}
+
 function initSweep(): void {
   const stage = document.querySelector<HTMLElement>("[data-sweep]");
   const surface = document.querySelector<HTMLElement>("[data-sweep-surface]");
@@ -89,6 +96,19 @@ function initSweep(): void {
   build();
   doc.subscribe(build);
 
+  // The margin annotations name each capability at the moment the sweep
+  // renders it — the act's teaching line, earned rather than asserted. Each
+  // one is keyed to the block that actually contains its selector, so they
+  // fire in document order and never fire twice.
+  const notes: Annotation[] = [];
+  for (const note of document.querySelectorAll<HTMLElement>("[data-annotation]")) {
+    const selector = note.dataset.annotation;
+    if (!selector) continue;
+    const index = blocks.findIndex((block) => block.rendered.querySelector(selector));
+    if (index < 0) continue;
+    notes.push({ note, at: blocks[index].at + BLOCK_RAMP * 0.6, fired: false });
+  }
+
   if (reducedMotion()) {
     // Static composed frame: the first half stays raw, the rest stays
     // rendered, so the before/after reads top-to-bottom with zero motion.
@@ -100,6 +120,7 @@ function initSweep(): void {
     });
     stage.style.setProperty("--sweep-progress", "1");
     windowEl.dataset.chrome = "app";
+    for (const note of notes) note.note.classList.add("is-bloomed", "is-static");
     return;
   }
 
@@ -122,6 +143,13 @@ function initSweep(): void {
       block.rendered.style.opacity = String(inn);
       block.rendered.style.transform = `translateY(${((1 - inn) * 7).toFixed(2)}px)`;
       block.raw.style.transform = `translateY(${(out * -7).toFixed(2)}px)`;
+    }
+
+    for (const note of notes) {
+      const bloomed = progress >= note.at;
+      if (bloomed === note.fired) continue;
+      note.fired = bloomed;
+      note.note.classList.toggle("is-bloomed", bloomed);
     }
   };
 

@@ -412,12 +412,25 @@
   position: sticky;
   top: 56px;
   display: grid;
-  width: min(100%, 1080px);
+  width: min(100%, var(--page-max));
   height: calc(100svh - 56px);
   margin: 0 auto;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
   grid-template-rows: auto auto 1fr auto;
+  column-gap: clamp(24px, 3vw, 56px);
   align-content: center;
   padding: 24px 0 30px;
+}
+
+.sweep .eyebrow { grid-column: 1; }
+
+/* The annotations name each capability as the sweep renders it. */
+.sweep .annotation-rail {
+  grid-column: 2;
+  grid-row: 2 / span 2;
+  align-self: center;
+  margin: 0;
+  list-style: none;
 }
 
 /* The lede hands over to the closing line at the end of the sweep. Both sit
@@ -442,6 +455,7 @@
 
 .sweep__window {
   grid-row: 3;
+  grid-column: 1;
   display: flex;
   min-height: 0;
   flex-direction: column;
@@ -538,6 +552,7 @@
 
 .sweep__capture {
   grid-row: 4;
+  grid-column: 1;
   max-width: 74ch;
   margin: 16px 0 0;
   color: var(--text-faint);
@@ -552,6 +567,7 @@
 /* The page's second and last handwritten aside. */
 .sweep__annotation {
   grid-row: 4;
+  grid-column: 2;
   justify-self: end;
   margin: 10px 0 0;
   color: var(--text-faint);
@@ -1214,3 +1230,52 @@
 [data-reduced-motion="true"] .app-window__inner,
 [data-reduced-motion="true"] .glass-toast,
 [data-reduced-motion="true"] .change-toast { transition: none; }
+
+/* ── /themes: one live window, six real controls ──────────────────────── */
+
+.themes-page__stage {
+  display: grid;
+  grid-template-columns: minmax(200px, 250px) minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+  width: min(100% - 96px, var(--page-max));
+  margin: 56px auto 0;
+}
+
+.themes-page__controls { display: grid; gap: 2px; align-content: start; }
+
+.themes-page__controls button {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-panel);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate);
+}
+
+.themes-page__controls button:hover { background: color-mix(in oklab, var(--surface) 70%, var(--bg)); }
+.themes-page__controls button[aria-selected="true"] { border-color: var(--rule); background: var(--surface); }
+.themes-page__controls strong { color: var(--heading); font-size: 14px; font-weight: 600; }
+.themes-page__controls small { color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
+
+.themes-page__note {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  color: var(--text-faint);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.themes-page__window .app-window { height: min(660px, calc(100dvh - 160px)); }
+
+@media (max-width: 900px) {
+  .themes-page__stage { grid-template-columns: 1fr; width: min(100% - 32px, var(--page-max)); }
+  .themes-page__window .app-window { height: 520px; }
+}

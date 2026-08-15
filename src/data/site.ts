@@ -20,19 +20,18 @@ export { sampleMarkdown };
 
 export const sections = [
   { id: "hero", label: "Start", detail: "The native Markdown app" },
-  { id: "gap", label: "The gap", detail: "It opens badly, and there is more of it than ever" },
-  { id: "render", label: "The render", detail: "Your bytes, decorated — never rewritten" },
-  { id: "agent", label: "The agent visit", detail: "Review the write, win the conflict" },
-  { id: "speed", label: "Speed", detail: "Measured with a budget beside it" },
-  { id: "architecture", label: "Architecture", detail: "Raw text stays in charge" },
-  { id: "reach", label: "System reach", detail: "Finder, Quick Look, terminal" },
-  { id: "themes", label: "Themes", detail: "Six palettes, one document" },
+  { id: "gap", label: "The difference", detail: "What macOS shows you, and what Downright shows you" },
+  { id: "agent", label: "Agent writes", detail: "See what changed, then decide" },
+  { id: "speed", label: "Speed", detail: "Every number has a limit beside it" },
+  { id: "architecture", label: "How it works", detail: "Your text stays in charge" },
+  { id: "reach", label: "Everywhere", detail: "Finder, Quick Look, the terminal" },
+  { id: "themes", label: "Themes", detail: "Six themes, one document" },
   { id: "close", label: "Free and open", detail: "MIT, no account" },
 ] as const;
 
 export const copy = {
   title: "Downright | The native Markdown app for macOS",
-  description: "Downright is a native Markdown reader and editor for macOS. Your coding agents write more Markdown than you'll ever read — Downright renders it exactly, reviews it live, and never touches your bytes.",
+  description: "Downright is a native Markdown reader and editor for macOS. It renders your files exactly, shows you what changed when an agent rewrites them, and never edits your bytes.",
   hero: {
     heading: "The native Markdown app for macOS.",
     body: "Your coding agents write too much Markdown. Downright renders it exactly, reviews rewrites live, and never touches your bytes.",
@@ -44,40 +43,40 @@ export const copy = {
     capture: "Real capture · qlmanage on macOS 26 · nothing retouched. The lines above are the same bytes, live.",
     closing: "Same file. Same bytes. Downright just renders them.",
     annotation: "same bytes ↑",
-    beatTwoHeading: "And there is more of it every day.",
+    beatTwoHeading: "There is more of it every day.",
     beatTwoLine: "Your agents wrote 3,000 words while you read this sentence. One of them matters. Good luck finding it.",
   },
   render: {
-    heading: "It reads finished.",
-    body: "Scroll. The page drives the document in exact proportion, and every capability passes your eyes: math, Mermaid, tables, callouts, tasks, footnotes, code in true theme syntax.",
-    closing: "Exact-source rendering. Your bytes, decorated — never rewritten.",
-    aside: "And when there is too much of it, Structural Zoom collapses the document through five semantic levels — ⌃⌥⌘1–5, in the app.",
+    heading: "Every part of the file renders.",
+    body: "Scroll, and the document scrolls with you. Math, diagrams, tables, callouts, tasks, footnotes, and code all render — no plugins, no setup.",
+    closing: "Downright decorates your text. It never rewrites it.",
+    aside: "Long file? Structural Zoom collapses it to headings, then to first sentences, and back — ⌃⌥⌘1–5, in the app.",
   },
   speed: {
-    heading: "The limit belongs beside the number.",
-    body: "These are the app's current baselines, with the corpus, date, and missing measurements stated in the same breath.",
+    heading: "Every number here has a limit beside it.",
+    body: "These are the app's own measurements. The corpus, the date, and the things we did not measure are all listed below the table.",
   },
   architecture: {
-    heading: "Raw text stays in charge.",
-    body: "One adaptive surface moves between Read, Live, and Source Focus. The renderer decorates. It never rewrites the bytes.",
+    heading: "Your text stays in charge.",
+    body: "One window handles reading, editing, and source. Downright adds styling on top of your file. It never changes what is in it.",
     punctuation: "This page keeps its source too. Press ⌘⇧E.",
   },
   reach: {
-    heading: "The document follows the work.",
-    body: "Open it from Finder, preview it with Space, flick the cards — they have real weight — or send it through the down command.",
+    heading: "It opens your files from anywhere.",
+    body: "Open a file from Finder. Preview it with Space. Flick a card and it slides — the cards have real weight. Or pipe a file through the down command.",
   },
   themes: {
-    heading: "Six palettes. One document.",
-    body: "The theme engine on this page is the same engine in the app. Choose a palette and watch the ink pour.",
+    heading: "Six themes. One document.",
+    body: "This page uses the app's theme engine. Pick a theme and the whole page changes with it.",
   },
   agent: {
-    heading: "The file changes while you read it.",
-    body: "What you are about to see is the moment agents make ordinary: an external write lands on the document. Watch the marks, then decide.",
-    contextual: "That's what reviewing agent work should feel like.",
+    heading: "The file changes while you are reading it.",
+    body: "An agent writes to the file you have open. Downright marks every word that changed and waits for you to decide what to keep.",
+    contextual: "That is what reviewing agent work should feel like.",
   },
   close: {
     heading: "Free. Open source. MIT. No account.",
-    body: "No telemetry, no cookies, no server — this page has none. Your Markdown stays on your Mac.",
+    body: "No telemetry, no cookies, no server. This page has none of them. Your Markdown stays on your Mac.",
   },
 } as const;
 

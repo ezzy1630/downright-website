@@ -2,7 +2,7 @@
  * The traveling window — the Living Document made literal. Exactly one app
  * window exists on the page. It starts in the hero (prerendered, the LCP),
  * and as the visitor scrolls it FLIP-morphs between the acts that want it:
- * hero → gap → render → agent → themes. The window is a single DOM node, so
+ * hero → agent → themes. The window is a single DOM node, so
  * the editor, the undo stack, and the caret all survive the journey, and
  * every act renders the same bytes from the kernel store — no static
  * duplicates, ever.
@@ -23,7 +23,7 @@ import { reducedMotion } from "../kernel/switchboard";
 import { doc } from "../kernel/store";
 import { renderSampleMarkdown } from "../data/site";
 
-export type SlotId = "hero" | "render" | "agent" | "theme";
+export type SlotId = "hero" | "agent" | "theme";
 
 interface Slot {
   id: SlotId;
@@ -56,11 +56,6 @@ export class WindowDirector {
         section: "hero",
         host: () => document.querySelector<HTMLElement>(".hero__window"),
         before: () => document.querySelector<HTMLElement>(".hero__annotation"),
-      },
-      {
-        id: "render",
-        section: "render",
-        host: () => document.querySelector<HTMLElement>("[data-window-slot=render]"),
       },
       {
         id: "agent",
@@ -146,13 +141,9 @@ export class WindowDirector {
     // window as a document-only surface, so no two acts repeat a composition.
     this.window.dataset.view = target === "hero" ? "split" : "document";
 
-    // The render act drives the read pane's scrollTop directly. Leaving it
-    // where the last frame left it made every later act open on the middle of
-    // the document — so every arrival except render's starts at the top.
-    if (target !== "render") {
-      const read = this.window.querySelector<HTMLElement>("[data-document-read]");
-      if (read) read.scrollTop = 0;
-    }
+    // Every arrival opens at the top of the document.
+    const read = this.window.querySelector<HTMLElement>("[data-document-read]");
+    if (read) read.scrollTop = 0;
 
     // A fresh document arrival always shows read mode unless it is the hero
     // and the visitor already mounted the editor there.

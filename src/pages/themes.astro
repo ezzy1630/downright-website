@@ -1,24 +1,70 @@
 ---
+/**
+ * /themes — one live window, six real controls.
+ *
+ * The old page stacked six non-interactive screenshots of the same document,
+ * which was long to scroll, impossible to use, and duplicated the switcher in
+ * the header. There are no captures here now: the window below is the same
+ * component the homepage uses, reading the same store, and every control
+ * re-inks this page through the app's own spill engine.
+ */
 import BaseLayout from "../layouts/BaseLayout.astro";
-import RendererWindow from "../components/RendererWindow.astro";
+import AppWindow from "../components/AppWindow.astro";
 import { copy, themes, themeColorEntries } from "../data/site";
 ---
 
-<BaseLayout title="Themes | Downright" description="The six source-derived Downright themes, rendered around the same document." markdownPath="/themes.md" imagePath="/og/themes.svg">
-  <main class="subpage theme-showroom-page">
+<BaseLayout
+  title="Themes | Downright"
+  description="Six Downright themes, one live document. Pick a theme and this page changes with it."
+  markdownPath="/themes.md"
+  imagePath="/og/themes.svg"
+>
+  <main class="subpage themes-page" data-theme-zone>
     <section class="subpage-hero">
-      <p class="subpage-hero__path">Downright / Themes</p>
+      <p class="eyebrow">Downright / Themes</p>
       <h1>{copy.themes.heading}</h1>
       <p>{copy.themes.body}</p>
     </section>
-    <section class="theme-preview-list" aria-label="Six Downright themes">
-      {themes.map((theme) => (
-        <article class="theme-preview" data-theme={theme.id}>
-          <div class="theme-preview__heading"><h2>{theme.name}</h2><span>{theme.appearance}</span></div>
-          <RendererWindow mode="theme" />
-          <div class="theme-values"><p>Palette tokens from the app JSON</p><div>{themeColorEntries(theme).slice(0, 10).map(([name, value]) => <span><b>{name}</b><code>{value}</code></span>)}</div></div>
-        </article>
-      ))}
+
+    <section class="themes-page__stage" aria-label="Theme picker and live document">
+      <div class="themes-page__controls" role="listbox" aria-label="Choose a theme">
+        {themes.map((theme) => (
+          <button
+            type="button"
+            role="option"
+            aria-selected={theme.id === "warm-dark" ? "true" : "false"}
+            data-theme-option={theme.id}
+            data-magnet
+          >
+            <span
+              class="theme-option__dot"
+              style={`--dot: ${theme.palette.background}; --dot-ink: ${theme.palette.accent}`}
+              aria-hidden="true"
+            ></span>
+            <strong>{theme.name}</strong>
+            <small>{theme.appearance}</small>
+          </button>
+        ))}
+        <p class="themes-page__note">
+          Type in the window. Switch themes while you type. Nothing here is a screenshot.
+        </p>
+      </div>
+
+      <div class="themes-page__window">
+        <AppWindow editable view="split" label="sample.md" />
+      </div>
+    </section>
+
+    <section class="theme-token-table" aria-label="Theme values">
+      <p>The same values, straight from the app's theme files.</p>
+      <div class="theme-token-table__rows">
+        {themes.map((theme) => (
+          <div>
+            <strong>{theme.name}</strong>
+            {themeColorEntries(theme).slice(0, 4).map(([, value]) => <code>{value}</code>)}
+          </div>
+        ))}
+      </div>
     </section>
   </main>
 </BaseLayout>

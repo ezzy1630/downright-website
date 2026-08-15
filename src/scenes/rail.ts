@@ -24,6 +24,8 @@ interface Tick {
   detail: string;
   element: HTMLElement;
   y: number;
+  /** 0–1: how much document this act carries. Drives the tick's length. */
+  weight: number;
   scale: SpringScalar;
   alpha: SpringScalar;
   changed: boolean;
@@ -59,6 +61,11 @@ export function initRail(): RailController | null {
     canvas.style.height = `${height}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     for (const tick of ticks) tick.y = TOP_INSET + (tick.element.offsetTop / maxSectionTop()) * (height - TOP_INSET - BOTTOM_INSET);
+    // Weight is the act's own scroll length: the rail reads as a density map
+    // of the page, which is what the app's sidebar does with a document.
+    let heaviest = 1;
+    for (const tick of ticks) heaviest = Math.max(heaviest, tick.element.offsetHeight);
+    for (const tick of ticks) tick.weight = tick.element.offsetHeight / heaviest;
   };
 
   const maxSectionTop = (): number => {
@@ -74,6 +81,7 @@ export function initRail(): RailController | null {
       detail: section.dataset.sectionDetail ?? "",
       element: section,
       y: 0,
+      weight: 0,
       scale: new SpringScalar(1, MOTION.durations.quick),
       alpha: new SpringScalar(1, MOTION.durations.quick),
       changed: false,
@@ -140,23 +148,33 @@ export function initRail(): RailController | null {
 
     const nearest = nearestTick();
     paintNumber(nearest);
+    const centre = width / 2;
     ticks.forEach((tick, index) => {
       const scale = tick.scale.value;
-      const alpha = tick.alpha.value * (index === nearest ? 1 : 0.75);
+      const alpha = tick.alpha.value * (index === nearest ? 1 : 0.72);
+      const passed = index <= nearest;
+      // Ticks, not dots: the length is the act's weight, so the rail reads as
+      // a density map of the page rather than a row of identical pips.
+      const length = (7 + tick.weight * 11) * scale * (index === nearest ? 1.18 : 1);
       ctx.globalAlpha = Math.min(1, alpha);
-      ctx.fillStyle = index <= nearest ? current : ink;
-      const radius = (index === nearest ? 3.2 : 2.4) * scale;
+      ctx.strokeStyle = passed ? current : ink;
+      ctx.lineWidth = index === nearest ? 2 : 1.5;
+      ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.arc(width / 2, tick.y, radius, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(centre - length / 2, tick.y);
+      ctx.lineTo(centre + length / 2, tick.y);
+      ctx.stroke();
 
       if (tick.changed) {
-        // A change mark hangs off the rail after the agent visit.
+        // A change mark hangs off the tick's leading edge after the agent
+        // visit — the app marks a changed region the same way.
         ctx.globalAlpha = Math.min(1, alpha);
-        ctx.fillStyle = accent;
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(width / 2 + 10, tick.y - 6, 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(centre + length / 2 + 4, tick.y);
+        ctx.lineTo(centre + length / 2 + 9, tick.y);
+        ctx.stroke();
       }
     });
     ctx.globalAlpha = 1;
