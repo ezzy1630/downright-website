@@ -24,7 +24,7 @@ The approved Quick Look before/after pair, Finder thumbnails folder, conflict an
 ## Payload provenance
 
 - Native source commit: 93bc7fe5f4ee9c0377d09c233ed1823b66bcc7da
-- Payload generated: 2026-08-15T21:24:51.379Z
+- Payload generated: 2026-08-15T21:26:44.470Z
 - Native working tree dirty at generation: yes; unrelated source changes were preserved
 
 The technical site budgets, accessibility audits, Markdown mirrors, llms.txt, RSS, and social OG images are generated and verified locally. Clean-machine download and install verification remains pending the artifact URL.
