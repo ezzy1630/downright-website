@@ -1,0 +1,20 @@
+---
+import { themes } from "../data/site";
+---
+
+<div class="theme-control" data-theme-control>
+  <button class="theme-control__trigger" type="button" aria-expanded="false" aria-controls="theme-list">
+    <span class="theme-control__swatch" aria-hidden="true"></span>
+    <span class="theme-control__label">Theme</span>
+  </button>
+  <div class="theme-panel" id="theme-list" hidden>
+    <p class="theme-panel__title">Choose a theme</p>
+    <div class="theme-panel__options" role="listbox" aria-label="Site theme">
+      {themes.map((theme) => (
+        <button type="button" role="option" aria-selected={theme.id === "system" ? "true" : "false"} data-theme-option={theme.id}>
+          <span class="theme-option__dot" aria-hidden="true"></span><span>{theme.name}</span>
+        </button>
+      ))}
+    </div>
+  </div>
+</div>

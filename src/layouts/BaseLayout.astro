@@ -1,0 +1,178 @@
+---
+import tokensCss from "../styles/tokens.css?raw";
+import globalCss from "../styles/global.css?raw";
+import actsCss from "../styles/acts.css?raw";
+import BrandMark from "../components/BrandMark.astro";
+import DownloadButton from "../components/DownloadButton.astro";
+import ThemeControl from "../components/ThemeControl.astro";
+import { copy, facts } from "../data/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  pageClass?: string;
+  markdownPath?: string;
+  imagePath?: string;
+}
+
+const {
+  title = copy.title,
+  description = copy.description,
+  pageClass = "",
+  markdownPath = "/index.md",
+  imagePath = "/og/index.svg",
+} = Astro.props;
+const repository = facts.repository;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://downright.app").toString();
+const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
+---
+
+<!--
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │  downright.app — the living document                               │
+  │                                                                     │
+  │  One Markdown file runs this whole page. You can type in it,       │
+  │ watch an agent rewrite it, win the conflict, spill a theme over     │
+  │ it, flip it to this source, or drop your own .md on it.            │
+  │                                                                     │
+  │  No frameworks. One spring kernel, the app's own constants.        │
+  │  No analytics, no cookies, no server. The document is the site.    │
+  │                                                                     │
+  │  This page is also Markdown:  curl downright.app/index.md          │
+  └─────────────────────────────────────────────────────────────────────┘
+-->
+<!doctype html>
+<html lang="en" data-theme="system">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="text/markdown" href={new URL(markdownPath, Astro.site ?? "https://downright.app")} title="Markdown version" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 900px)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Downright" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(imagePath, Astro.site ?? "https://downright.app")} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(imagePath, Astro.site ?? "https://downright.app")} />
+    <title>{title}</title>
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem("downright-theme");
+          document.documentElement.dataset.theme = saved || "system";
+        } catch {}
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        const activateFallbackFonts = () => {
+          if (!document.fonts) return;
+          Promise.all([
+            document.fonts.load('400 1em "Newsreader"'),
+            document.fonts.load('400 1em "Inter"'),
+            document.fonts.load('400 1em "JetBrains Mono"'),
+          ]).finally(() => document.documentElement.classList.add("fonts-ready"));
+        };
+        window.addEventListener("load", () => window.setTimeout(activateFallbackFonts, 2500), { once: true });
+      })();
+    </script>
+    <style is:inline set:html={inlineStyles}></style>
+  </head>
+  <body class={pageClass} data-theme-zone>
+    <header class="site-header glass" data-site-header data-theme-zone>
+      <div class="site-header__inner">
+        <BrandMark />
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="/themes">Themes</a>
+          <a href="/changelog">Changelog</a>
+          {repository && <a href={repository} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>}
+        </nav>
+        <div class="site-header__actions">
+          <button type="button" class="palette-trigger" data-palette-trigger data-magnet aria-label="Open the command palette (⌘K)">
+            <span aria-hidden="true">⌘K</span>
+          </button>
+          <ThemeControl />
+          <div class="header-download"><DownloadButton compact /></div>
+        </div>
+        <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+          <span></span><span></span>
+        </button>
+      </div>
+      <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" hidden data-mobile-menu>
+        <a href="/themes">Themes</a>
+        <a href="/changelog">Changelog</a>
+        {repository && <a href={repository} target="_blank" rel="noreferrer">GitHub</a>}
+        <div class="mobile-menu__download"><small>Free · MIT · macOS {facts.minimumMacOS}+ — the download lives on your Mac: share this page to it below.</small></div>
+      </nav>
+    </header>
+
+    <slot />
+
+    <dialog class="command-palette glass" data-command-palette aria-label="Command palette">
+      <input type="search" data-palette-input placeholder="Type a command or a place…" aria-label="Search commands" autocomplete="off" />
+      <div class="command-palette__list" data-palette-list role="listbox"></div>
+    </dialog>
+
+    <dialog class="shortcut-sheet glass" data-shortcut-sheet aria-label="Keyboard shortcuts">
+      <table>
+        <tbody>
+          <tr><td><kbd>⌘K</kbd></td><td>This palette</td></tr>
+          <tr><td><kbd>⌘⇧E</kbd></td><td>Flip the window to its source</td></tr>
+          <tr><td><kbd>Space</kbd></td><td>Quick Look the focused file card</td></tr>
+          <tr><td><kbd>1–5</kbd></td><td>Structural zoom level</td></tr>
+          <tr><td><kbd>← → ↑ ↓</kbd></td><td>Divider, zoom, rail, palette</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Close whatever opened</td></tr>
+        </tbody>
+      </table>
+      <form method="dialog"><button>Close</button></form>
+    </dialog>
+
+    <div class="release-status glass" id="release-status" role="status" aria-live="polite" data-release-status hidden>
+      <div><strong>The signed macOS release is not configured yet.</strong><span>The download starts the moment a notarized artifact is verified at the release URL.</span></div>
+      <button type="button" aria-label="Dismiss release status" data-release-dismiss>Close</button>
+    </div>
+
+    <footer class="site-footer" data-theme-zone>
+      <div class="site-footer__top">
+        <BrandMark compact />
+        <nav aria-label="Footer navigation">
+          {repository && <a href={repository} target="_blank" rel="noreferrer">Repository</a>}
+          <a href="/changelog">Changelog</a>
+          <a href="/themes">Themes</a>
+          <a href="/privacy">Privacy</a>
+          <span>{facts.license} licence</span>
+        </nav>
+      </div>
+      <p class="site-footer__absence">
+        No cookies, no analytics, no newsletter, no chat widget, no server — and it says so because for some of you that line is the pitch.
+      </p>
+      <div class="site-footer__bottom">
+        <p>This page is also Markdown. <code>curl downright.app/index.md | down</code></p>
+        <div>
+          <a href="/llms.txt">llms.txt</a>
+          <a href="/humans.txt">humans.txt</a>
+          <button type="button" data-sound-toggle>Sound: off</button>
+          <button type="button" data-motion-toggle>Motion: full</button>
+          <span>Free · MIT · macOS {facts.minimumMacOS}+</span>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      console.log("%cDownright%c This page is also Markdown: /index.md", "font-weight:700", "");
+    </script>
+    <script src="../scripts/site.ts"></script>
+  </body>
+</html>

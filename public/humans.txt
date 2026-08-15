@@ -1,0 +1,22 @@
+/* humans.txt — who made this */
+
+# SITE
+Made by Ezzy Rappeport.
+One agent build pass, one spring kernel, no frameworks.
+
+# THE APP
+Downright — native Markdown for macOS.
+Sources: github.com/ezzy1630/Downright
+The site's tokens, curves, and claims trace to the app's payload,
+generated from the repository itself.
+
+# TYPE
+Newsreader (display and document serif) — Google Fonts, OFL
+Inter (sans fallback) — Google Fonts, OFL
+JetBrains Mono (mono fallback) — JetBrains, OFL
+System stacks lead on Apple hardware: SF Pro, SF Mono.
+
+# THANKS
+The Monaspace pattern of the operable specimen.
+kube.io's liquid-glass displacement technique.
+Everyone who reads view-source.

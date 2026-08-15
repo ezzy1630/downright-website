@@ -1,0 +1,37 @@
+# Downright
+
+> The native Markdown app for macOS.
+
+Downright is a local-first Markdown reader and editor. The native app renders Markdown without a WebView, keeps raw bytes exact, and integrates with Finder, Quick Look, and the down command.
+
+## Routes
+
+- https://downright.app/ - product argument and interactive document demos
+- https://downright.app/themes - six source-derived themes
+- https://downright.app/changelog - generated native-app changelog
+- https://downright.app/privacy - privacy promises
+- https://downright.app/known-gaps - current release and evidence gaps
+- https://downright.app/index.md - Markdown version of the homepage
+- https://downright.app/themes.md - Markdown theme data
+- https://downright.app/changelog.md - Markdown changelog
+- https://downright.app/known-gaps.md - Markdown launch record
+
+## Source and evidence
+
+- Native source: /Volumes/Neural/Downright
+- App payload commit: f3726b1c67f1e03f4d8e6525ac0faef1ce3f3558
+- Payload generated: 2026-08-15T18:44:16.852Z
+- Benchmark corpus: 120,825 characters / 4,885 lines
+- Benchmark date: 2026-08-06
+- Benchmark qualification: Baseline only. Not a cross-machine claim.
+- Missing benchmark measurements: TextKit layout, scroll frames, IME input, live window frame time
+
+## Claims
+
+- Minimum macOS: 14.0+
+- License: MIT
+- Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
+- Download artifact: Downright.dmg
+- Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
+
+The site does not claim a Homebrew cask or confirmed domain beyond the current https://downright.app deployment assumption.

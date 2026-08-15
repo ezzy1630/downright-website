@@ -1,0 +1,24 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import RendererWindow from "../components/RendererWindow.astro";
+import { copy, themes, themeColorEntries } from "../data/site";
+---
+
+<BaseLayout title="Themes | Downright" description="The six source-derived Downright themes, rendered around the same document." markdownPath="/themes.md" imagePath="/og/themes.svg">
+  <main class="subpage theme-showroom-page">
+    <section class="subpage-hero">
+      <p class="subpage-hero__path">Downright / Themes</p>
+      <h1>{copy.themes.heading}</h1>
+      <p>{copy.themes.body}</p>
+    </section>
+    <section class="theme-preview-list" aria-label="Six Downright themes">
+      {themes.map((theme) => (
+        <article class="theme-preview" data-theme={theme.id}>
+          <div class="theme-preview__heading"><h2>{theme.name}</h2><span>{theme.appearance}</span></div>
+          <RendererWindow mode="theme" />
+          <div class="theme-values"><p>Palette tokens from the app JSON</p><div>{themeColorEntries(theme).slice(0, 10).map(([name, value]) => <span><b>{name}</b><code>{value}</code></span>)}</div></div>
+        </article>
+      ))}
+    </section>
+  </main>
+</BaseLayout>

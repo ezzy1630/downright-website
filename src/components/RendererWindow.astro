@@ -1,0 +1,20 @@
+---
+import { sampleHtml } from "../data/site";
+
+const { mode = "hero", showRail = false, clipped = false } = Astro.props;
+---
+
+<figure class:list={["document-window", `document-window--${mode}`, { "document-window--clipped": clipped }]} data-document-window>
+  <div class="document-window__bar">
+    <div class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="document-window__file"><span class="file-glyph" aria-hidden="true">▤</span><strong>sample.md</strong><small>Docs</small></div>
+    <div class="document-window__controls" aria-label="Document view">
+      <span class="document-window__segment is-active">Document</span><span class="document-window__segment">Source</span>
+      <span class="window-icon" aria-hidden="true">⌕</span><span class="window-icon window-icon--check" aria-hidden="true">✓</span><span class="window-icon" aria-hidden="true">•••</span>
+    </div>
+  </div>
+  <div class="document-window__body">
+    {showRail && <div class="document-gutter" aria-hidden="true"><i></i><i class="is-current"></i><i></i><i></i><i></i><i></i></div>}
+    <article class="document-content" set:html={sampleHtml}></article>
+  </div>
+</figure>

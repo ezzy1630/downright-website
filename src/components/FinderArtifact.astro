@@ -1,0 +1,25 @@
+---
+const files = [
+  ["README.md", "Downright renderer showcase", "78%"],
+  ["ARCHITECTURE.md", "Raw text stays in charge", "42%"],
+  ["PERFORMANCE.md", "Measured baselines", "100%"],
+  ["CHANGELOG.md", "Version truth", "64%"],
+];
+---
+
+<figure class="finder-artifact">
+  <div class="finder-artifact__bar"><span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span><strong>Downright</strong><span class="finder-artifact__path">/Volumes/Neural/Downright/Docs</span></div>
+  <div class="finder-artifact__body">
+    <aside class="finder-artifact__sidebar"><span>Favorites</span><b>Documents</b><b>Downloads</b><b>Downright</b><span>Tags</span><b>Markdown</b></aside>
+    <div class="finder-artifact__files">
+      {files.map(([name, heading, progress]) => (
+        <div class="finder-file">
+          <picture><source srcset="/assets/downright-app-icon.webp" type="image/webp" /><img src="/assets/downright-app-icon.webp" alt="" width="42" height="42" loading="lazy" /></picture>
+          <span><strong>{name}</strong><small>{heading}</small></span>
+          <i style={`--file-progress: ${progress}`} aria-hidden="true"></i>
+        </div>
+      ))}
+    </div>
+  </div>
+  <figcaption>Finder thumbnails use the first heading and task progress from the document.</figcaption>
+</figure>

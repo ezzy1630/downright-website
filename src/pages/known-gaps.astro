@@ -1,0 +1,40 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { facts } from "../data/site";
+
+const hasPublicArtifact = Boolean(facts.downloadUrl);
+---
+
+<BaseLayout title="Known gaps | Downright" description="The current release, evidence, and launch gaps for the Downright site." markdownPath="/known-gaps.md" imagePath="/og/index.svg">
+  <main class="subpage legal-page known-gaps-page">
+    <section class="subpage-hero">
+      <p class="subpage-hero__path">Downright / Known gaps</p>
+      <h1>{hasPublicArtifact ? "What remains before launch." : "What is not ready yet."}</h1>
+      <p>{hasPublicArtifact ? `The ${facts.version} release artifact is public. The remaining gaps below are kept visible until their own source evidence exists.` : "The implementation is verified locally. Release and native-capture gaps stay visible until their source evidence exists."}</p>
+    </section>
+    <article class="legal-copy">
+      <h2>Release inputs</h2>
+      <ul>
+        <li><strong>Domain:</strong> <code>downright.app</code> is the current deployment assumption and still needs confirmation.</li>
+        <li><strong>Artifact:</strong> <code>{facts.artifactName}</code> is available at {hasPublicArtifact ? <a href={facts.downloadUrl} target="_blank" rel="noreferrer">the public GitHub Release URL</a> : "no signed, notarized, stapled public URL is configured"}.</li>
+        <li><strong>Homebrew:</strong> no cask is claimed until one exists and is verified.</li>
+        <li><strong>Repository:</strong> <a href={facts.repository ?? "/"}>{facts.repository ?? "not configured"}</a> is the source remote; public address confirmation remains open.</li>
+        <li><strong>Brand:</strong> the current knot mark ships as the canonical mark; whether it evolves before launch remains open.</li>
+      </ul>
+
+      <h2>Native capture set</h2>
+      <p>The current native evidence stills are from the installed /Applications/Downright.app bundle on macOS 26 at version 1.0.13, build 173, source commit <code>b178f7d</code>. The payload now follows the newer {facts.version} source commit <code>{facts.sourceCommit.slice(0, 7)}</code>. Its committed diff changes version, release, CLI, and project plumbing, not themes, motion, docs, or the rendered sample. A fresh capture refresh for that newer commit was attempted but the native window provider became unavailable; the stills remain explicitly versioned. The page includes the real Warm Dark renderer, Source Focus, Tasks inspector, and Command Palette captures.</p>
+      <ul>
+        <li>render-warm-dark.jpg - rendered sample.md in Warm Dark</li>
+        <li>source-warm-dark.jpg - the same document in Source Focus</li>
+        <li>tasks-warm-dark.jpg - the native Tasks inspector with the completed sample task</li>
+        <li>command-palette-warm-dark.jpg - the native command palette with its searchable command list</li>
+      </ul>
+      <p>The approved Quick Look before/after pair, Finder thumbnails folder, conflict and agent story, density rail rest/hover, structural zoom ×5, six theme frames, split view, terminal, and motion clips are still not present. They are not simulated as shipped evidence; the remaining demonstrations stay payload-driven HTML until their native sessions are cut.</p>
+
+      <h2>Payload provenance</h2>
+      <p>Native source commit <code>{facts.sourceCommit}</code>. Payload generated <code>{new Date(facts.generatedAt).toISOString()}</code>. Native working tree dirty at generation: <strong>{facts.sourceWorkingTreeDirty ? "yes; unrelated source changes were preserved" : "no"}</strong>.</p>
+      <p>The technical budgets, accessibility audits, Markdown mirrors, <code>llms.txt</code>, RSS, and social OG images are generated and verified locally. The public artifact was verified on the release Mac; clean-machine download and install verification remains pending.</p>
+    </article>
+  </main>
+</BaseLayout>

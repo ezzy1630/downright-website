@@ -1,0 +1,26 @@
+---
+/**
+ * The mark: the document itself. A `#` — Markdown's most iconic glyph —
+ * drawn with the app's optical care: the horizontals carry the weight (they
+ * are the text), the verticals lean a half-degree (the hand). Reads at 16px,
+ * works single-color in currentColor, sits in the traffic-light row. The
+ * knot is retired.
+ */
+interface Props {
+  compact?: boolean;
+  href?: string;
+  withWordmark?: boolean;
+}
+const { compact = false, href = "/", withWordmark = true } = Astro.props;
+---
+<a class:list={["brand", { "brand--compact": compact }]} href={href} aria-label="Downright home">
+  <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M8.5 3.7 7 20.3M17.2 3.7l-1.5 16.6M3.9 9.1h16.4M3.2 14.9h16.4"
+      stroke="currentColor"
+      stroke-width={compact ? 2.2 : 2.4}
+      stroke-linecap="round"
+    />
+  </svg>
+  {withWordmark && <span class="brand-wordmark">Downright</span>}
+</a>

@@ -1,0 +1,26 @@
+---
+/**
+ * The download CTA. Microcopy states the promise: platform, price — the size
+ * joins once the signed DMG is verified. The button carries the site's one
+ * pop() on press; the click starts the DMG immediately and the glass toast
+ * carries the GitHub ask.
+ */
+import { facts } from "../data/site";
+
+interface Props {
+  compact?: boolean;
+  label?: string;
+}
+const { compact = false, label = "Download for macOS" } = Astro.props;
+const downloadUrl = import.meta.env.PUBLIC_DOWNLOAD_URL?.trim() || facts.downloadUrl;
+---
+
+<button
+  type="button"
+  class:list={["button", "button--primary", "download-button", { "button--compact": compact }]}
+  data-download
+  data-magnet
+  aria-label={`${label} — ${facts.artifactName}, free, MIT licence`}>
+  <span>{label}</span>
+  <span class="download-button__micro" aria-hidden="true">free{downloadUrl ? " · direct DMG" : ""}</span>
+</button>

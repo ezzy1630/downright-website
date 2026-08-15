@@ -1,0 +1,308 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DensityRail from "../components/DensityRail.astro";
+import DownloadButton from "../components/DownloadButton.astro";
+import AppWindow from "../components/AppWindow.astro";
+import { benchmarks, copy, facts, themes } from "../data/site";
+
+const osVersion = "macOS 26";
+const benchmarkNames = ["Parse 100 KB", "Source edit and paragraph map", "Text diff, external rewrite", "End-to-end semantic convergence", "Syntax highlight, 10 KB Swift"];
+const benchmarkRows = benchmarkNames
+  .map((name) => benchmarks.rows.find((row) => row.measurement === name))
+  .filter((row): row is NonNullable<typeof row> => Boolean(row));
+const architectureClaims = [
+  "Raw text is the only source of truth",
+  "One adaptive surface for Read, Live, and Source Focus",
+  "No WebView anywhere",
+  "Exact byte identity. The renderer decorates, never rewrites",
+  "Full reparse with incremental restyle",
+];
+const annotations: [selector: string, label: string, detail: string][] = [
+  [".doc-math--block", "Math", "Inline and block, real symbols, no screenshots"],
+  [".mermaid-figure", "Mermaid", "Diagrams as documents, zoomable and selectable"],
+  [".doc-table", "Tables", "Real table geometry from pipe bytes"],
+  [".doc-callout", "Callouts", "GitHub alerts, native rules"],
+  [".doc-footnote", "Footnotes", "Numbered, linked, and honest at the bottom"],
+  [".doc-code", "Code", "True theme syntax from the app's token set"],
+];
+const zoomLevels = [1, 2, 3, 4, 5] as const;
+const zoomLevelNames = ["Headings", "Leads", "Artifacts", "Full text", "Everything"];
+const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target) || 8));
+---
+
+<BaseLayout>
+  <main class="home-page" data-theme-zone>
+    <DensityRail />
+
+    {/* 8.1 — Hero: it's real, type in it */}
+    <section class="hero section-anchor" id="hero" data-rail-section data-section-label="Start" data-section-detail="The native Markdown app" data-theme-zone>
+      <div class="hero__copy">
+        <h1>{copy.hero.heading}</h1>
+        <p>{copy.hero.body}</p>
+        <div class="hero__actions">
+          <DownloadButton />
+          <button type="button" class="brew-chip" data-brew data-magnet aria-label="Copy Homebrew install command">
+            <span aria-hidden="true">$</span> brew install --cask downright
+          </button>
+        </div>
+        <p class="hero__micro">{copy.hero.micro}</p>
+      </div>
+      <div class="hero__window">
+        <AppWindow variant="hero" editable clipped />
+        <p class="hero__caption">This window is real. Type in it.</p>
+        <div class="film-invite-row" aria-hidden="true">
+          <span class="film-invite" data-film-invite></span>
+          <button type="button" class="film-chip" data-film-type>tap to type</button>
+          <button type="button" class="film-chip" data-film-insert>insert an edit</button>
+        </div>
+      </div>
+    </section>
+
+    {/* 8.2 — The gap, doubled */}
+    <section class="page-section gap-section section-anchor" id="gap" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
+      <div class="section-intro">
+        <h2>{copy.gap.beatOneHeading}</h2>
+        <p>{copy.gap.beatOneBody}</p>
+      </div>
+      <div class="gap-stage" data-gap-stage style="--divider-position: 50%">
+        <div class="gap-pane gap-pane--plain">
+          <figure class="preview-window">
+            <div class="preview-window__bar">
+              <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="preview-window__title">sample.md — Quick Look</span>
+              <span class="preview-window__file">macOS default</span>
+            </div>
+            <div class="preview-window__body">
+              <img
+                src="/assets/native/quicklook-sample.webp"
+                alt="macOS Quick Look opening sample.md as a plain text sheet with no rendering"
+                width="1470"
+                height="1470"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <figcaption>Real Quick Look capture · qlmanage on {osVersion} · nothing retouched</figcaption>
+          </figure>
+        </div>
+        <div class="gap-pane gap-pane--app">
+          <AppWindow variant="render" flip={false} />
+        </div>
+        <div class="gap-divider" data-divider role="separator" aria-label="Compare Quick Look with Downright" aria-valuemin="18" aria-valuemax="82" aria-valuenow="50" tabindex="0">
+          <span aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="gap-wall" aria-label="An agent's Markdown output">
+        <p class="gap-wall__line">{copy.gap.beatTwoLine}</p>
+        <div class="gap-wall__scroller" data-agent-wall data-agent-wall-scroll tabindex="0" aria-label="Real agent-generated Markdown from a refactoring session"></div>
+      </div>
+    </section>
+
+    {/* 8.3 — The render: pinned, scroll-driven */}
+    <section class="render-stage section-anchor" id="render" data-rail-section data-section-label="The render" data-section-detail="Decorated, never rewritten" data-render-stage data-theme-zone>
+      <div class="render-stage__sticky">
+        <div class="render-stage__copy">
+          <h2>{copy.render.heading}</h2>
+          <p>{copy.render.body}</p>
+          <ul class="annotation-rail" aria-label="Capabilities as they pass">
+            {annotations.map(([selector, label, detail]) => (
+              <li data-annotation={selector}>
+                <i class="annotation-rail__connector" aria-hidden="true"></i>
+                <strong>{label}</strong>
+                <span>{detail}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="render-stage__closing">{copy.render.closing}</p>
+        </div>
+        <div class="render-stage__window" data-render-viewport>
+          <div class="render-document-viewport" data-render-scroller>
+            <AppWindow variant="render" flip={false} />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* 8.4 — Structural zoom: operable */}
+    <section class="page-section zoom-section section-anchor" id="zoom" data-rail-section data-section-label="Structural zoom" data-section-detail="Five resolutions, one anchor" data-theme-zone>
+      <div class="section-intro">
+        <h2>{copy.zoom.heading}</h2>
+        <p>{copy.zoom.body}</p>
+      </div>
+      <div class="zoom-stage" data-zoom-stage data-zoom-level="5" tabindex="0" role="group" aria-label="Structural zoom — keys 1 to 5, arrows, or pinch">
+        <div class="zoom-stage__bar">
+          <span class="zoom-stage__name">Structural zoom</span>
+          <div class="zoom-levels" aria-label="Zoom level">
+            {zoomLevels.map((level) => (
+              <button type="button" data-zoom-level={level} aria-pressed={level === 5 ? "true" : "false"}>{level}</button>
+            ))}
+          </div>
+          <span class="zoom-stage__hint">⌃⌥⌘1–5 · pinch the document</span>
+        </div>
+        <div class="zoom-surface" data-zoom-surface>
+          <div class="document-content" data-static-document></div>
+        </div>
+        <p class="zoom-stage__closing">{copy.zoom.closing}</p>
+        <div class="zoom-stage__meta">
+          <p class="zoom-stage__level-name" aria-live="polite">{zoomLevelNames[4]}</p>
+          <span class="film-level-pill" data-film-level aria-hidden="true">Everything</span>
+        </div>
+      </div>
+    </section>
+
+    {/* 8.5 — The agent visit: the climax */}
+    <section class="page-section agent-section section-anchor" id="agent" data-rail-section data-section-label="The agent visit" data-section-detail="Review the write" data-theme-zone>
+      <div class="section-intro">
+        <h2>{copy.agent.heading}</h2>
+        <p>{copy.agent.body}</p>
+      </div>
+      <div class="agent-stage" data-agent-stage>
+        <div class="agent-stage__document" data-agent-document>
+          <AppWindow variant="agent" flip={false} />
+        </div>
+        <div class="conflict-bar" data-conflict-bar role="region" aria-label="External write needs review" hidden>
+          <strong>An agent rewrote this file while you had it open.</strong>
+          <button type="button" data-conflict-action="review" data-conflict-focus>Review</button>
+          <button type="button" data-conflict-action="mine">Keep Mine</button>
+          <button type="button" data-conflict-action="theirs">Take Theirs</button>
+        </div>
+        <div class="change-toast" data-change-toast role="status" aria-live="polite">
+          <strong>External write</strong>
+          <span data-change-summary>…</span>
+        </div>
+        <div class="review-panel" data-review-panel aria-hidden="true"></div>
+      </div>
+      <div class="agent-contextual" data-contextual-cta hidden>
+        <p>{copy.agent.contextual}</p>
+        <DownloadButton />
+      </div>
+      <div class="agent-story">
+        <div class="agent-story__timeline" aria-label="Version timeline">
+          <span>May</span>
+          <i><b></b><b></b><b></b><b></b><b></b></i>
+          <span>August</span>
+        </div>
+        <p>Every external write lands on a timeline. Bursts stay reviewable, versions stay diffable, and the first-run flow is three checkboxes and one default: <strong>nothing leaves your Mac</strong>.</p>
+      </div>
+    </section>
+
+    {/* 8.6 — Speed: dark band №1 */}
+    <section class="dark-band speed-section section-anchor" id="speed" data-rail-section data-section-label="Speed" data-section-detail="Budgets beside numbers" data-speed-section data-theme-zone>
+      <div class="dark-band__inner">
+        <div class="section-intro">
+          <h2>{copy.speed.heading}</h2>
+          <p>{copy.speed.body}</p>
+        </div>
+        <div class="benchmark-table-wrap">
+          <table class="benchmark-table">
+            <caption>Current local benchmark — budgets draw once, log scale</caption>
+            <thead><tr><th scope="col">Measurement</th><th scope="col">p50</th><th scope="col">p95</th><th scope="col">Budget</th><th scope="col" aria-hidden="true"></th></tr></thead>
+            <tbody>
+              {benchmarkRows.map((row) => (
+                <tr data-budget-row data-value={parseFloat(row.p50) || 0.15} data-scale={maxBudgetMs}>
+                  <th scope="row">{row.measurement}</th>
+                  <td>{row.p50}</td>
+                  <td>{row.p95}</td>
+                  <td>{row.target}</td>
+                  <td class="benchmark-bar-cell" aria-hidden="true"><span class="benchmark-bar" data-budget-bar></span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="benchmark-session" data-session-row>Your median parse this visit joins this table once you type in the hero.</p>
+        <div class="benchmark-notes">
+          <p><strong>Corpus</strong> {benchmarks.corpus}. <strong>Date</strong> {benchmarks.date}. <strong>Machine</strong> {benchmarks.machine}.</p>
+          <p>{benchmarks.qualification} Missing: {benchmarks.limitations.join(", ")}.</p>
+        </div>
+      </div>
+    </section>
+
+    {/* 8.7 — Architecture: dark band №2 */}
+    <section class="dark-band architecture-section section-anchor" id="architecture" data-rail-section data-section-label="Architecture" data-section-detail="Raw text stays in charge" data-theme-zone>
+      <div class="dark-band__inner architecture-layout">
+        <div class="architecture-quote">
+          <p>{copy.architecture.heading}</p>
+          <a href={facts.repository} target="_blank" rel="noreferrer">Read the repository <span aria-hidden="true">↗</span></a>
+        </div>
+        <ul class="architecture-list">{architectureClaims.map((claim) => <li>{claim}</li>)}</ul>
+        <p class="architecture-punctuation">{copy.architecture.punctuation}</p>
+      </div>
+    </section>
+
+    {/* 8.8 — System reach: verlet cards, Quick Look, terminal */}
+    <section class="page-section reach-section section-anchor" id="reach" data-rail-section data-section-label="System reach" data-section-detail="Finder, Quick Look, terminal" data-theme-zone>
+      <div class="section-intro">
+        <h2>{copy.reach.heading}</h2>
+        <p>{copy.reach.body}</p>
+      </div>
+      <div class="file-surface" data-file-surface aria-label="Markdown files — flick them, press Space to Quick Look, drag one onto the document"></div>
+      <div class="quick-look" data-quick-look hidden>
+        <div class="quick-look__panel" role="dialog" aria-modal="false" aria-label="Quick Look">
+          <div class="quick-look__bar">
+            <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <strong data-quick-look-title>file.md</strong>
+            <button type="button" data-quick-look-close aria-label="Close Quick Look">Esc</button>
+          </div>
+          <div class="quick-look__body document-content" data-quick-look-body></div>
+        </div>
+      </div>
+      <div class="terminal-artifact" data-terminal>
+        <div class="terminal-artifact__bar"><span>down — the document from the terminal</span><span>zsh</span></div>
+        <pre data-terminal-body><code></code></pre>
+      </div>
+      <p class="reach-note">Spotlight indexes documents you have opened. Downright does not run a background scan.</p>
+    </section>
+
+    {/* 8.9 — Themes: the spill */}
+    <section class="page-section themes-section section-anchor" id="themes" data-rail-section data-section-label="Themes" data-section-detail="Six palettes, one document" data-theme-zone>
+      <div class="section-intro">
+        <h2>{copy.themes.heading}</h2>
+        <p>{copy.themes.body}</p>
+      </div>
+      <div class="theme-showroom">
+        <div class="theme-showroom__list" role="listbox" aria-label="Theme showroom">
+          {themes.map((theme) => (
+            <button type="button" role="option" aria-selected={theme.id === "paper-light" ? "true" : "false"} data-theme-option={theme.id} data-magnet>
+              <span class="theme-option__dot" style={`--dot: ${theme.palette.background}; --dot-ink: ${theme.palette.accent}`} aria-hidden="true"></span>
+              <strong>{theme.name}</strong>
+              <small>{theme.appearance}</small>
+            </button>
+          ))}
+        </div>
+        <div class="theme-showroom__document">
+          <AppWindow variant="theme" flip={false} />
+        </div>
+      </div>
+      <div class="theme-token-table">
+        <p>Theme JSON, rendered as the source.</p>
+        <div class="theme-token-table__rows">
+          {themes.slice(0, 6).map((theme) => (
+            <div><strong>{theme.name}</strong><code>{theme.palette.background}</code><code>{theme.palette.text}</code><code>{theme.palette.accent}</code></div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* 8.10 — The close */}
+    <section class="close-section section-anchor" id="close" data-rail-section data-section-label="Free and open" data-section-detail="MIT, no account" data-theme-zone>
+      <div class="close-section__inner">
+        <h2>{copy.close.heading}</h2>
+        <p>{copy.close.body}</p>
+        <DownloadButton />
+        <small>macOS {facts.minimumMacOS}+ · direct download · {facts.artifactName} when verified · or <code>brew install --cask downright</code></small>
+        <div class="film-handoff" aria-label="Send this page to your Mac">
+          <p class="film-handoff__line">Downright lives on your Mac. Send it there.</p>
+          <button type="button" class="film-handoff__primary" data-share="share">AirDrop this page to your Mac</button>
+          <div class="film-handoff__row">
+            <button type="button" data-share="copy">Copy link</button>
+            <button type="button" data-share="mail">Mail it to yourself</button>
+            {facts.repository && <a href={facts.repository} target="_blank" rel="noreferrer">★ Star</a>}
+          </div>
+          <p class="film-handoff__note">No email capture. No server. The share sheet's first target on iOS is AirDrop.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

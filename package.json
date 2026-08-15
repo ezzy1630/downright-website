@@ -1,0 +1,30 @@
+{
+  "name": "downright-website",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "generate:data": "node scripts/generate-app-data.ts",
+    "generate:mirrors": "node scripts/generate-site-mirrors.mjs",
+    "generate:og": "node scripts/generate-og.mjs",
+    "prebuild": "npm run generate:data && npm run generate:mirrors && npm run generate:og",
+    "build": "astro build",
+    "check": "astro check",
+    "preview": "astro preview",
+    "audit:contrast": "node scripts/audit-contrast.mjs",
+    "audit:budgets": "node scripts/audit-budgets.mjs",
+    "test:editor": "node scripts/test-editor.mjs"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.10.4",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.1",
+    "@codemirror/view": "^6.43.8",
+    "astro": "latest"
+  },
+  "devDependencies": {
+    "@astrojs/check": "latest",
+    "typescript": "latest"
+  }
+}

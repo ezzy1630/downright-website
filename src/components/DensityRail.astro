@@ -1,0 +1,17 @@
+---
+/**
+ * The density rail: a canvas of ticks, one per act, with its glass outline
+ * HUD. The canvas mirrors a visually-hidden nav list so the rail stays
+ * keyboard-complete; below 900px it stands down for the mobile film.
+ */
+import { sections } from "../data/site";
+---
+
+<aside class="density-rail" data-density-rail aria-label="Acts">
+  <nav class="density-rail__nav" aria-label="Jump to act">
+    {sections.map((section) => (
+      <a href={`#${section.id}`} data-rail-link={section.id}>{section.label}</a>
+    ))}
+  </nav>
+  <div class="density-rail__hud" data-rail-hud aria-hidden="true"><strong></strong><span></span></div>
+</aside>

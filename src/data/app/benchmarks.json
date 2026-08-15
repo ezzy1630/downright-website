@@ -1,0 +1,87 @@
+{
+  "source": "Docs/PERFORMANCE.md",
+  "date": "2026-08-06",
+  "corpus": "120,825 characters / 4,885 lines",
+  "machine": "single unrecorded machine",
+  "qualification": "Baseline only. Not a cross-machine claim.",
+  "limitations": [
+    "TextKit layout",
+    "scroll frames",
+    "IME input",
+    "live window frame time"
+  ],
+  "rows": [
+    {
+      "measurement": "cmark parse",
+      "p50": "12.827 ms",
+      "p95": "13.309 ms",
+      "target": "<250 ms",
+      "passCondition": "p95 below target"
+    },
+    {
+      "measurement": "Full MarkdownParser.parse",
+      "p50": "29.463 ms",
+      "p95": "30.372 ms",
+      "target": "Informational",
+      "passCondition": "Baseline only"
+    },
+    {
+      "measurement": "AST dirty set, one-character edit",
+      "p50": "0.030 ms",
+      "p95": "0.031 ms",
+      "target": "Informational",
+      "passCondition": "Baseline only"
+    },
+    {
+      "measurement": "Text diff, external rewrite",
+      "p50": "2.099 ms",
+      "p95": "2.164 ms",
+      "target": "Informational",
+      "passCondition": "Baseline only"
+    },
+    {
+      "measurement": "Incremental decoration",
+      "p50": "0.097 ms",
+      "p95": "0.104 ms",
+      "target": "<8 ms",
+      "passCondition": "p95 below target"
+    },
+    {
+      "measurement": "Wholesale decoration",
+      "p50": "103.722 ms",
+      "p95": "171.493 ms",
+      "target": "Informational",
+      "passCondition": "Baseline only"
+    },
+    {
+      "measurement": "Source edit and paragraph map",
+      "p50": "0.146 ms",
+      "p95": "0.153 ms",
+      "target": "<8 ms",
+      "passCondition": "p95 below target"
+    },
+    {
+      "measurement": "End-to-end semantic convergence",
+      "p50": "30.583 ms",
+      "p95": "31.445 ms",
+      "target": "<100 ms",
+      "passCondition": "p95 below target"
+    },
+    {
+      "measurement": "Parse 100 KB",
+      "p50": "12.078 ms",
+      "p95": "12.395 ms",
+      "target": "<250 ms",
+      "passCondition": "p95 below target"
+    },
+    {
+      "measurement": "Syntax highlight, 10 KB Swift",
+      "p50": "0.093 ms",
+      "p95": "0.094 ms",
+      "target": "Informational",
+      "passCondition": "Baseline only"
+    }
+  ],
+  "sourceCommit": "f3726b1c67f1e03f4d8e6525ac0faef1ce3f3558",
+  "generatedAt": "2026-08-15T18:44:16.852Z"
+}

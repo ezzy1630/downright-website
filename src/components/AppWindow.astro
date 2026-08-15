@@ -1,0 +1,58 @@
+---
+/**
+ * The living document window: the app's real chrome (traffic lights,
+ * Document/Source segmented control with a sprung indicator, status bar with
+ * the honesty meter) around the document surface. The body ships prerendered
+ * — it is the LCP — and the editor hydrates on intent. ⌘⇧E flips the window
+ * to its raw source with line numbers; the source face mirrors the document
+ * byte-for-byte.
+ */
+import { sampleHtml } from "../data/site";
+
+interface Props {
+  variant?: "hero" | "render" | "zoom" | "agent" | "theme";
+  editable?: boolean;
+  flip?: boolean;
+  clipped?: boolean;
+  label?: string;
+}
+
+const { variant = "render", editable = false, flip = true, clipped = false, label = "sample.md" } = Astro.props;
+---
+
+<div
+  class={`app-window app-window--${variant}${clipped ? " is-clipped" : ""}`}
+  data-window
+  data-flip-window={flip ? "" : undefined}
+  data-editor-window={editable ? "" : undefined}
+  data-face="document"
+>
+  <div class="app-window__inner" data-theme-zone>
+    <div class="app-window__face app-window__face--document">
+      <div class="app-window__bar">
+        <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="app-window__file"><b data-file-label>{label}</b><small>Downright · Live</small></span>
+        {flip && (
+          <div class="app-window__segmented" role="tablist" aria-label="Window mode">
+            <button type="button" role="tab" aria-selected="true" data-face-button="document">Document</button>
+            <button type="button" role="tab" aria-selected="false" data-face-button="source">Source</button>
+            <i class="app-window__segmented-indicator" aria-hidden="true"></i>
+          </div>
+        )}
+        <span class="app-window__hint" aria-hidden="true">⌘⇧E</span>
+      </div>
+      <div class="app-window__body" data-window-body>
+        <div class="document-content" data-static-document set:html={sampleHtml} />
+      </div>
+      <div class="app-window__status">
+        <span class="app-window__status-item app-window__status-file"><i aria-hidden="true">●</i><span data-file-label>{label}</span></span>
+        <span class="app-window__status-item app-window__status-honesty">
+          <span data-honesty-meter>parse —</span>
+          <small>measured per keystroke · frame floor 16 ms</small>
+        </span>
+        <span class="app-window__status-item app-window__status-shortcut">This window is real. Type in it.</span>
+      </div>
+    </div>
+    <div class="app-window__face app-window__face--source" data-source-face aria-hidden="true"></div>
+  </div>
+</div>

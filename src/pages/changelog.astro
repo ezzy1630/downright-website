@@ -1,0 +1,41 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { changelog, facts } from "../data/site";
+
+type ChangelogEntry = (typeof changelog.entries)[number];
+type ChangelogGroup = { version: string; date: string; entries: ChangelogEntry[] };
+const grouped: ChangelogGroup[] = [];
+for (const entry of changelog.entries) {
+  const existing = grouped.find((group) => group.version === entry.version);
+  if (existing) existing.entries.push(entry);
+  else grouped.push({ version: entry.version, date: entry.date, entries: [entry] });
+}
+---
+
+<BaseLayout title="Changelog | Downright" description="The Downright changelog, generated from the native app payload." markdownPath="/changelog.md" imagePath="/og/changelog.svg">
+  <main class="subpage changelog-page">
+    <section class="subpage-hero">
+      <p class="subpage-hero__path">Downright / Changelog</p>
+      <h1>Version truth, in public.</h1>
+      <p>Entries come from the native app's pinned CHANGELOG.md. The page keeps the source commit and generation date in its payload.</p>
+      <a class="text-link" href="/changelog.xml">Subscribe to RSS <span aria-hidden="true">↗</span></a>
+    </section>
+    <section class="changelog-list">
+      {grouped.map((group, groupIndex) => (
+        <article class="changelog-group">
+          <div class="changelog-group__meta"><strong>{group.version}</strong><span>{group.date}</span></div>
+          <div class="changelog-group__entries">
+            {group.entries.slice(0, 12).map((entry, entryIndex) => (
+              <article class="changelog-entry">
+                <div><span>{entry.kind}</span><time>{entry.date}</time></div>
+                <h2>{entry.summary}</h2>
+                {groupIndex === 0 && entryIndex === 0 && <picture><source srcset="/assets/downright-renderer-showcase-768.avif 768w, /assets/downright-renderer-showcase-1470.avif 1470w" sizes="(max-width: 900px) 100vw, 70vw" type="image/avif" /><source srcset="/assets/downright-renderer-showcase-768.webp 768w, /assets/downright-renderer-showcase-1470.webp 1470w" sizes="(max-width: 900px) 100vw, 70vw" type="image/webp" /><img src="/assets/downright-renderer-showcase-1470.webp" alt="Downright rendering a Markdown document" width="1470" height="956" loading="lazy" /></picture>}
+              </article>
+            ))}
+          </div>
+        </article>
+      ))}
+    </section>
+    <p class="source-stamp">App payload {facts.sourceCommit.slice(0, 12)}. Generated {new Date(facts.generatedAt).toISOString().slice(0, 10)}.</p>
+  </main>
+</BaseLayout>
