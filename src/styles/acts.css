@@ -8,7 +8,6 @@
 /* ── Glass: three tiers (§6), floating surfaces only ─────────────────── */
 
 .glass {
-  position: relative;
   border: 0.5px solid color-mix(in oklab, var(--rule) 80%, transparent);
   background: color-mix(in oklab, var(--surface) 72%, transparent);
   backdrop-filter: blur(12px) saturate(1.5);
@@ -19,9 +18,10 @@
 }
 
 [data-glass="t1"] .glass {
-  /* Chromium: refraction map + specular rim, geometry static. */
-  backdrop-filter: url(#glass), blur(2px) saturate(1.3);
-  -webkit-backdrop-filter: url(#glass), blur(2px) saturate(1.3);
+  /* Chromium: refraction map + specular rim, geometry static. The filter
+     list is space-separated — commas make the declaration invalid. */
+  backdrop-filter: url(#glass) blur(2px) saturate(1.3);
+  -webkit-backdrop-filter: url(#glass) blur(2px) saturate(1.3);
 }
 
 [data-reduced-transparency="true"] .glass {
@@ -133,6 +133,12 @@
   border-bottom: 1px solid var(--rule);
   background: color-mix(in oklab, var(--surface) 92%, var(--text) 1%);
   font-size: 12px;
+}
+
+/* T2 owned-backdrop: the chrome refracts content we render ourselves with a
+   regular filter (no backdrop sampling); the gentle map keeps labels crisp. */
+[data-glass="t1"] .app-window__bar {
+  filter: url(#glass-chrome);
 }
 
 .app-window__file { display: grid; line-height: 1.25; }

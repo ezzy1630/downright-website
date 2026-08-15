@@ -8,7 +8,7 @@
 export function toast(html: string, options: { duration?: number } = {}): void {
   const host = document.querySelector<HTMLElement>("[data-toast-host]") ?? createHost();
   const element = document.createElement("div");
-  element.className = "glass-toast";
+  element.className = "glass-toast glass";
   element.setAttribute("role", "status");
   element.innerHTML = html;
   host.append(element);

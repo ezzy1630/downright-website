@@ -48,12 +48,6 @@ export function ensureGlassFilter(): void {
   // Snell's-law style lens: displacement grows toward the rim, zero at the
   // center, encoded in the red/green channels (dx, dy). Precomputed per
   // pixel, then referenced as an feImage so the browser caches the map.
-  const map = document.createElementNS("http://www.w3.org/2000/svg", "filter");
-  map.id = "glass-map";
-  map.setAttribute("filterUnits", "userSpaceOnUse");
-  map.setAttribute("width", String(size));
-  map.setAttribute("height", String(size));
-
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
@@ -80,46 +74,70 @@ export function ensureGlassFilter(): void {
   ctx.putImageData(image, 0, 0);
 
   const dataUrl = canvas.toDataURL();
-  const feImage = document.createElementNS("http://www.w3.org/2000/svg", "feImage");
-  feImage.setAttribute("href", dataUrl);
-  feImage.setAttribute("result", "map");
-  const feDisplacement = document.createElementNS("http://www.w3.org/2000/svg", "feDisplacementMap");
-  feDisplacement.setAttribute("in", "SourceGraphic");
-  feDisplacement.setAttribute("in2", "map");
-  feDisplacement.setAttribute("scale", "24");
-  feDisplacement.setAttribute("xChannelSelector", "R");
-  feDisplacement.setAttribute("yChannelSelector", "G");
-  map.append(feImage, feDisplacement);
 
+  // One filter graph: the precomputed map feeds the displacement, the
+  // specular lighting reads the source alpha as a lens height for the rim,
+  // and the composite masks it back to the surface shape. All primitives
+  // must live inside the SAME filter — feDisplacementMap's `in2` resolves
+  // within its own filter only, so a sibling filter's `result` is invisible.
   const apply = document.createElementNS("http://www.w3.org/2000/svg", "filter");
   apply.id = "glass";
   apply.setAttribute("x", "-20%");
   apply.setAttribute("y", "-20%");
   apply.setAttribute("width", "140%");
   apply.setAttribute("height", "140%");
+  apply.setAttribute("color-interpolation-filters", "sRGB");
+
+  const feImage = document.createElementNS("http://www.w3.org/2000/svg", "feImage");
+  feImage.setAttribute("href", dataUrl);
+  feImage.setAttribute("result", "map");
+
   const refraction = document.createElementNS("http://www.w3.org/2000/svg", "feDisplacementMap");
   refraction.setAttribute("in", "SourceGraphic");
   refraction.setAttribute("in2", "map");
   refraction.setAttribute("scale", "18");
   refraction.setAttribute("xChannelSelector", "R");
   refraction.setAttribute("yChannelSelector", "G");
+
   const specular = document.createElementNS("http://www.w3.org/2000/svg", "feSpecularLighting");
+  specular.setAttribute("in", "SourceAlpha");
   specular.setAttribute("surfaceScale", "1.4");
-  specular.setAttribute("specularConstant", "0.6");
-  specular.setAttribute("specularExponent", "18");
+  specular.setAttribute("specularConstant", "0.55");
+  specular.setAttribute("specularExponent", "20");
+  specular.setAttribute("lighting-color", "#ffffff");
   specular.setAttribute("result", "specular");
   const light = document.createElementNS("http://www.w3.org/2000/svg", "fePointLight");
-  light.setAttribute("x", "80");
-  light.setAttribute("y", "40");
-  light.setAttribute("z", "120");
+  light.setAttribute("x", "120");
+  light.setAttribute("y", "60");
+  light.setAttribute("z", "140");
   specular.append(light);
+
   const compose = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
   compose.setAttribute("in", "specular");
   compose.setAttribute("in2", "SourceAlpha");
   compose.setAttribute("operator", "in");
-  apply.append(refraction, specular, compose);
 
-  svg.append(map, apply);
+  apply.append(feImage, refraction, specular, compose);
+
+  // T2 owned-backdrop: the window chrome sits over content we render
+  // ourselves, so it refracts with a regular filter (no backdrop sampling).
+  // A gentler scale keeps the title bar's labels legible; specular only.
+  const chrome = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+  chrome.id = "glass-chrome";
+  chrome.setAttribute("x", "-20%");
+  chrome.setAttribute("y", "-20%");
+  chrome.setAttribute("width", "140%");
+  chrome.setAttribute("height", "140%");
+  chrome.setAttribute("color-interpolation-filters", "sRGB");
+  const chromeImage = feImage.cloneNode(true) as SVGElement;
+  const chromeRefract = refraction.cloneNode(true) as SVGElement;
+  chromeRefract.setAttribute("scale", "7");
+  const chromeSpecular = specular.cloneNode(true) as SVGElement;
+  chromeSpecular.setAttribute("specularConstant", "0.35");
+  const chromeCompose = compose.cloneNode(true) as SVGElement;
+  chrome.append(chromeImage, chromeRefract, chromeSpecular, chromeCompose);
+
+  svg.append(apply, chrome);
   document.body.append(svg);
   document.documentElement.dataset.glass = "t1";
 }
