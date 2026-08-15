@@ -100,31 +100,3 @@ export class SpringPoint {
   snap(x: number, y: number): void { this.x.snap(x); this.y.snap(y); }
   advance(dt: number): boolean { return this.x.advance(dt) || this.y.advance(dt); }
 }
-
-export class SharedSpringDriver {
-  private readonly jobs = new Set<(dt: number) => boolean>();
-  private frame = 0;
-  private lastTime = 0;
-
-  add(job: (dt: number) => boolean): () => void {
-    this.jobs.add(job);
-    this.start();
-    return () => this.jobs.delete(job);
-  }
-
-  private start(): void {
-    if (this.frame) return;
-    this.lastTime = performance.now();
-    this.frame = requestAnimationFrame((time) => this.tick(time));
-  }
-
-  private tick(time: number): void {
-    this.frame = 0;
-    const dt = Math.min(0.05, Math.max(0, (time - this.lastTime) / 1000));
-    this.lastTime = time;
-    for (const job of this.jobs) if (!job(dt)) this.jobs.delete(job);
-    if (this.jobs.size) this.start();
-  }
-}
-
-export const sharedSpringDriver = new SharedSpringDriver();

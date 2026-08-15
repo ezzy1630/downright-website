@@ -14,7 +14,8 @@
     "preview": "astro preview",
     "audit:contrast": "node scripts/audit-contrast.mjs",
     "audit:budgets": "node scripts/audit-budgets.mjs",
-    "test:editor": "node scripts/test-editor.mjs"
+    "test:editor": "node scripts/test-editor.mjs",
+    "test:theme": "node scripts/test-theme.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",
