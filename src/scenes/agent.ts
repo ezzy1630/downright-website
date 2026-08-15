@@ -169,7 +169,7 @@ export function initAgent(rail: RailController | null): void {
     }
     if (fired) {
       // Already seen this session: hold the final state, no replay.
-      stage.dataset.agentReplay = "held";
+      stage!.dataset.agentReplay = "held";
       revealContextual();
       return;
     }

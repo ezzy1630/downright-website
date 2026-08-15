@@ -71,12 +71,13 @@ function initTapToType(): void {
 
 /** The keyboard-averse still dirty the buffer — the agent act needs them too. */
 function initInsertEditChip(): void {
-  document.querySelector<HTMLButtonElement>("[data-film-insert]")?.addEventListener("click", (event) => {
-    const chip = event.currentTarget;
+  const chip = document.querySelector<HTMLButtonElement>("[data-film-insert]");
+  if (!chip) return;
+  chip.addEventListener("click", () => {
     doc.edit(`${doc.current.text}\n\n- [ ] tapped from the phone — the Mac gets the real thing`);
     const surface = document.querySelector<HTMLElement>("[data-document-read] [data-static-document]");
     if (surface) surface.innerHTML = renderSampleMarkdown(doc.current.text);
-    const label = chip.textContent;
+    const label = chip.textContent ?? "";
     chip.textContent = "inserted ✓";
     window.setTimeout(() => {
       chip.textContent = label;
