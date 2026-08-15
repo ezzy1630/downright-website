@@ -89,13 +89,15 @@ export class WindowDirector {
 
   /** Re-render the read layer + file labels from the store. */
   private paintStore(): void {
-    // While the agent is streaming or a conflict is open, the agent scene
-    // owns the read layer (it is mid-rewrite with live change marks); a
-    // repaint here would wipe them.
     // In the hero the window is SPLIT: the source pane is the editor and the
-    // document pane sits beside it, so it must repaint on every keystroke —
-    // that live coupling is the whole demonstration.
-    const agentOwns = doc.current.agent === "streaming" || doc.current.agent === "conflict";
+    // document pane sits beside it, so it repaints on every keystroke — that
+    // live coupling is the whole demonstration.
+    //
+    // The one exception: the agent scene owns the read layer while the reader
+    // is in its act and the visit is not idle — mid-rewrite AND after it
+    // resolves, since the word-level change marks live in that markup and a
+    // repaint erases them.
+    const agentOwns = doc.current.agent !== "idle" && this.current === "agent";
     if (!agentOwns) {
       const surface = this.readLayer();
       if (surface) surface.innerHTML = renderSampleMarkdown(doc.current.text);
@@ -135,9 +137,22 @@ export class WindowDirector {
     const host = slot?.host();
     if (!slot || !host) return;
 
+    // Claim the slot BEFORE anything repaints. setMode() below runs a store
+    // paint, and if `current` still named the previous slot that paint did not
+    // recognise the agent's ownership and wiped its change marks on arrival.
+    this.current = target;
+
     // The hero is the only split slot; every other act receives the same
     // window as a document-only surface, so no two acts repeat a composition.
     this.window.dataset.view = target === "hero" ? "split" : "read";
+
+    // The render act drives the read pane's scrollTop directly. Leaving it
+    // where the last frame left it made every later act open on the middle of
+    // the document — so every arrival except render's starts at the top.
+    if (target !== "render") {
+      const read = this.window.querySelector<HTMLElement>("[data-document-read]");
+      if (read) read.scrollTop = 0;
+    }
 
     // A fresh document arrival always shows read mode unless it is the hero
     // and the visitor already mounted the editor there.
@@ -154,7 +169,6 @@ export class WindowDirector {
     const anchor = slot.before?.() ?? null;
     if (anchor) host.insertBefore(this.window, anchor);
     else host.append(this.window);
-    this.current = target;
     this.window.dataset.slot = target;
 
     // Invert + Play.
@@ -212,14 +226,21 @@ export class WindowDirector {
     // A scroll read shared by the rail, the agent arming, and the pinning
     // stages; throttle through rAF so we read geometry at most once a frame.
     let ticking = false;
+    const settle = (): void => {
+      if (!ticking) return;
+      ticking = false;
+      const active = this.resolveActive();
+      if (active !== this.current) this.moveTo(active);
+    };
     const onScroll = (): void => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        const active = this.resolveActive();
-        if (active !== this.current) this.moveTo(active);
-      });
+      requestAnimationFrame(settle);
+      // rAF is throttled to zero in background tabs, in low-power mode, and in
+      // several in-app webviews. Without this timer a single stalled frame
+      // latches `ticking` forever and the window never travels again — the
+      // page silently loses its connective tissue.
+      window.setTimeout(settle, 250);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });

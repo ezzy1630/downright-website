@@ -1,7 +1,7 @@
 /* ────────────────────────────────────────────────────────────────────────
    The acts. Everything the experience layer needs beyond the v1 skeleton:
    the app window and its two faces, the living editor, glass tiers, the
-   gap, annotations, zoom, the agent visit, file cards, palette, toasts.
+   gap, annotations, the agent visit, file cards, palette, toasts.
    Every duration/curve/radius traces to tokens.css ← Motion.swift.
    ──────────────────────────────────────────────────────────────────────── */
 
@@ -602,62 +602,20 @@
 .render-document-viewport { height: min(720px, calc(100dvh - 168px)); overflow: hidden; }
 .render-document-viewport .app-window { height: 100%; }
 
-/* ── Structural zoom ──────────────────────────────────────────────────── */
-
-.zoom-stage {
-  position: sticky;
-  top: 72px;
-  margin-top: 52px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-window);
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.zoom-stage__bar {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 13px 18px;
-  border-bottom: 1px solid var(--rule);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 11px;
-}
-
-.zoom-stage__name { color: var(--heading); }
-.zoom-stage__hint { margin-left: auto; color: var(--text-faint); }
-
-.zoom-surface {
-  position: relative;
-  max-height: 560px;
-  min-height: 480px;
-  overflow: hidden;
-  padding: 34px clamp(20px, 5vw, 90px);
-  touch-action: pan-y pinch-zoom;
-}
-
-.zoom-surface .document-content { width: min(calc(100% - 40px), var(--measure)); margin: 0 auto; padding: 0 0 48px; will-change: translate; }
-
-.zoom-stage__closing {
-  padding: 16px 18px 18px;
-  border-top: 1px solid var(--rule);
-  color: var(--heading);
-  font-family: var(--font-display);
-  font-size: 18px;
-}
-
-.zoom-stage__level-name {
-  padding: 0 18px 14px;
-  color: var(--text-faint);
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-
 /* ── The agent visit ──────────────────────────────────────────────────── */
 
 .agent-stage { position: relative; margin-top: 56px; }
-.agent-stage__document { position: relative; height: min(728px, 82vh); overflow: hidden; border-radius: var(--radius-window); }
+/* The agent act is a review, so the window arrives as a reading column, not
+   a full-bleed slab — a different shape from the hero's split and the theme
+   showroom's specimen. */
+.agent-stage__document {
+  position: relative;
+  width: min(100%, 880px);
+  height: min(660px, 76vh);
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: var(--radius-window);
+}
 .agent-stage__document .app-window { height: 100%; }
 
 .change-mark { padding: 0 2px; border-radius: 3px; opacity: 0; transition: opacity 0.12s var(--ease-decelerate); }
@@ -808,8 +766,9 @@
 
 .file-surface {
   position: relative;
-  height: 420px;
-  margin-top: 55px;
+  width: min(100%, 940px);
+  height: 340px;
+  margin: 55px auto 0;
   overflow: hidden;
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
@@ -876,6 +835,21 @@
 
 .density-rail { position: fixed; z-index: 30; top: 50%; right: 18px; width: 44px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
 .density-rail canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* The act number rides above the dot column — the reader's place in the
+   sequence, stated once, in the same mono voice as the eyebrows. */
+.density-rail__number {
+  position: absolute;
+  top: 34px;
+  left: 0;
+  width: 100%;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
 .density-rail__nav { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 
 .density-rail__hud {
@@ -1144,13 +1118,12 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
-  .gap-stage, .zoom-stage, .render-stage__sticky, .agent-stage, .file-surface, .theme-showroom {
+  .compare, .render-stage__sticky, .agent-stage, .file-surface, .theme-showroom {
     content-visibility: auto;
     contain-intrinsic-size: auto 600px;
   }
   .app-window__status-shortcut { display: none; }
   .conflict-bar button { min-height: 48px; flex: 1 1 auto; }
-  .zoom-levels button { width: 44px; height: 44px; }
   .theme-showroom__list button { min-height: 52px; }
   .film-handoff__row button, .film-handoff__row a { min-height: 48px; }
 }
@@ -1179,7 +1152,6 @@
   .hero__caption { text-align: left; }
   .gap-wall__scroller { height: 280px; }
   .render-document-viewport { height: 560px; }
-  .zoom-surface { min-height: 420px; max-height: 480px; }
   .agent-stage__document { height: 560px; }
   .conflict-bar button { flex: 1 1 auto; }
 }

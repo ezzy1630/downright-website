@@ -102,6 +102,15 @@ export function initRail(): RailController | null {
   let lastProgress = -1;
   let active = true;
 
+  // The act number: the reader's place in the sequence, stated once.
+  const numberEl = rail.querySelector<HTMLElement>("[data-rail-number]");
+  let lastNumber = -1;
+  const paintNumber = (index: number): void => {
+    if (!numberEl || index === lastNumber) return;
+    lastNumber = index;
+    numberEl.textContent = String(index + 1).padStart(2, "0");
+  };
+
   const draw = (): void => {
     const styles = getComputedStyle(document.documentElement);
     const ink = styles.getPropertyValue("--rail-tick").trim() || styles.getPropertyValue("--secondary").trim() || "#888";
@@ -130,6 +139,7 @@ export function initRail(): RailController | null {
     ctx.stroke();
 
     const nearest = nearestTick();
+    paintNumber(nearest);
     ticks.forEach((tick, index) => {
       const scale = tick.scale.value;
       const alpha = tick.alpha.value * (index === nearest ? 1 : 0.75);

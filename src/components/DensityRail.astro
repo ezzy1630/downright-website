@@ -8,6 +8,7 @@ import { sections } from "../data/site";
 ---
 
 <aside class="density-rail" data-density-rail aria-label="Acts">
+  <span class="density-rail__number" data-rail-number aria-hidden="true">01</span>
   <nav class="density-rail__nav" aria-label="Jump to act">
     {sections.map((section) => (
       <a href={`#${section.id}`} data-rail-link={section.id}>{section.label}</a>
