@@ -8,7 +8,7 @@
     "generate:data": "node scripts/generate-app-data.ts",
     "generate:mirrors": "node scripts/generate-site-mirrors.mjs",
     "generate:og": "node scripts/generate-og.mjs",
-    "prebuild": "npm run generate:data && npm run generate:mirrors && npm run generate:og",
+    "prebuild": "npm run generate:mirrors && npm run generate:og",
     "build": "astro build",
     "check": "astro check",
     "preview": "astro preview",
