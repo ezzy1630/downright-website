@@ -16,7 +16,8 @@
     "audit:budgets": "node scripts/audit-budgets.mjs",
     "test:editor": "node scripts/test-editor.mjs",
     "test:theme": "node scripts/test-theme.mjs",
-    "test:acts": "node scripts/test-acts.mjs"
+    "test:acts": "node scripts/test-acts.mjs",
+    "audit:sweep": "node scripts/audit-sweep.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",
