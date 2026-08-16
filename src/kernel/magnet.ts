@@ -42,7 +42,9 @@ export function magnetize(root: ParentNode = document): () => void {
     ticker.add((dt) => {
       let moving = false;
       for (const [element, state] of controls) {
-        const elementMoving = state.x.advance(dt) || state.y.advance(dt);
+        const movingX = state.x.advance(dt);
+        const movingY = state.y.advance(dt);
+        const elementMoving = movingX || movingY;
         element.style.setProperty("--magnet-x", `${state.x.value.toFixed(2)}px`);
         element.style.setProperty("--magnet-y", `${state.y.value.toFixed(2)}px`);
         if (elementMoving) moving = true;

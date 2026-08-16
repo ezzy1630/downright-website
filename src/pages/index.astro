@@ -49,17 +49,17 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
                 <span>Choose an install path</span>
                 <span>Click a command to copy</span>
               </div>
-              <button type="button" class="terminal-install__option" data-install-command={brewCommand} aria-label="Copy Homebrew install command">
+              <button type="button" class="terminal-install__option" data-pop data-install-command={brewCommand} aria-label="Copy Homebrew install command">
                 <span class="terminal-install__method">Homebrew</span>
                 <code>{brewCommand}</code>
                 <span class="terminal-install__copy" data-install-label>Copy</span>
               </button>
-              <button type="button" class="terminal-install__option" data-install-command={npmCommand} aria-label="Copy npm install command">
+              <button type="button" class="terminal-install__option" data-pop data-install-command={npmCommand} aria-label="Copy npm install command">
                 <span class="terminal-install__method">npm</span>
                 <code>{npmCommand}</code>
                 <span class="terminal-install__copy" data-install-label>Copy</span>
               </button>
-              <button type="button" class="terminal-install__option" data-install-command={curlCommand} aria-label="Copy curl install command">
+              <button type="button" class="terminal-install__option" data-pop data-install-command={curlCommand} aria-label="Copy curl install command">
                 <span class="terminal-install__method">curl</span>
                 <code>{curlCommand}</code>
                 <span class="terminal-install__copy" data-install-label>Copy</span>
@@ -80,8 +80,8 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         </p>
         <div class="film-invite-row">
           <span class="film-invite" data-film-invite aria-hidden="true"></span>
-          <button type="button" class="film-chip" data-film-type>Tap to type</button>
-          <button type="button" class="film-chip" data-film-insert>Insert an edit</button>
+          <button type="button" class="film-chip" data-film-type data-pop>Tap to type</button>
+          <button type="button" class="film-chip" data-film-insert data-pop>Insert an edit</button>
         </div>
       </div>
     </section>
@@ -99,7 +99,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
 
         <ul class="annotation-rail" aria-label="What renders, as it renders">
           {annotations.map(([selector, label, detail]) => (
-            <li data-annotation={selector}>
+            <li data-annotation={selector} data-glow data-tilt>
               <i class="annotation-rail__connector" aria-hidden="true"></i>
               <strong>{label}</strong>
               <span>{detail}</span>
@@ -202,8 +202,8 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <ul class="architecture-list act-reveal">{architectureClaims.map((claim) => <li>{claim}</li>)}</ul>
         <div class="architecture-mode act-reveal" role="tablist" aria-label="Read or source view">
           <span>One surface, two honest faces</span>
-          <button type="button" role="tab" aria-selected="true" data-architecture-view="document">Document</button>
-          <button type="button" role="tab" aria-selected="false" data-architecture-view="source">Source</button>
+          <button type="button" role="tab" aria-selected="true" data-architecture-view="document" data-pop>Document</button>
+          <button type="button" role="tab" aria-selected="false" data-architecture-view="source" data-pop>Source</button>
         </div>
         <p class="architecture-punctuation act-reveal">{copy.architecture.punctuation}</p>
       </div>
@@ -233,7 +233,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <div class="quick-look__body document-content" data-quick-look-body></div>
         </div>
       </div>
-      <div class="terminal-artifact act-reveal" data-terminal data-fingerprint="terminal">
+      <div class="terminal-artifact act-reveal" data-terminal data-fingerprint="terminal" data-glow>
         <div class="terminal-artifact__bar"><span>down — the document from the terminal</span><span>zsh</span></div>
         <pre data-terminal-body><code></code></pre>
       </div>
@@ -248,7 +248,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       <div class="theme-showroom act-reveal">
         <div class="theme-showroom__list" data-fingerprint="themes" role="listbox" aria-label="Theme showroom">
           {themes.map((theme) => (
-            <button type="button" role="option" aria-selected={theme.id === "warm-dark" ? "true" : "false"} data-theme-option={theme.id} data-magnet>
+            <button type="button" role="option" aria-selected={theme.id === "warm-dark" ? "true" : "false"} data-theme-option={theme.id} data-magnet data-pop data-glow>
               <span class="theme-option__dot" style={`--dot: ${theme.palette.background}; --dot-ink: ${theme.palette.accent}`} aria-hidden="true"></span>
               <strong>{theme.name}</strong>
               <small>{theme.appearance}</small>

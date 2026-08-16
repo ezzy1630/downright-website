@@ -86,17 +86,3 @@ export class SpringScalar {
     return true;
   }
 }
-
-export class SpringPoint {
-  readonly x: SpringScalar;
-  readonly y: SpringScalar;
-
-  constructor(x = 0, y = 0, duration = 0.2, bounce = 0) {
-    this.x = new SpringScalar(x, duration, bounce);
-    this.y = new SpringScalar(y, duration, bounce);
-  }
-
-  setTarget(x: number, y: number): void { this.x.setTarget(x); this.y.setTarget(y); }
-  snap(x: number, y: number): void { this.x.snap(x); this.y.snap(y); }
-  advance(dt: number): boolean { return this.x.advance(dt) || this.y.advance(dt); }
-}

@@ -70,6 +70,8 @@ function initVerlet(): void {
   CARD_FILENAMES.forEach(([name, key], index) => {
     const element = document.createElement("div");
     element.className = "file-card";
+    element.dataset.glow = "";
+    element.dataset.tilt = "";
     element.tabIndex = 0;
     element.setAttribute("role", "button");
     element.setAttribute("aria-label", `${name} — press Space to Quick Look`);

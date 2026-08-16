@@ -6,9 +6,12 @@
  */
 
 import { SpringScalar } from "../motion/spring";
-import { ticker } from "./ticker";
 
-export { SpringScalar, SpringPoint } from "../motion/spring";
+export { SpringScalar } from "../motion/spring";
+
+// --- OKLab color spring (pure math lives in src/motion/oklab.ts) ---------
+export { SpringColor, hexToRgb, rgbToOklab, oklabToRgb, oklabToHex } from "../motion/oklab";
+export type { Rgb } from "../motion/oklab";
 
 export const MOTION = {
   durations: {
@@ -31,33 +34,6 @@ export const MOTION = {
   },
 } as const;
 
-/** A scalar spring that drives a DOM write through the shared ticker. */
-export function attachScalar(
-  spring: SpringScalar,
-  write: (value: number) => void,
-  onSettle?: () => void,
-): () => void {
-  let detach: (() => void) | null = null;
-  const job = (dt: number): boolean => {
-    const moving = spring.advance(dt);
-    write(spring.value);
-    if (!moving) {
-      if (onSettle) onSettle();
-      return false;
-    }
-    return true;
-  };
-  detach = ticker.add(job);
-  return () => {
-    if (detach) detach();
-  };
-}
-
-// --- OKLab color spring (pure math lives in src/motion/oklab.ts) ---------
-export { SpringColor, hexToRgb, rgbToOklab, oklabToRgb, oklabToHex } from "../motion/oklab";
-export type { Rgb } from "../motion/oklab";
-
-/** Springs center + size (never four edges) for morphing rectangles. */
 export class SpringRect {
   readonly x: SpringScalar;
   readonly y: SpringScalar;
@@ -79,7 +55,12 @@ export class SpringRect {
   }
 
   advance(dt: number): boolean {
-    const moving = this.x.advance(dt) || this.y.advance(dt) || this.height.advance(dt);
-    return this.width.advance(dt) || moving;
+    // Advance every axis before OR-ing: a bare `||` chain freezes every
+    // spring after the first one still moving.
+    const movingX = this.x.advance(dt);
+    const movingY = this.y.advance(dt);
+    const movingW = this.width.advance(dt);
+    const movingH = this.height.advance(dt);
+    return movingX || movingY || movingW || movingH;
   }
 }

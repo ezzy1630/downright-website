@@ -50,6 +50,36 @@
   box-shadow: 0 10px 26px -12px color-mix(in oklab, #1a1512 46%, transparent);
 }
 
+/* ── Pointer presence ────────────────────────────────────────────────────
+   One delegated pass (kernel/glow.ts) writes --px/--py on [data-glow] and
+   --tilt-x/--tilt-y on [data-tilt]; these rules turn them into the effect.
+   Fine pointers only: touch never sees a cursor to follow. The tilt is
+   geometry, so the kernel stands it down under reduced motion. */
+[data-glow] { position: relative; --px: 50%; --py: 50%; }
+[data-glow]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(240px circle at var(--px) var(--py), color-mix(in oklab, var(--accent) 6%, transparent), transparent 68%);
+  opacity: 0;
+  transition: opacity var(--motion-hover) var(--ease-decelerate);
+}
+@media (hover: hover) {
+  [data-glow]:hover::after { opacity: 1; }
+}
+
+[data-tilt] {
+  rotate: var(--tilt-x, 0deg) var(--tilt-y, 0deg) 0deg;
+  transition: rotate var(--motion-standard) var(--ease-snap);
+}
+.annotation-rail, .file-surface__field { perspective: 720px; }
+
+/* The generalized press: [data-pop] elements dip and answer (kernel/pop.ts). */
+[data-pop] { scale: var(--pop-scale, 1); }
+
 /* Press states, straight off Motion.swift: 0.985 down in pressIn 0.07s,
    back up over pressOut 0.11s. The scale composes lift × pop × press so the
    three never fight over one property. */
@@ -78,7 +108,7 @@
 
 /* ── The app window: two faces, one document ──────────────────────────── */
 
-.app-window { position: relative; }
+.app-window { position: relative; view-transition-name: app-window; }
 .app-window__inner { position: relative; height: 100%; }
 
 .app-window__face {
@@ -94,6 +124,13 @@
     box-shadow var(--motion-deliberate) var(--ease-decelerate);
 }
 
+/* Hover: the window leans toward the pointer with a breath of shadow. */
+@media (hover: hover) {
+  .app-window:hover .app-window__face {
+    box-shadow: 0 30px 66px -28px color-mix(in srgb, #1a1512 62%, transparent);
+  }
+}
+
 /* Mid-flight the window is picked up: a deeper, softer shadow reads as
    altitude while it morphs between slots, and settles again on landing. */
 .app-window[data-flying] .app-window__face {
@@ -105,6 +142,17 @@
 /* The window is one node; each act's slot sizes it. */
 .app-window { width: 100%; height: 100%; }
 .hero__window .app-window { height: min(728px, calc(100dvh - 112px)); min-height: 540px; }
+/* The window arrives with the page: transform-only and backwards-filled, so
+   the prerendered LCP text paints immediately and nothing the animation set
+   can out-rank the travel director's inline geometry later. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__window .app-window {
+    animation: window-settle var(--motion-liquid-settle) var(--ease-decelerate) backwards;
+  }
+}
+@keyframes window-settle {
+  from { translate: 0 16px; scale: 0.99; }
+}
 .window-slot { width: 100%; height: 100%; }
 .window-slot--render { height: 100%; }
 .window-slot--agent { height: 100%; }
@@ -720,10 +768,11 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.72) * 5), 1);
 }
 
-/* The slot that hosts THE window inside the pinned stage. The enter clamp is
-   the sweep's readability floor: the window rides below it until the stage
-   actually engages, so the pinned frame never peeks into the hero's viewport. */
-.sweep__slot { grid-row: 3; grid-column: 1; min-height: 0; opacity: var(--enter, 1); }
+/* The slot that hosts THE window inside the pinned stage. No enter clamp:
+   the window arrives by flight exactly when the gap claims the reading line,
+   and its raw Quick Look state IS the composed frame at progress zero —
+   clamping it left the approach zone dead. */
+.sweep__slot { grid-row: 3; grid-column: 1; min-height: 0; }
 
 /* The film builds its own lighter sheet inside the slot (no travel on the
    film); these are its bones. */
@@ -1121,6 +1170,12 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 .benchmark-table-wrap {
   margin-top: 54px;
   overflow-x: auto;
+}
+
+/* Rows answer the pointer while the numbers count up. */
+[data-budget-row] { transition: background-color var(--motion-hover) var(--ease-decelerate); }
+@media (hover: hover) {
+  [data-budget-row]:hover { background: color-mix(in oklab, var(--accent) 5%, transparent); }
 }
 
 .benchmark-table {
@@ -2226,7 +2281,6 @@ html[data-film="true"] .film-chip { min-height: 44px; }
 .sweep .eyebrow { opacity: 1; }
 .sweep__lede { opacity: clamp(0, calc((0.7 - var(--sweep-progress, 0)) * 10), 1); }
 .sweep__window { opacity: 1; }
-.sweep__slot { opacity: 1; }
 
 html[data-film="true"] .film-beat {
   display: flex;

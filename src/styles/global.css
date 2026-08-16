@@ -130,6 +130,7 @@ ol {
 
 .site-header {
   position: fixed;
+  view-transition-name: site-header;
   z-index: 40;
   inset: 0 0 auto;
   height: 56px;
@@ -137,11 +138,12 @@ ol {
   background: color-mix(in oklab, var(--bg) 78%, transparent);
   backdrop-filter: blur(12px) saturate(1.5);
   -webkit-backdrop-filter: blur(12px) saturate(1.5);
-  transition: border-color var(--motion-quick) var(--ease-decelerate), background-color var(--motion-standard) var(--ease-decelerate);
+  transition: border-color var(--motion-quick) var(--ease-decelerate), background-color var(--motion-standard) var(--ease-decelerate), box-shadow var(--motion-deliberate) var(--ease-decelerate);
 }
 
 .site-header.has-scrolled {
   border-color: var(--rule);
+  box-shadow: 0 12px 32px -20px color-mix(in srgb, #1a1512 36%, transparent);
 }
 
 .site-header__inner {
@@ -850,6 +852,24 @@ ol {
 .traffic-lights i:nth-child(2) { background: #febc2e; }
 .traffic-lights i:nth-child(3) { background: #28c840; }
 
+/* Real macOS detail: hover the lights and they name their function. */
+@media (hover: hover) {
+  .traffic-lights i { display: grid; place-items: center; }
+  .traffic-lights i::before {
+    opacity: 0;
+    color: rgb(0 0 0 / 0.55);
+    font-family: var(--font-body);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    transition: opacity var(--motion-hover) var(--ease-decelerate);
+  }
+  .traffic-lights:hover i::before { opacity: 1; }
+  .traffic-lights i:first-child::before { content: "×"; }
+  .traffic-lights i:nth-child(2)::before { content: "–"; }
+  .traffic-lights i:nth-child(3)::before { content: "+"; }
+}
+
 .document-window__file {
   display: grid;
   grid-template-columns: auto auto;
@@ -1478,6 +1498,27 @@ ol {
 @keyframes reveal-in {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: none; }
+}
+
+/* ── Cross-document View Transitions (Chromium, progressive) ────────────
+   Same-origin navigations morph shared chrome instead of white-flashing:
+   the header persists by name, and the homepage's living window carries
+   the same name as the themes page's window — clicking "Themes" hands THE
+   window across the page change. Other engines get plain fast loads;
+   reduced motion keeps plain swaps. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--motion-deliberate);
+  }
+  ::view-transition-group(app-window),
+  ::view-transition-group(site-header) {
+    animation-duration: var(--motion-liquid-settle);
+    animation-timing-function: var(--ease-snap);
+  }
 }
 
 @media (prefers-reduced-transparency: reduce) {

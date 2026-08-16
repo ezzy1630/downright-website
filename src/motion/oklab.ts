@@ -97,7 +97,11 @@ export class SpringColor {
   }
 
   advance(dt: number): boolean {
-    const moving = this.L.advance(dt);
-    return this.a.advance(dt) || this.b.advance(dt) || moving;
+    // Advance every channel before OR-ing: a bare `||` chain freezes the
+    // channels after the first one still moving.
+    const movingL = this.L.advance(dt);
+    const movingA = this.a.advance(dt);
+    const movingB = this.b.advance(dt);
+    return movingL || movingA || movingB;
   }
 }

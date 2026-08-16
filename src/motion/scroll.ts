@@ -23,32 +23,3 @@ export function springScrollTo(target: number, kick = 0): void {
   };
   requestAnimationFrame(tick);
 }
-
-export function observeScrollProgress(target: HTMLElement, callback: (progress: number) => void): () => void {
-  let frame = 0;
-  let active = false;
-  const update = () => {
-    frame = 0;
-    const travel = Math.max(1, target.offsetHeight - window.innerHeight);
-    callback(clamp(-target.getBoundingClientRect().top / travel));
-    if (active) frame = requestAnimationFrame(update);
-  };
-  const observer = new IntersectionObserver((entries) => {
-    active = entries.some((entry) => entry.isIntersecting);
-    if (active && !frame) frame = requestAnimationFrame(update);
-    if (!active && frame) { cancelAnimationFrame(frame); frame = 0; }
-  }, { threshold: 0 });
-  observer.observe(target);
-  return () => { observer.disconnect(); if (frame) cancelAnimationFrame(frame); };
-}
-
-export function observeOnce(targets: NodeListOf<HTMLElement>, callback: (target: HTMLElement) => void): () => void {
-  const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
-    if (!entry.isIntersecting) return;
-    const target = entry.target as HTMLElement;
-    observer.unobserve(target);
-    callback(target);
-  }), { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
-  targets.forEach((target) => observer.observe(target));
-  return () => observer.disconnect();
-}

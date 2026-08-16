@@ -12,6 +12,7 @@ import { initPalette } from "../shell/palette";
 import { initShare } from "../shell/share";
 import { initGlass } from "../kernel/glass";
 import { magnetize } from "../kernel/magnet";
+import { initPointerPresence } from "../kernel/glow";
 import { sound } from "../kernel/sound";
 import { setInPageReduce } from "../kernel/switchboard";
 import { initRail, type RailController } from "../scenes/rail";
@@ -19,7 +20,7 @@ import { initGap } from "../scenes/gap";
 import { initAgent } from "../scenes/agent";
 import { initReach } from "../scenes/reach";
 import { initSpeed } from "../scenes/speed";
-import { initDownloadFunnel } from "../shell/funnel";
+import { initDownloadFunnel, initPop } from "../shell/funnel";
 import { initFilm } from "../scenes/film";
 import { initTravel } from "../shell/travel";
 import { initReveal } from "../scenes/reveal";
@@ -47,6 +48,8 @@ initPalette();
 initShare();
 initDownloadFunnel();
 magnetize();
+initPointerPresence();
+initPop();
 // Film detection precedes lazy scene mounting: gap and travel otherwise build
 // desktop choreography into the seven-beat mobile composition.
 initTravel();

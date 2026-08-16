@@ -8,7 +8,8 @@
 import { reducedMotion } from "../kernel/switchboard";
 import { medianParseMs } from "../editor/stats";
 import { benchmarks } from "../data/site";
-import { MOTION } from "../kernel/springs";
+import { MOTION, SpringScalar } from "../kernel/springs";
+import { ticker } from "../kernel/ticker";
 
 export function initSpeed(): void {
   const section = document.querySelector<HTMLElement>("[data-speed-section]");
@@ -31,6 +32,9 @@ export function initSpeed(): void {
           bar.style.transition = `width ${MOTION.durations.deliberate}s ${MOTION.curves.structural}`;
           bar.style.width = `${width}%`;
         });
+        // The numbers count to their values as the bars grow — the table
+        // wakes up instead of arriving finished.
+        for (const cell of row.querySelectorAll<HTMLElement>("td:nth-of-type(1), td:nth-of-type(2)")) countUp(cell);
       }
     }
     joinSession();
@@ -46,6 +50,24 @@ export function initSpeed(): void {
     { threshold: 0.3 },
   );
   observer.observe(section);
+}
+
+/** Tween a "0.18 ms"-style cell from zero on the deliberate curve. */
+function countUp(cell: HTMLElement): void {
+  const match = (cell.textContent ?? "").match(/^([\d.]+)\s*(\S[\s\S]*)$/);
+  if (!match) return;
+  const target = Number(match[1]);
+  const decimals = (match[1].split(".")[1] ?? "").length;
+  const suffix = match[2];
+  const value = new SpringScalar(0, MOTION.durations.deliberate, 0.12);
+  value.setTarget(target);
+  ticker.add((dt) => {
+    const moving = value.advance(dt);
+    cell.textContent = moving
+      ? `${value.value.toFixed(decimals)} ${suffix}`
+      : `${target.toFixed(decimals)} ${suffix}`;
+    return moving;
+  });
 }
 
 /** "Your median parse this visit: X ms" — honest, labeled, payload-budgeted. */

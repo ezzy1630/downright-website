@@ -11,7 +11,7 @@ import { themes } from "../data/site";
     <p class="theme-panel__title">Choose a theme</p>
     <div class="theme-panel__options" role="listbox" aria-label="Site theme">
       {themes.map((theme) => (
-        <button type="button" role="option" aria-selected={theme.id === "warm-dark" ? "true" : "false"} data-theme-option={theme.id} popovertarget="theme-list" popovertargetaction="hide">
+        <button type="button" role="option" aria-selected={theme.id === "warm-dark" ? "true" : "false"} data-theme-option={theme.id} data-pop popovertarget="theme-list" popovertargetaction="hide">
           <span class="theme-option__dot" style={`--dot: ${theme.palette.background}; --dot-ink: ${theme.palette.accent}`} aria-hidden="true"></span><span>{theme.name}</span>
         </button>
       ))}

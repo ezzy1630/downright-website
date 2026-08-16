@@ -79,9 +79,10 @@ class CDP {
 
 await ensureChrome();
 const { WebSocket } = await import("node:ws").catch(() => ({ WebSocket: globalThis.WebSocket }));
-const list = await (await fetch(`http://127.0.0.1:${PORT}/json`)).json();
-const page = list.find((p) => p.type === "page");
-const ws = new WebSocket(page.webSocketDebuggerUrl);
+// Own target: create a fresh tab instead of racing whatever page happens to
+// be first in /json (ad-hoc sessions leave busy pages behind).
+const created = await fetch(`http://127.0.0.1:${PORT}/json/new?about:blank`, { method: "PUT" }).then((r) => r.json());
+const ws = new WebSocket(created.webSocketDebuggerUrl);
 await new Promise((r, j) => { ws.addEventListener("open", r); ws.addEventListener("error", j); });
 const cdp = new CDP(ws);
 await cdp.send("Page.enable");
@@ -136,4 +137,5 @@ for (const target of targets) {
   await writeFile(file, Buffer.from(shot.data, "base64"));
   console.log(`${target.padEnd(14)} ${state}  → ${file}`);
 }
+await fetch(`http://127.0.0.1:${PORT}/json/close/${created.id}`).catch(() => {});
 console.log("done");

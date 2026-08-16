@@ -259,13 +259,20 @@ export class WindowDirector {
     };
 
     const cancel = ticker.add((dt) => {
-      const moving = px.advance(dt) || py.advance(dt) || w.advance(dt) || h.advance(dt) || arc.advance(dt);
+      // Advance every spring before OR-ing: `a.advance(dt) || b.advance(dt)`
+      // short-circuits and freezes b for as long as a is still moving — the
+      // flight stalls on one axis (the y spring sat at its origin forever).
+      const movingPx = px.advance(dt);
+      const movingPy = py.advance(dt);
+      const movingW = w.advance(dt);
+      const movingH = h.advance(dt);
+      const movingArc = arc.advance(dt);
       const lift = Math.sin(CLAMP(arc.value, 0, 1) * Math.PI) * arcPx;
       this.window.style.translate = `${px.value.toFixed(2)}px ${(py.value - lift).toFixed(2)}px`;
       this.window.style.width = `${w.value.toFixed(2)}px`;
       this.window.style.height = `${h.value.toFixed(2)}px`;
-      if (!moving) settle();
-      return moving;
+      if (!(movingPx || movingPy || movingW || movingH || movingArc)) settle();
+      return movingPx || movingPy || movingW || movingH || movingArc;
     });
     this.cancelFlight = () => {
       cancel();

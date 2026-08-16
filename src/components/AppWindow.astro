@@ -37,7 +37,7 @@ const { editable = false, flip = true, label = "sample.md", view = "document" } 
   data-editor-window={editable ? "" : undefined}
 >
   <div class="app-window__inner" data-theme-zone>
-    <div class="app-window__face app-window__face--document">
+    <div class="app-window__face app-window__face--document" data-glow>
       <div class="app-window__bar">
         <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="app-window__file">
@@ -51,9 +51,9 @@ const { editable = false, flip = true, label = "sample.md", view = "document" } 
           <span class="app-window__ql-action" aria-hidden="true">Open with…</span>
           {flip && (
             <div class="app-window__segmented" role="tablist" aria-label="Window mode">
-              <button type="button" role="tab" aria-selected={view === "document" ? "true" : "false"} data-view-button="document">Document</button>
-              <button type="button" role="tab" aria-selected={view === "split" ? "true" : "false"} data-view-button="split">Split</button>
-              <button type="button" role="tab" aria-selected={view === "source" ? "true" : "false"} data-view-button="source">Source</button>
+              <button type="button" role="tab" aria-selected={view === "document" ? "true" : "false"} data-view-button="document" data-pop>Document</button>
+              <button type="button" role="tab" aria-selected={view === "split" ? "true" : "false"} data-view-button="split" data-pop>Split</button>
+              <button type="button" role="tab" aria-selected={view === "source" ? "true" : "false"} data-view-button="source" data-pop>Source</button>
               <i class="app-window__segmented-indicator" aria-hidden="true"></i>
             </div>
           )}

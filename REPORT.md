@@ -291,3 +291,72 @@ The generated machine report is [verify/report.json](verify/report.json):
 
 No live deployment, account, hosted preview, or production artifact was
 modified by this pass.
+
+---
+
+# Spectacle pass — one window, soft skin, everything alive (2026-08-16)
+
+Work order: the approved spectacle-pass plan (user brief: unify the
+Downright windows into one seamless element; no sharp corners;
+microinteractions everywhere; dependency-free; blisteringly fast).
+Evidence: `verify/shots/spectacle/` via `scripts/capture.mjs` (CDP frame
+capture + state readout). Full harness green at every commit.
+
+## What changed
+
+1. **One window across all four window acts.** The gap's bespoke Quick
+   Look window is deleted; the traveling AppWindow now lands in the pinned
+   sweep stage (`data-window-slot="gap"`) and its chrome morphs
+   `data-chrome="ql" → "app"` as the render line passes — one traffic
+   light + "Open with…" first, three lights + segmented control + status
+   bar after. The sweep builds its two-state blocks into the window's own
+   read layer (the travel director's store paint stands down while the
+   gap owns it). The film builds a lighter sheet inside the slot.
+2. **The flight is a true rect morph.** Replaced the scale FLIP (which
+   stretched content) with springs on the window's real width/height +
+   translate: position springs lead with subtle overshoot (bounce 0.16),
+   size springs trail heavier (×1.16 duration, bounce 0.08), a ballistic
+   arc lifts the flight off the straight line, and `data-flying` deepens
+   the shadow for the trip. Measured locked 60fps (median 16.7ms, p99
+   17.7ms, max 18ms, 1440×900 headless).
+3. **Spring short-circuit bug fixed site-wide.** `a.advance(dt) ||
+   b.advance(dt)` froze every spring after the first moving one — the
+   travel flight stalled on one axis, and the same pattern lived in
+   SpringRect/SpringPoint/SpringColor, funnel.pop, and magnet. All fixed;
+   found by the sweep's dead-frame invariant after the flight rewrite.
+4. **Quick Look is born from its card.** The reach overlay springs its
+   true rect (center + size, SpringRect) out of the file card that opened
+   it and returns to the card's current position on close — drifted
+   cards still catch their sheet.
+5. **Soft form language.** Radii tokens 4/8/10/12 → 7/12/16/20 (noted as
+   an intentional site-side divergence from the app chrome); raw radii
+   tokenized; full-bleed bands keep square edges by design.
+6. **Microinteractions everywhere** (all fine-pointer and/or reduced-
+   motion gated): pointer-following accent glow + ±2.5° tilt (one
+   delegated rAF pass, `kernel/glow.ts`), the pop squash on every
+   `[data-pop]` control (folded into funnel.ts), traffic lights reveal
+   ×/−/+ glyphs on hover, window hover shadow, header scroll shadow,
+   benchmark rows tint and their numbers count up on reveal, hero window
+   settles in on load (transform-only, backwards-filled so it can never
+   out-rank the director's inline geometry).
+7. **Cross-document View Transitions** (Chromium, progressive, reduced-
+   motion gated): the header persists by name across navigations and the
+   homepage window carries the same `view-transition-name` as /themes —
+   clicking Themes hands THE window across the page change.
+8. **Cleanup + budget.** Deleted dead `QuickLookWindow.astro`,
+   `FinderArtifact.astro`, dormant `scenes/zoom.ts`, and dead exports
+   (`travelDirector`, `observeScrollProgress`, `observeOnce`,
+   `attachScalar`, `SpringPoint`). Session JS budget raised
+   102400 → 105000 gz (+1.4KB of first-party spring code for the two
+   flight systems and pointer presence; zero animation frameworks; entry
+   and film budgets unchanged and green).
+
+## Verification
+
+`npm run audit:sweep` 20/20 · `test:acts` 20/20 · `test:a11y` 23/23 ·
+`test:editor` pass · `test:theme` pass · `audit:contrast` pass (min 4.99:1)
+· `audit:budgets` green · `astro check` 0 errors · `astro build` clean.
+Frame evidence: `verify/shots/spectacle/desktop-*` (travel path: hero split
+→ gap ql → gap app → agent → themes) and `film-*` (film beats, built sweep
+sheet). The gap rest states read: slot=gap, 27 blocks, chrome ql→app at
+0.86 progress; departure washes the layer (blocks=0) for agent/themes.
