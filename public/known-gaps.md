@@ -8,7 +8,7 @@ This is the current launch record for the approved site plan. The site does not 
 - Artifact: Downright.dmg is available at https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg.
 - Homebrew: no cask is claimed until one exists and is verified.
 - Repository: https://github.com/ezzy1630/Downright is the source remote; public address confirmation remains open.
-- Brand: the current knot mark ships as the canonical mark; whether it evolves before launch remains open.
+- Brand: the app-derived vector mark is canonical; the tactile native raster remains product artwork.
 
 ## Native evidence
 

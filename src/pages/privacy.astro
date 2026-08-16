@@ -1,8 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { copy } from "../data/site";
 ---
 
-<BaseLayout title="Privacy | Downright" description="Downright privacy. Local use by default, no account, no cloud sync, and no core-app telemetry." markdownPath="/privacy.md" imagePath="/og/privacy.svg">
+<BaseLayout title="Privacy | Downright" description={copy.description} markdownPath="/privacy.md" imagePath="/og/privacy.svg">
   <main class="subpage legal-page">
     <section class="subpage-hero">
       <p class="subpage-hero__path">Downright / Privacy</p>

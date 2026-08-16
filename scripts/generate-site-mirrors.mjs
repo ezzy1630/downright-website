@@ -6,13 +6,14 @@ const publicRoot = join(root, "public");
 const dataRoot = join(root, "src/data/app");
 const readJson = (name) => readFile(join(dataRoot, name), "utf8").then(JSON.parse);
 const plain = (value) => value.replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
+const entityDescription = "Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.";
 const [themes, benchmarks, facts, changelog] = await Promise.all(["themes.json", "benchmarks.json", "facts.json", "changelog.json"].map(readJson));
 
 const index = `# Downright
 
-The native Markdown app for macOS.
+${entityDescription}
 
-A native reader and editor for files people and coding agents change together. No WebView. No account.
+A native Markdown reader and editor for files people and coding agents change together. Exact rendering and live agent-rewrite review keep the source in charge.
 
 ## The file is the starting point
 
@@ -91,7 +92,7 @@ This is the current launch record for the approved site plan. The site does not 
 - Artifact: ${facts.artifactName} is available at ${facts.downloadUrl || "no signed, notarized, stapled public URL is configured"}.
 - Homebrew: no cask is claimed until one exists and is verified.
 - Repository: ${facts.repository ?? "not configured"} is the source remote; public address confirmation remains open.
-- Brand: the current knot mark ships as the canonical mark; whether it evolves before launch remains open.
+- Brand: the app-derived vector mark is canonical; the tactile native raster remains product artwork.
 
 ## Native evidence
 
@@ -110,9 +111,9 @@ The technical site budgets, accessibility audits, Markdown mirrors, llms.txt, RS
 
 const llms = `# Downright
 
-> The native Markdown app for macOS.
+> ${entityDescription}
 
-Downright is a local-first Markdown reader and editor. The native app renders Markdown without a WebView, keeps raw bytes exact, and integrates with Finder, Quick Look, and the down command.
+${entityDescription} It integrates with Finder, Quick Look, and the down command while keeping the source file in charge.
 
 ## Routes
 
@@ -121,6 +122,11 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 - https://downright.cc/changelog - generated native-app changelog
 - https://downright.cc/privacy - privacy promises
 - https://downright.cc/known-gaps - current release and evidence gaps
+- https://downright.cc/markdown-viewer-mac - how to preview and read Markdown on a Mac
+- https://downright.cc/markdown-editor-mac-free - free Markdown editors compared
+- https://downright.cc/downright-vs-typora - Downright and Typora
+- https://downright.cc/downright-vs-obsidian - Downright and Obsidian
+- https://downright.cc/faq - product FAQ
 - https://downright.cc/index.md - Markdown version of the homepage
 - https://downright.cc/themes.md - Markdown theme data
 - https://downright.cc/changelog.md - Markdown changelog

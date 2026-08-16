@@ -18,6 +18,8 @@ export const changelog = changelogPayload as ChangelogPayload;
 export const motion = motionPayload;
 export { sampleMarkdown };
 
+export const entityDescription = "Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.";
+
 export const sections = [
   { id: "hero", label: "Start", detail: "The native Markdown app" },
   { id: "gap", label: "The difference", detail: "What macOS shows you, and what Downright shows you" },
@@ -31,7 +33,7 @@ export const sections = [
 
 export const copy = {
   title: "Downright | The native Markdown app for macOS",
-  description: "Downright is a native Markdown reader and editor for macOS. It renders your files exactly, shows you what changed when an agent rewrites them, and never edits your bytes.",
+  description: entityDescription,
   hero: {
     heading: "The native Markdown app for macOS.",
     body: "Your coding agents write too much Markdown. Downright renders it exactly, reviews rewrites live, and never touches your bytes.",

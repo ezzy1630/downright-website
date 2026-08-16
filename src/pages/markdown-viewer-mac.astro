@@ -1,0 +1,25 @@
+---
+import AnswerPage from "../components/AnswerPage.astro";
+
+const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
+---
+
+<AnswerPage title="How to preview and read Markdown on a Mac" trail="Markdown viewer" updated={updated} markdownPath="/markdown-viewer-mac.md">
+  <p>Markdown is plain text, but a plain-text preview is not always a good reading surface. On a Mac, Finder and Quick Look are useful for a fast glance. A long README, a refactor note, or an agent-generated document deserves a more deliberate viewer.</p>
+
+  <h2>Use Quick Look for the glance</h2>
+  <p>Select a Markdown file in Finder and press Space. Quick Look is the right tool when you need to confirm a filename or scan a short note. It is not a full editor, and complex documents can be harder to read when the preview is constrained by Finder.</p>
+
+  <h2>Use Downright for the document</h2>
+  <p>Downright is a free, open-source, native Markdown editor and viewer for macOS. Open the same file and move between Document, Split, and Source views. Headings, tables, callouts, tasks, footnotes, math, Mermaid, and code stay in one surface.</p>
+  <p>The renderer decorates the file. It does not replace the file. When an agent changes an open document, Downright marks the rewrite and lets you keep your version or take theirs.</p>
+
+  <h2>A simple decision</h2>
+  <ul>
+    <li>Need a two-second check? Press Space in Finder.</li>
+    <li>Need to read, edit, and review a real Markdown file? Open it in Downright.</li>
+    <li>Need a web-published note or a vault? Choose a tool built for that workflow instead.</li>
+  </ul>
+
+  <p class="answer-sources">Product facts: <a href="/privacy">privacy</a>, <a href="/known-gaps">release evidence</a>, and the <a href="https://github.com/ezzy1630/Downright" target="_blank" rel="noreferrer">native source repository</a>.</p>
+</AnswerPage>

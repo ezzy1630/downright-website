@@ -1,8 +1,8 @@
 # Downright
 
-The native Markdown app for macOS.
+Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.
 
-A native reader and editor for files people and coding agents change together. No WebView. No account.
+A native Markdown reader and editor for files people and coding agents change together. Exact rendering and live agent-rewrite review keep the source in charge.
 
 ## The file is the starting point
 
@@ -37,7 +37,7 @@ Free. Open source. MIT. No account. Your Markdown stays on your Mac.
 
 - Repository: https://github.com/ezzy1630/Downright
 - App payload commit: 5abc2b68a356dc04f13ae647300efd0b86899342
-- App payload generated: 2026-08-16T03:40:40.389Z
+- App payload generated: 2026-08-16T05:04:29.596Z
 - Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
 
 Download: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg

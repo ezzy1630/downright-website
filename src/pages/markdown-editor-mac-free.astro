@@ -1,0 +1,30 @@
+---
+import AnswerPage from "../components/AnswerPage.astro";
+
+const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
+---
+
+<AnswerPage title="Free Markdown editors for macOS compared" trail="Free editors" updated={updated} markdownPath="/markdown-editor-mac-free.md">
+  <p>There is no single best Markdown editor for every Mac user. The useful question is what the app treats as primary: a file, a writing surface, a vault, or a publishing workflow.</p>
+
+  <div class="answer-table-wrap">
+    <table class="answer-table">
+      <caption>Short, practical comparison. Prices are USD where the publisher states one.</caption>
+      <thead>
+        <tr><th scope="col">Editor</th><th scope="col">Price</th><th scope="col">Desktop surface</th><th scope="col">Preview model</th><th scope="col">License / fit</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row"><a href="/">Downright</a></th><td>Free</td><td>Native AppKit</td><td>Document, Split, and Source; exact local files</td><td>MIT; agent-rewrite review</td></tr>
+        <tr><th scope="row"><a href="https://typora.io/" target="_blank" rel="noreferrer">Typora</a></th><td>$14.99 one-time</td><td>Web-backed desktop surface; its docs reference WebView inspection</td><td>Inline Live Preview</td><td>Proprietary; paid after trial</td></tr>
+        <tr><th scope="row"><a href="https://ia.net/writer/pricing" target="_blank" rel="noreferrer">iA Writer</a></th><td>$49.99 one-time for Mac</td><td>Mac app with WebKit Preview</td><td>Editor plus split or full Preview</td><td>Proprietary; focused writing</td></tr>
+        <tr><th scope="row"><a href="https://obsidian.md/pricing" target="_blank" rel="noreferrer">Obsidian</a></th><td>Free; Sync from $4/mo</td><td>Cross-platform desktop app; vault-first</td><td>In-place live preview</td><td>Proprietary; free for personal use</td></tr>
+        <tr><th scope="row"><a href="https://github.com/MacDownApp/macdown" target="_blank" rel="noreferrer">MacDown</a></th><td>Free</td><td>Native macOS project</td><td>Editor plus preview</td><td>MIT; original project is quiet</td></tr>
+        <tr><th scope="row"><a href="https://www.zettlr.com/" target="_blank" rel="noreferrer">Zettlr</a></th><td>Free, open source</td><td>Electron</td><td>In-place or WYSIWYG</td><td>GPLv3; research and publishing workbench</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Which one should you choose?</h2>
+  <p>Choose Downright when native macOS behavior, exact bytes, and review of agent edits matter. Choose Typora or iA Writer when a polished writing-first live preview is the priority. Choose Obsidian when your work is a linked vault. Choose Zettlr for academic workflows. Choose MacDown for a small, open-source Mac editor and a familiar split preview.</p>
+  <p class="answer-sources">Sources checked August 2026: <a href="https://store.typora.io/" target="_blank" rel="noreferrer">Typora pricing</a>, <a href="https://ia.net/writer/pricing" target="_blank" rel="noreferrer">iA Writer pricing</a>, <a href="https://obsidian.md/help/vault" target="_blank" rel="noreferrer">Obsidian vaults</a>, <a href="https://github.com/MacDownApp/macdown" target="_blank" rel="noreferrer">MacDown</a>, and <a href="https://www.zettlr.com/about" target="_blank" rel="noreferrer">Zettlr</a>.</p>
+</AnswerPage>

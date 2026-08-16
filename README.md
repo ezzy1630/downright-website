@@ -4,6 +4,10 @@ Standalone Astro site for Downright. The native app checkout at
 `/Volumes/Neural/Downright` remains the source of product claims; this project
 contains the marketing surface only.
 
+Downright is a free, open-source, native Markdown editor and viewer for macOS.
+It renders files exactly, reviews agent rewrites live, never modifies your
+bytes, uses no WebView, and is MIT licensed.
+
 ## The living document (plan v2.1)
 
 One Markdown file — the app's real `sample.md` in a shared client-side store —
@@ -55,6 +59,11 @@ main-branch release; it stays gated if the value is absent.
 - `/themes` — six semantic theme palettes
 - `/known-gaps` — current release and native-evidence gaps
 - `/index.md`, `/changelog.md`, `/themes.md`, `/llms.txt` — machine-readable content
+
+## Guide routes
+
+The answer pages are /markdown-viewer-mac, /markdown-editor-mac-free,
+/downright-vs-typora, /downright-vs-obsidian, and /faq.
 
 ## Known gaps
 

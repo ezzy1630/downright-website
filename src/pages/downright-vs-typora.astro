@@ -1,0 +1,29 @@
+---
+import AnswerPage from "../components/AnswerPage.astro";
+
+const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
+---
+
+<AnswerPage title="Downright vs Typora" trail="Downright vs Typora" updated={updated} markdownPath="/downright-vs-typora.md">
+  <p>Downright and Typora are both serious Markdown editors. They make different promises about the center of the experience.</p>
+
+  <h2>Choose Downright if…</h2>
+  <ul>
+    <li>You want a native macOS editor and viewer with no WebView.</li>
+    <li>You want Document, Split, and Source views over the same bytes.</li>
+    <li>You review Markdown written by coding agents and need word-level change marks before accepting a rewrite.</li>
+    <li>You want a free MIT-licensed tool with no account or cloud sync requirement.</li>
+  </ul>
+
+  <h2>Choose Typora if…</h2>
+  <ul>
+    <li>You prefer an inline Live Preview that hides Markdown markers as you type.</li>
+    <li>You want a cross-platform writing surface on macOS, Windows, and Linux.</li>
+    <li>You prefer a mature paid product with a one-time license and a short trial.</li>
+  </ul>
+
+  <h2>The practical difference</h2>
+  <p>Typora is a focused writing environment. Downright is a file-aware review surface. Downright keeps the source view close, treats external writes as a first-class event, and makes the unchanged file the authority. Neither choice is universally better. Choose the one that matches the work you actually do.</p>
+
+  <p class="answer-sources">Compare the publishers directly: <a href="https://store.typora.io/" target="_blank" rel="noreferrer">Typora pricing and FAQ</a> and <a href="/markdown-editor-mac-free">the full editor comparison</a>.</p>
+</AnswerPage>

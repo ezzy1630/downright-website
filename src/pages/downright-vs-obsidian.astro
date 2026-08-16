@@ -1,0 +1,29 @@
+---
+import AnswerPage from "../components/AnswerPage.astro";
+
+const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
+---
+
+<AnswerPage title="Downright vs Obsidian" trail="Downright vs Obsidian" updated={updated} markdownPath="/downright-vs-obsidian.md">
+  <p>Downright and Obsidian both work with Markdown files locally. Their mental models are different: Downright starts with the file you opened; Obsidian starts with a vault of linked notes.</p>
+
+  <h2>Choose Downright if…</h2>
+  <ul>
+    <li>Your source files already live in project folders, repositories, or agent workspaces.</li>
+    <li>You want an exact renderer, a close Source view, and no database-like vault layer.</li>
+    <li>You want external-write review when Claude Code or another coding agent changes an open file.</li>
+    <li>You want a free MIT-licensed native Mac app without an account.</li>
+  </ul>
+
+  <h2>Choose Obsidian if…</h2>
+  <ul>
+    <li>You want backlinks, graph navigation, plugins, and a knowledge-management workflow.</li>
+    <li>You are happy to organize work inside one or more vault folders.</li>
+    <li>You want optional Sync or Publish services across devices.</li>
+  </ul>
+
+  <h2>The practical difference</h2>
+  <p>Obsidian is a strong choice for a connected personal knowledge base. Downright is a strong choice for reading and reviewing ordinary Markdown where the file path, raw bytes, and external changes matter. Both can be local-first. They optimize for different kinds of continuity.</p>
+
+  <p class="answer-sources">Compare the publishers directly: <a href="https://obsidian.md/help/vault" target="_blank" rel="noreferrer">Obsidian vaults</a>, <a href="https://obsidian.md/pricing" target="_blank" rel="noreferrer">Obsidian pricing</a>, and <a href="/markdown-editor-mac-free">the full editor comparison</a>.</p>
+</AnswerPage>

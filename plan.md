@@ -425,7 +425,7 @@ Serif, enormous, on paper: **Free. Open source. MIT. No account.** The
 download CTA with its `pop()`; requirement + brew lines; the post-download
 toast (§1) carries the star ask. Footer: repo · changelog · themes ·
 privacy · licence · the no-dark-patterns line · "this page is also
-Markdown → `curl downright.app/index.md`" · llms.txt · sound/motion
+Markdown → `curl downright.cc/index.md`" · llms.txt · sound/motion
 toggles.
 
 ### The density rail (persistent)
@@ -553,7 +553,7 @@ drafts are floors. Ban list applies to every line.
 - **/changelog** — generated from payload, image per major entry, RSS,
   `.md` mirror.
 - **/privacy** — three true paragraphs (and the no-dark-patterns list).
-- **/404** — `downright.app/this-page:404` in mono with the app's red
++ **/404** — `downright.cc/this-page:404` in mono with the app's red
   dotted missing-path underline. One line, link home.
 
 ## 16. Brand identity workstream (approved: redesign)

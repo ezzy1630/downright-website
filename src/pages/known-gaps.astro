@@ -1,11 +1,11 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { facts } from "../data/site";
+import { copy, facts } from "../data/site";
 
 const hasPublicArtifact = Boolean(facts.downloadUrl);
 ---
 
-<BaseLayout title="Known gaps | Downright" description="The current release, evidence, and launch gaps for the Downright site." markdownPath="/known-gaps.md" imagePath="/og/index.svg">
+<BaseLayout title="Known gaps | Downright" description={copy.description} markdownPath="/known-gaps.md" imagePath="/og/index.svg">
   <main class="subpage legal-page known-gaps-page">
     <section class="subpage-hero">
       <p class="subpage-hero__path">Downright / Known gaps</p>
@@ -19,7 +19,7 @@ const hasPublicArtifact = Boolean(facts.downloadUrl);
         <li><strong>Artifact:</strong> <code>{facts.artifactName}</code> is available at {hasPublicArtifact ? <a href={facts.downloadUrl} target="_blank" rel="noreferrer">the public GitHub Release URL</a> : "no signed, notarized, stapled public URL is configured"}.</li>
         <li><strong>Homebrew:</strong> no cask is claimed until one exists and is verified.</li>
         <li><strong>Repository:</strong> <a href={facts.repository ?? "/"}>{facts.repository ?? "not configured"}</a> is the source remote; public address confirmation remains open.</li>
-        <li><strong>Brand:</strong> the current knot mark ships as the canonical mark; whether it evolves before launch remains open.</li>
+        <li><strong>Brand:</strong> the app-derived vector mark is canonical; the tactile native raster remains product artwork.</li>
       </ul>
 
       <h2>Native evidence</h2>

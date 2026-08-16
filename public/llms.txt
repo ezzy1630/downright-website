@@ -1,8 +1,8 @@
 # Downright
 
-> The native Markdown app for macOS.
+> Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.
 
-Downright is a local-first Markdown reader and editor. The native app renders Markdown without a WebView, keeps raw bytes exact, and integrates with Finder, Quick Look, and the down command.
+Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed. It integrates with Finder, Quick Look, and the down command while keeping the source file in charge.
 
 ## Routes
 
@@ -11,6 +11,11 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 - https://downright.cc/changelog - generated native-app changelog
 - https://downright.cc/privacy - privacy promises
 - https://downright.cc/known-gaps - current release and evidence gaps
+- https://downright.cc/markdown-viewer-mac - how to preview and read Markdown on a Mac
+- https://downright.cc/markdown-editor-mac-free - free Markdown editors compared
+- https://downright.cc/downright-vs-typora - Downright and Typora
+- https://downright.cc/downright-vs-obsidian - Downright and Obsidian
+- https://downright.cc/faq - product FAQ
 - https://downright.cc/index.md - Markdown version of the homepage
 - https://downright.cc/themes.md - Markdown theme data
 - https://downright.cc/changelog.md - Markdown changelog
@@ -20,7 +25,7 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 
 - Native source: /Volumes/Neural/Downright
 - App payload commit: 5abc2b68a356dc04f13ae647300efd0b86899342
-- Payload generated: 2026-08-16T03:40:40.389Z
+- Payload generated: 2026-08-16T05:04:29.596Z
 - Benchmark corpus: 120,825 characters / 4,885 lines
 - Benchmark date: 2026-08-06
 - Benchmark qualification: Baseline only. Not a cross-machine claim.

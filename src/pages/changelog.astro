@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { changelog, facts } from "../data/site";
+import { changelog, copy, facts } from "../data/site";
 
 type ChangelogEntry = (typeof changelog.entries)[number];
 type ChangelogGroup = { version: string; date: string; entries: ChangelogEntry[] };
@@ -12,7 +12,7 @@ for (const entry of changelog.entries) {
 }
 ---
 
-<BaseLayout title="Changelog | Downright" description="The Downright changelog, generated from the native app payload." markdownPath="/changelog.md" imagePath="/og/changelog.svg">
+<BaseLayout title="Changelog | Downright" description={copy.description} markdownPath="/changelog.md" imagePath="/og/changelog.svg">
   <main class="subpage changelog-page">
     <section class="subpage-hero">
       <p class="subpage-hero__path">Downright / Changelog</p>
@@ -29,7 +29,7 @@ for (const entry of changelog.entries) {
               <article class="changelog-entry">
                 <div><span>{entry.kind}</span><time>{entry.date}</time></div>
                 <h2>{entry.summary}</h2>
-                {groupIndex === 0 && entryIndex === 0 && <picture><source srcset="/assets/downright-renderer-showcase-768.avif 768w, /assets/downright-renderer-showcase-1470.avif 1470w" sizes="(max-width: 900px) 100vw, 70vw" type="image/avif" /><source srcset="/assets/downright-renderer-showcase-768.webp 768w, /assets/downright-renderer-showcase-1470.webp 1470w" sizes="(max-width: 900px) 100vw, 70vw" type="image/webp" /><img src="/assets/downright-renderer-showcase-1470.webp" alt="Downright rendering a Markdown document" width="1470" height="956" loading="lazy" /></picture>}
+                {groupIndex === 0 && entryIndex === 0 && <p class="changelog-entry__note">The current release is generated from the native app payload. The website publishes live document surfaces, not screenshots.</p>}
               </article>
             ))}
           </div>

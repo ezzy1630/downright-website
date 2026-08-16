@@ -3,9 +3,11 @@
 # SITE
 Made by Ezzy Rappeport.
 One agent build pass, one spring kernel, no frameworks.
+Site: https://downright.cc
+Description: Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.
 
 # THE APP
-Downright — native Markdown for macOS.
+Downright — free, open-source, native Markdown editor and viewer for macOS.
 Sources: github.com/ezzy1630/Downright
 The site's tokens, curves, and claims trace to the app's payload,
 generated from the repository itself.
