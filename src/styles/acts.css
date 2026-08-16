@@ -389,9 +389,8 @@
   transition: background-color var(--motion-hover) var(--ease-decelerate), color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), translate var(--motion-press-out) var(--ease-snap), box-shadow var(--motion-hover) var(--ease-decelerate);
 }
 
-.terminal-install__trigger::-webkit-details-marker { display: none; }
 .terminal-install__trigger:hover,
-.terminal-install[open] .terminal-install__trigger {
+.terminal-install[data-open="true"] .terminal-install__trigger {
   border-color: color-mix(in oklab, var(--accent) 72%, var(--rule));
   background: color-mix(in oklab, var(--accent) 7%, var(--surface));
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 10%, transparent);
@@ -430,7 +429,7 @@
   translate: 0 -2px;
   transition: color var(--motion-hover) var(--ease-decelerate), rotate var(--motion-standard) var(--ease-snap), translate var(--motion-standard) var(--ease-snap);
 }
-.terminal-install[open] .terminal-install__toggle {
+.terminal-install[data-open="true"] .terminal-install__toggle {
   color: var(--link);
   rotate: 225deg;
   translate: 0 2px;
@@ -449,6 +448,7 @@
   background: color-mix(in oklab, var(--surface) 96%, transparent);
   box-shadow: var(--window-shadow);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
   scale: 0.985;
   transform-origin: top right;
@@ -456,12 +456,21 @@
   transition: opacity var(--motion-standard) var(--ease-decelerate), scale var(--motion-standard) var(--ease-snap), translate var(--motion-standard) var(--ease-snap);
 }
 
-.terminal-install[open] .terminal-install__menu {
+.terminal-install[data-open="true"] .terminal-install__menu {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   scale: 1;
   translate: 0;
 }
+
+.terminal-install[data-menu-placement="above"] .terminal-install__menu {
+  top: auto;
+  bottom: calc(100% + 8px);
+  transform-origin: bottom right;
+  translate: 0 6px;
+}
+.terminal-install[data-menu-placement="above"][data-open="true"] .terminal-install__menu { translate: 0; }
 
 .terminal-install__menu-head {
   display: flex;
@@ -529,6 +538,7 @@
 
 @media (max-width: 480px) {
   .terminal-install__menu { left: 0; width: 100%; transform-origin: top left; }
+  .terminal-install[data-menu-placement="above"] .terminal-install__menu { transform-origin: bottom left; }
   .terminal-install__option { grid-template-columns: auto minmax(0, 1fr); }
   .terminal-install__copy { grid-column: 2; justify-self: start; margin-top: -3px; }
 }

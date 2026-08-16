@@ -193,6 +193,37 @@ function setupChrome(): void {
 function initTerminalInstall(): void {
   const timers = new WeakMap<HTMLButtonElement, number>();
 
+  for (const install of document.querySelectorAll<HTMLElement>(".terminal-install")) {
+    const trigger = install.querySelector<HTMLButtonElement>(".terminal-install__trigger");
+    const menu = install.querySelector<HTMLElement>(".terminal-install__menu");
+    if (!trigger || !menu) continue;
+
+    const setOpen = (open: boolean): void => {
+      if (open) {
+        const spaceBelow = window.innerHeight - trigger.getBoundingClientRect().bottom;
+        const menuHeight = menu.getBoundingClientRect().height;
+        install.dataset.menuPlacement = menuHeight + 16 > spaceBelow ? "above" : "below";
+        install.dataset.open = "true";
+        trigger.setAttribute("aria-expanded", "true");
+        menu.setAttribute("aria-hidden", "false");
+        menu.removeAttribute("inert");
+        return;
+      }
+
+      install.dataset.open = "false";
+      trigger.setAttribute("aria-expanded", "false");
+      menu.setAttribute("aria-hidden", "true");
+      menu.setAttribute("inert", "");
+    };
+
+    trigger.addEventListener("click", () => setOpen(install.dataset.open !== "true"));
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || install.dataset.open !== "true") return;
+      setOpen(false);
+      trigger.focus();
+    });
+  }
+
   for (const option of document.querySelectorAll<HTMLButtonElement>("[data-install-command]")) {
     const label = option.querySelector<HTMLElement>("[data-install-label]");
     if (!label) continue;

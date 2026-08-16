@@ -37,13 +37,13 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <p>{copy.hero.body}</p>
         <div class="hero__actions">
           <DownloadButton />
-          <details class="terminal-install">
-            <summary class="terminal-install__trigger" data-magnet>
+          <div class="terminal-install" data-open="false">
+            <button type="button" class="terminal-install__trigger" data-magnet aria-controls="terminal-install-menu" aria-expanded="false">
               <span class="terminal-install__prompt" aria-hidden="true">$</span>
               <span class="terminal-install__label">Install via Terminal</span>
               <span class="terminal-install__toggle" aria-hidden="true"></span>
-            </summary>
-            <div class="terminal-install__menu" role="group" aria-label="Terminal installation commands">
+            </button>
+            <div id="terminal-install-menu" class="terminal-install__menu" role="group" aria-label="Terminal installation commands" aria-hidden="true" inert>
               <div class="terminal-install__menu-head" aria-hidden="true">
                 <span>Choose an install path</span>
                 <span>Click a command to copy</span>
@@ -64,7 +64,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
                 <span class="terminal-install__copy" data-install-label>Copy</span>
               </button>
             </div>
-          </details>
+          </div>
         </div>
         <p class="hero__micro">{copy.hero.micro}</p>
       </div>
