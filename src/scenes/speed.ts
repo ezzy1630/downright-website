@@ -8,6 +8,7 @@
 import { reducedMotion } from "../kernel/switchboard";
 import { medianParseMs } from "../editor/stats";
 import { benchmarks } from "../data/site";
+import { MOTION } from "../kernel/springs";
 
 export function initSpeed(): void {
   const section = document.querySelector<HTMLElement>("[data-speed-section]");
@@ -27,7 +28,7 @@ export function initSpeed(): void {
       bar.style.width = reducedMotion() ? `${width}%` : "0%";
       if (!reducedMotion()) {
         requestAnimationFrame(() => {
-          bar.style.transition = "width 0.32s cubic-bezier(0.3, 0.3, 0.2, 1)";
+          bar.style.transition = `width ${MOTION.durations.deliberate}s ${MOTION.curves.structural}`;
           bar.style.width = `${width}%`;
         });
       }
