@@ -255,5 +255,11 @@ export function initPalette(): void {
       event.preventDefault();
       filtered[cursor]?.run(() => dialog.close());
     }
+    if (event.key === "Escape") {
+      // Explicit, not just the native <dialog> close, so Esc stays reliable
+      // when focus sits in the filter input.
+      event.preventDefault();
+      dialog.close();
+    }
   });
 }

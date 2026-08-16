@@ -53,7 +53,8 @@ const frameworkHits = ["gsap", "lenis", "three.js", "framer"].filter((name) =>
 );
 
 // Funnel shape: exactly four download CTAs, and the absence list ships.
-const downloadCount = (html.match(/data-download/g) ?? []).length;
+// Match the bare attribute, not its metadata (`data-download-url`, etc.).
+const downloadCount = (html.match(/data-download(?![\w-])/g) ?? []).length;
 const absenceList = html.includes("No cookies, no analytics");
 const markdownMirror = files.some((file) => file.endsWith("index.md"));
 const humansTxt = files.some((file) => file.endsWith("humans.txt"));

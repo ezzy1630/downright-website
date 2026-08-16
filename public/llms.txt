@@ -19,8 +19,8 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 ## Source and evidence
 
 - Native source: /Volumes/Neural/Downright
-- App payload commit: 93bc7fe5f4ee9c0377d09c233ed1823b66bcc7da
-- Payload generated: 2026-08-15T21:26:44.470Z
+- App payload commit: 5abc2b68a356dc04f13ae647300efd0b86899342
+- Payload generated: 2026-08-16T03:40:40.389Z
 - Benchmark corpus: 120,825 characters / 4,885 lines
 - Benchmark date: 2026-08-06
 - Benchmark qualification: Baseline only. Not a cross-machine claim.
@@ -32,6 +32,6 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 - License: MIT
 - Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
 - Download artifact: Downright.dmg
-- Download URL: not configured until a signed and notarized artifact is verified
+- Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
 
 The site does not claim a Homebrew cask or confirmed domain beyond the current https://downright.app deployment assumption.

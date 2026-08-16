@@ -17,6 +17,7 @@
     "test:editor": "node scripts/test-editor.mjs",
     "test:theme": "node scripts/test-theme.mjs",
     "test:acts": "node scripts/test-acts.mjs",
+    "test:a11y": "node scripts/test-a11y.mjs",
     "audit:sweep": "node scripts/audit-sweep.mjs"
   },
   "dependencies": {

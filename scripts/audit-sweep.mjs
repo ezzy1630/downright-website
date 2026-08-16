@@ -388,6 +388,19 @@ async function sweepViewport(cdp, vp, shotDir) {
     await captureShot(cdp, shotDir, `${prefix}-rest-${rest.id}`);
   }
 
+  // Three evenly spaced frames per handoff seam, so the human can eyeball
+  // the hard cuts (the one crossfade-like event allowed is the window morph).
+  if (!QUICK) {
+    for (const seam of seams) {
+      const band = seam.frac * vh;
+      for (const [label, offset] of [["pre", -band * 0.4], ["mid", 0], ["post", band * 0.4]]) {
+        await cdp.evaluate(`window.scrollTo(0, ${Math.max(0, Math.round(seam.t + offset))})`);
+        await sleep(220);
+        await captureShot(cdp, shotDir, `${prefix}-seam-${seam.id}-${label}`);
+      }
+    }
+  }
+
   if (vp.film) {
     const banned = ["speed", "architecture", "reach", "themes"];
     const stray = steps.find((s) =>
