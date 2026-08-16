@@ -267,18 +267,6 @@ ol {
   color: var(--cta-ink);
 }
 
-/* "free · direct DMG" is the promise, not part of the label: a quiet suffix
-   behind a hairline so the two never read as one run-on string. */
-.download-button__micro {
-  padding-left: 10px;
-  border-left: 1px solid color-mix(in oklab, var(--cta-ink) 26%, transparent);
-  color: color-mix(in oklab, var(--cta-ink) 74%, var(--cta-fill));
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-}
-
 .button--quiet {
   border-color: transparent;
   color: var(--text-secondary);
@@ -1133,42 +1121,6 @@ ol {
 .close-section .button { margin-top: 30px; }
 .close-section small { display: block; margin-top: 15px; color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
 
-/* The close is a statement, not a whisper: four facts in a single row so the
-   act still reads as a composed frame instead of a centred caption. */
-.close-facts {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  margin: 52px 0 0;
-  list-style: none;
-  text-align: left;
-}
-
-.close-facts li {
-  padding: 28px 26px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-panel);
-  background: var(--surface);
-}
-
-.close-facts strong {
-  display: block;
-  color: var(--heading);
-  font-family: var(--font-display);
-  font-size: 40px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-.close-facts span {
-  display: block;
-  margin-top: 8px;
-  color: var(--text-faint);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  line-height: 1.5;
-}
-
 /* The sponsor ask (§8.2): a quiet serif line, same scale as the body, no
    button, no badge — an invitation, never a gate. */
 .close-sponsor {
@@ -1181,10 +1133,6 @@ ol {
   text-wrap: balance;
 }
 .close-sponsor a { color: var(--link); }
-
-@media (max-width: 680px) {
-  .close-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 
 .site-footer { width: min(100% - 96px, var(--content-max)); margin: 0 auto; padding: 28px 0 34px; border-top: 1px solid var(--rule); color: var(--text-secondary); font-size: 12px; }
 .site-footer__top,

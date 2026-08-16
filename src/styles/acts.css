@@ -1397,11 +1397,10 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   display: none;
 }
 
-/* The gap-wall ("there is more of it every day") and the close-facts grid are
+/* The gap-wall ("there is more of it every day") and the close sponsor are
    desktop furniture. On the film the gap is the thumb scrub and the close is
    the handoff — these two would only crowd the beats below them. */
 [data-film="true"] .gap-wall,
-[data-film="true"] .close-facts,
 [data-film="true"] .close-sponsor {
   display: none;
 }
@@ -1718,7 +1717,8 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   padding: 0 16px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-button);
-  color: var(--text-secondary);
+  background: var(--surface);
+  color: var(--heading);
   cursor: pointer;
   font-size: 13px;
   text-decoration: none;
@@ -1787,7 +1787,6 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   .themes-section { padding-top: 9svh; padding-bottom: 8svh; }
   .theme-showroom { margin-top: 30px; }
 
-  .close-facts { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1970,7 +1969,7 @@ html[data-film="true"] .hero__window { width: 100%; margin: 0; }
 html[data-film="true"] .hero__window .app-window { height: 38svh; min-height: 300px; }
 html[data-film="true"] .hero__annotation { display: none; }
 html[data-film="true"] .film-invite-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-html[data-film="true"] .film-invite { min-height: 24px; color: var(--text-faint); font: 12px var(--font-mono); }
+html[data-film="true"] .film-invite { flex: 0 0 100%; min-height: 24px; color: var(--text-faint); font: 12px var(--font-mono); }
 html[data-film="true"] .film-invite::after { animation: none; }
 html[data-film="true"] .film-chip { min-height: 44px; }
 

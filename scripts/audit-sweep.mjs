@@ -502,9 +502,8 @@ async function sweepFunnel(cdp) {
   await cdp.send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   await goto(cdp, "http://localhost:4321/?film");
   const film = await sponsorCensus(cdp);
-  // On the film the serif close line is desktop furniture (hidden, like the
-  // close-facts grid); the close beat's sponsor ask is the tertiary handoff
-  // action beside the GitHub star.
+  // On the film the serif close line is desktop furniture; the close beat's
+  // sponsor ask is the tertiary handoff action beside the GitHub star.
   check("G · film sponsor placement", film.total === 2 && film.places.includes("film") && film.places.includes("footer") && !film.places.includes("close") && !film.places.includes("header") && !film.places.includes("panel"), JSON.stringify(film), prefix);
 }
 

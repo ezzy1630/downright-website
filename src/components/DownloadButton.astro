@@ -1,9 +1,7 @@
 ---
 /**
- * The download CTA. Microcopy states the promise: platform, price — the size
- * joins once the signed DMG is verified. The button carries the site's one
- * pop() on press; the click starts the DMG immediately and the glass toast
- * carries the GitHub ask.
+ * The download CTA. The visible label stays singular; the surrounding page
+ * owns the quieter platform and licensing details.
  */
 import { facts } from "../data/site";
 
@@ -24,5 +22,4 @@ const downloadUrl = import.meta.env.PUBLIC_DOWNLOAD_URL?.trim() || facts.downloa
   data-magnet
   aria-label={`${label} — ${facts.artifactName}, free, MIT licence`}>
   <span>{label}</span>
-  <span class="download-button__micro" aria-hidden="true">free{downloadUrl ? " · direct DMG" : ""}</span>
 </button>
