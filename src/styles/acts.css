@@ -811,6 +811,124 @@
 .agent-story p { max-width: 62ch; color: var(--text-secondary); font-size: 14px; }
 .agent-story p strong { color: var(--heading); }
 
+/* ── Dark bands: budgets + architecture keep their quieter ink ───────── */
+.dark-band {
+  background: var(--band-bg);
+  color: var(--band-text);
+}
+
+.dark-band .dark-band__inner {
+  width: min(calc(100% - 96px), var(--content-max));
+  margin: 0 auto;
+  padding: 144px 0;
+}
+
+.dark-band .section-intro h2,
+.dark-band .section-intro > p,
+.dark-band .benchmark-notes,
+.dark-band .architecture-list,
+.dark-band .architecture-quote p {
+  color: var(--band-heading);
+}
+
+.dark-band .section-intro > p,
+.dark-band .benchmark-notes,
+.dark-band .architecture-list {
+  color: var(--band-text-secondary);
+}
+
+.benchmark-table-wrap {
+  margin-top: 54px;
+  overflow-x: auto;
+}
+
+.benchmark-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.benchmark-table caption {
+  margin-bottom: 13px;
+  color: var(--band-text-secondary);
+  text-align: left;
+}
+
+.benchmark-table th,
+.benchmark-table td {
+  padding: 13px 12px;
+  border-top: 1px solid var(--band-rule);
+  text-align: left;
+}
+
+.benchmark-table th {
+  color: var(--band-heading);
+  font-weight: 500;
+}
+
+.benchmark-table td {
+  color: var(--band-text-secondary);
+}
+
+.benchmark-table td:last-child {
+  color: var(--band-heading);
+}
+
+.benchmark-notes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 19px;
+  font-size: 11px;
+}
+
+.benchmark-notes strong {
+  color: var(--band-heading);
+  font-weight: 600;
+}
+
+.architecture-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(40px, 10vw, 160px);
+  align-items: start;
+}
+
+.architecture-quote p {
+  max-width: 10ch;
+  font-family: var(--font-display);
+  font-size: clamp(42px, 5vw, 76px);
+  letter-spacing: -0.022em;
+  line-height: 0.98;
+}
+
+.architecture-quote a {
+  display: inline-flex;
+  gap: 8px;
+  margin-top: 30px;
+  color: var(--band-heading);
+  font-size: 13px;
+}
+
+.architecture-list {
+  list-style: none;
+}
+
+.architecture-list li {
+  padding: 16px 0;
+  border-top: 1px solid var(--band-rule);
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.2vw, 30px);
+  line-height: 1.16;
+}
+
+.reach-section {
+  padding-bottom: 116px;
+}
+
 /* ── Speed: bars + session ────────────────────────────────────────────── */
 
 .benchmark-bar-cell { width: 220px; max-width: 26vw; }
@@ -925,55 +1043,81 @@
 
 [data-reduced-transparency="true"] .quick-look__panel { background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; }
 
+.terminal-artifact {
+  overflow: hidden;
+  margin-top: 20px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-window);
+  background: var(--code-bg);
+}
+
+.terminal-artifact__bar {
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.terminal-artifact pre {
+  overflow: auto;
+  padding: 26px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.85;
+}
+
+.terminal-prompt { color: var(--link); }
+.terminal-output { color: var(--text-faint); }
+.reach-note { max-width: 60ch; }
+
 /* ── Themes showroom ──────────────────────────────────────────────────── */
 
 .theme-option__dot { background: radial-gradient(circle at 30% 30%, var(--dot-ink, var(--accent)) 0 22%, var(--dot, var(--bg)) 24%); }
 
-/* ── Density rail (canvas) ────────────────────────────────────────────── */
+/* ── Density rail (native document map) ───────────────────────────────── */
 
-/* The act number sits above the ticks and must clear the right viewport edge
-   — it was clipping there. The rail is inset far enough for the centred
-   number plus the HUD that opens to its left. */
-.density-rail { position: fixed; z-index: 30; top: 50%; right: 28px; width: 44px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
+/* The app's map is a small centred stack, not a second scrollbar. Keep the
+   lane wide enough for a calm hit target while drawing only the short marks. */
+.density-rail { position: fixed; z-index: 30; top: 50%; right: auto; left: 12px; width: 72px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
 .density-rail canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-/* The act number rides above the dot column — the reader's place in the
-   sequence, stated once, in the same mono voice as the eyebrows. */
-.density-rail__number {
-  position: absolute;
-  top: 34px;
-  right: 0;
-  left: 0;
-  width: 100%;
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
-  text-align: center;
-}
 .density-rail__nav { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 
 .density-rail__hud {
   position: absolute;
-  right: 40px;
+  left: 68px;
   top: var(--hud-y, 50%);
   display: grid;
-  gap: 1px;
-  min-width: 170px;
-  padding: 9px 12px;
-  border-radius: var(--radius-panel);
+  gap: 4px;
+  width: min(300px, calc(100vw - 100px));
+  padding: 12px 14px;
+  border-radius: var(--radius-window);
   border: 1px solid var(--rule);
+  background: var(--surface);
+  box-shadow: var(--window-shadow);
   pointer-events: none;
   opacity: 0;
-  translate: 6px 0;
+  translate: -6px -50%;
   transition: opacity var(--motion-hover) var(--ease-decelerate), translate var(--motion-hover) var(--ease-decelerate);
 }
 
-.density-rail__hud.is-open { opacity: 1; translate: 0 0; }
+.density-rail__hud::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 8px;
+  height: 1px;
+  background: var(--rule);
+}
+
+.density-rail__hud.is-open { opacity: 1; translate: 0 -50%; }
 .density-rail__hud strong { color: var(--heading); font-size: 12px; font-weight: 600; }
-.density-rail__hud span { color: var(--text-faint); font-family: var(--font-mono); font-size: 9px; opacity: 0; transition: opacity var(--motion-stagger) var(--ease-decelerate); }
-.density-rail__hud.is-detail span { opacity: 1; }
+.density-rail__hud span { color: var(--text-secondary); font-family: var(--font-display); font-size: 13px; line-height: 1.35; opacity: 0; transition: opacity var(--motion-stagger) var(--ease-decelerate); }
+.density-rail__hud small { color: var(--text-faint); font-family: var(--font-mono); font-size: 9px; opacity: 0; transition: opacity var(--motion-stagger) var(--ease-decelerate); }
+.density-rail__hud.is-detail span,
+.density-rail__hud.is-detail small { opacity: 1; }
 
 /* ── ⌘K palette + shortcut sheet ──────────────────────────────────────── */
 
@@ -1285,15 +1429,20 @@
 .film-zoom__doc {
   height: 100%;
   overflow: hidden;
+  padding-bottom: 76px;
   transform-origin: 50% 40%;
 }
 .film-zoom__doc .document-content { padding-top: 30px; }
 .film-zoom__levels {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   display: flex;
   gap: 6px;
+  z-index: 2;
+  padding: 12px;
+  background: var(--surface);
 }
 .film-zoom__levels button {
   min-width: 44px;
@@ -1500,6 +1649,16 @@
   .app-window__hint { display: none; }
   .app-window__bar { gap: 8px; padding: 0 10px; }
   .app-window__segmented button { min-width: 0; padding: 5px 9px; }
+  .app-window__segmented button {
+    font-size: 0;
+    line-height: 1;
+  }
+  .app-window__segmented button::after {
+    font-size: 10px;
+  }
+  .app-window__segmented button[data-view-button="document"]::after { content: "Doc"; }
+  .app-window__segmented button[data-view-button="split"]::after { content: "Split"; }
+  .app-window__segmented button[data-view-button="source"]::after { content: "Src"; }
   .app-window__file small { display: none; }
   .hero__caption { text-align: left; }
   .gap-wall__scroller { height: 280px; }

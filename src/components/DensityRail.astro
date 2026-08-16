@@ -7,12 +7,11 @@
 import { sections } from "../data/site";
 ---
 
-<aside class="density-rail" data-density-rail aria-label="Acts">
-  <span class="density-rail__number" data-rail-number aria-hidden="true">01</span>
-  <nav class="density-rail__nav" aria-label="Jump to act">
+<aside class="density-rail" data-density-rail aria-label="Document map">
+  <nav class="density-rail__nav" aria-label="Jump to section">
     {sections.map((section) => (
       <a href={`#${section.id}`} data-rail-link={section.id}>{section.label}</a>
     ))}
   </nav>
-  <div class="density-rail__hud" data-rail-hud aria-hidden="true"><strong></strong><span></span></div>
+  <div class="density-rail__hud" data-rail-hud aria-hidden="true"><strong></strong><span></span><small></small></div>
 </aside>

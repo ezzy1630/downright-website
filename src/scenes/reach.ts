@@ -72,6 +72,7 @@ function initVerlet(): void {
     element.tabIndex = 0;
     element.setAttribute("role", "button");
     element.setAttribute("aria-label", `${name} — press Space to Quick Look`);
+    element.setAttribute("aria-expanded", "false");
     element.dataset.fileCard = name;
     element.innerHTML = `<span class="file-card__kind" aria-hidden="true">MD</span><span class="file-card__name">${name}</span>`;
     surface.append(element);
@@ -234,23 +235,41 @@ function initVerlet(): void {
     return loader ? loader() : "";
   }
 
-  function openQuickLook(card: FileCard): void {
+  let openCard: FileCard | null = null;
+  let quickLookOrigin: HTMLElement | null = null;
+
+  function closeQuickLook(): void {
+    if (openCard) openCard.element.setAttribute("aria-expanded", "false");
+    openCard = null;
+    quickLook?.classList.remove("is-open");
+    quickLook?.setAttribute("hidden", "");
+    quickLookOrigin?.focus({ preventScroll: true });
+    quickLookOrigin = null;
+  }
+
+  function openQuickLook(card: FileCard, origin: HTMLElement = card.element): void {
     if (!quickLook) return;
     const body = quickLook.querySelector<HTMLElement>("[data-quick-look-body]");
     if (!body) return;
+    openCard?.element.setAttribute("aria-expanded", "false");
     body.innerHTML = renderSampleMarkdown(sourceFor(card));
     quickLook.querySelector<HTMLElement>("[data-quick-look-title]")!.textContent = card.name;
+    quickLook.removeAttribute("hidden");
     quickLook.classList.add("is-open");
+    card.element.setAttribute("aria-expanded", "true");
+    openCard = card;
+    quickLookOrigin = origin;
     quickLook.querySelector<HTMLButtonElement>("[data-quick-look-close]")?.focus();
     sound.whoosh();
   }
+
   quickLook?.addEventListener("click", (event) => {
     if ((event.target as HTMLElement).closest("[data-quick-look-close]") || event.target === quickLook) {
-      quickLook.classList.remove("is-open");
+      closeQuickLook();
     }
   });
   window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") quickLook?.classList.remove("is-open");
+    if (event.key === "Escape" && quickLook?.classList.contains("is-open")) closeQuickLook();
   });
 }
 

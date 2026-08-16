@@ -1,10 +1,9 @@
 /**
- * The density rail: a canvas of ticks, one per act, whose fill tracks scroll
- * and whose ticks chase the pointer through springs — chase radius 36px,
- * breathe 1.08, neighbor dim 0.82, jump kick 480pt/s, the app's constants.
- * Hover raises a glass outline HUD (title first, detail one stagger later).
- * Drag scrubs and settles under the hand; arrows + Enter for keyboard. Below
- * 900px it stands down for the mobile film's own progress system.
+ * The density rail: a native-style stack of quiet horizontal marks. It is a
+ * document map, not a second scrollbar: the stack stays centred, the current
+ * section is one brighter mark, and proximity makes neighbouring marks breathe
+ * and gently move around the pointer. Hover raises the section preview; click
+ * jumps and drag scrubs. Below 900px it stands down for the mobile film.
  */
 
 import { MOTION, SpringScalar } from "../kernel/springs";
@@ -14,18 +13,23 @@ import { springScrollTo } from "../motion/scroll";
 const CHASE_RADIUS = 36;
 const BREATHE = 1.08;
 const NEIGHBOR_DIM = 0.82;
+const NEIGHBOR_LIFT = 0.92;
+const NEIGHBOR_LIFT_RADIUS = 2;
 const JUMP_KICK = 480;
-const TOP_INSET = 96;
-const BOTTOM_INSET = 96;
+const TRACK_INSET = 28;
+const MAX_STACK_FRACTION = 0.5;
+const MIN_PITCH = 7;
+const MAX_PITCH = 11;
+const MAGNETIC_PULL = 1.5;
 
 interface Tick {
   id: string;
   label: string;
   detail: string;
+  preview: string;
   element: HTMLElement;
   y: number;
-  /** 0–1: how much document this act carries. Drives the tick's length. */
-  weight: number;
+  offset: SpringScalar;
   scale: SpringScalar;
   alpha: SpringScalar;
   changed: boolean;
@@ -50,6 +54,8 @@ export function initRail(): RailController | null {
   let width = 0;
   let height = 0;
   let dpr = 1;
+  let stackTop = 0;
+  let stackBottom = 0;
 
   const measure = (): void => {
     dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -60,18 +66,20 @@ export function initRail(): RailController | null {
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    for (const tick of ticks) tick.y = TOP_INSET + (tick.element.offsetTop / maxSectionTop()) * (height - TOP_INSET - BOTTOM_INSET);
-    // Weight is the act's own scroll length: the rail reads as a density map
-    // of the page, which is what the app's sidebar does with a document.
-    let heaviest = 1;
-    for (const tick of ticks) heaviest = Math.max(heaviest, tick.element.offsetHeight);
-    for (const tick of ticks) tick.weight = tick.element.offsetHeight / heaviest;
-  };
-
-  const maxSectionTop = (): number => {
-    let max = 1;
-    for (const tick of ticks) max = Math.max(max, tick.element.offsetTop);
-    return max;
+    const trackTop = Math.min(TRACK_INSET, Math.max(0, height / 2));
+    const trackBottom = Math.max(trackTop, height - TRACK_INSET);
+    const trackHeight = Math.max(1, trackBottom - trackTop);
+    const count = ticks.length;
+    const pitch = count > 1
+      ? Math.min(MAX_PITCH, Math.max(MIN_PITCH, (trackHeight * MAX_STACK_FRACTION) / (count - 1)))
+      : 0;
+    const span = pitch * Math.max(0, count - 1);
+    stackTop = trackTop + Math.max(0, (trackHeight - span) / 2);
+    stackBottom = stackTop + span;
+    ticks.forEach((tick, index) => {
+      tick.y = stackTop + (count > 1 ? (span * index) / (count - 1) : 0);
+      tick.offset.snap(0);
+    });
   };
 
   for (const section of document.querySelectorAll<HTMLElement>("[data-rail-section]")) {
@@ -79,9 +87,12 @@ export function initRail(): RailController | null {
       id: section.id,
       label: section.dataset.sectionLabel ?? section.id,
       detail: section.dataset.sectionDetail ?? "",
+      preview: section.querySelector<HTMLElement>(".section-intro > p, .hero__copy > p, .close-section__inner > p, p:not(.eyebrow)")?.textContent?.trim().replace(/\s+/g, " ")
+        ?? section.dataset.sectionDetail
+        ?? "",
       element: section,
       y: 0,
-      weight: 0,
+      offset: new SpringScalar(0, MOTION.durations.quick),
       scale: new SpringScalar(1, MOTION.durations.quick),
       alpha: new SpringScalar(1, MOTION.durations.quick),
       changed: false,
@@ -97,8 +108,9 @@ export function initRail(): RailController | null {
   const nearestTick = (): number => {
     let best = 0;
     let bestDistance = Infinity;
+    const headY = stackTop + currentProgress() * (stackBottom - stackTop);
     ticks.forEach((tick, index) => {
-      const distance = Math.abs(tick.y - (TOP_INSET + currentProgress() * (height - TOP_INSET - BOTTOM_INSET)));
+      const distance = Math.abs(tick.y + tick.offset.value - headY);
       if (distance < bestDistance) {
         bestDistance = distance;
         best = index;
@@ -110,15 +122,6 @@ export function initRail(): RailController | null {
   let lastProgress = -1;
   let active = true;
 
-  // The act number: the reader's place in the sequence, stated once.
-  const numberEl = rail.querySelector<HTMLElement>("[data-rail-number]");
-  let lastNumber = -1;
-  const paintNumber = (index: number): void => {
-    if (!numberEl || index === lastNumber) return;
-    lastNumber = index;
-    numberEl.textContent = String(index + 1).padStart(2, "0");
-  };
-
   const draw = (): void => {
     const styles = getComputedStyle(document.documentElement);
     const ink = styles.getPropertyValue("--rail-tick").trim() || styles.getPropertyValue("--secondary").trim() || "#888";
@@ -126,43 +129,21 @@ export function initRail(): RailController | null {
     const accent = styles.getPropertyValue("--accent").trim() || "#307afe";
     ctx.clearRect(0, 0, width, height);
 
-    const travel = height - TOP_INSET - BOTTOM_INSET;
-    const progress = currentProgress();
-    const headY = TOP_INSET + progress * travel;
-
-    // Fill line: tracks scroll exactly, no spring — it is the page's motion.
-    ctx.strokeStyle = current;
-    ctx.globalAlpha = 0.85;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(width / 2, TOP_INSET);
-    ctx.lineTo(width / 2, headY);
-    ctx.stroke();
-
-    ctx.strokeStyle = ink;
-    ctx.globalAlpha = 0.28;
-    ctx.beginPath();
-    ctx.moveTo(width / 2, headY);
-    ctx.lineTo(width / 2, height - BOTTOM_INSET);
-    ctx.stroke();
-
     const nearest = nearestTick();
-    paintNumber(nearest);
     const centre = width / 2;
     ticks.forEach((tick, index) => {
       const scale = tick.scale.value;
-      const alpha = tick.alpha.value * (index === nearest ? 1 : 0.72);
-      const passed = index <= nearest;
-      // Ticks, not dots: the length is the act's weight, so the rail reads as
-      // a density map of the page rather than a row of identical pips.
-      const length = (7 + tick.weight * 11) * scale * (index === nearest ? 1.18 : 1);
+      const isCurrent = index === nearest;
+      const alpha = tick.alpha.value * (isCurrent ? 1 : 0.72);
+      const length = (isCurrent ? 28 : 22) * scale;
+      const y = tick.y + tick.offset.value;
       ctx.globalAlpha = Math.min(1, alpha);
-      ctx.strokeStyle = passed ? current : ink;
-      ctx.lineWidth = index === nearest ? 2 : 1.5;
+      ctx.strokeStyle = isCurrent ? current : ink;
+      ctx.lineWidth = isCurrent ? 2.5 : 2;
       ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(centre - length / 2, tick.y);
-      ctx.lineTo(centre + length / 2, tick.y);
+      ctx.moveTo(centre - length / 2, y);
+      ctx.lineTo(centre + length / 2, y);
       ctx.stroke();
 
       if (tick.changed) {
@@ -172,8 +153,8 @@ export function initRail(): RailController | null {
         ctx.strokeStyle = accent;
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(centre + length / 2 + 4, tick.y);
-        ctx.lineTo(centre + length / 2 + 9, tick.y);
+        ctx.moveTo(centre + length / 2 + 4, y);
+        ctx.lineTo(centre + length / 2 + 9, y);
         ctx.stroke();
       }
     });
@@ -184,6 +165,7 @@ export function initRail(): RailController | null {
     if (!active) return false;
     let moving = false;
     for (const tick of ticks) {
+      if (tick.offset.advance(dt)) moving = true;
       if (tick.scale.advance(dt)) moving = true;
       if (tick.alpha.advance(dt)) moving = true;
     }
@@ -208,14 +190,21 @@ export function initRail(): RailController | null {
       releaseTicks();
       return;
     }
+    const distances = ticks.map((tick) => Math.hypot(x - width / 2, pointerY - tick.y));
+    const closestIndex = distances.reduce((best, distance, index) => distance < distances[best] ? index : best, 0);
+    const hoverIndex = distances[closestIndex] < CHASE_RADIUS ? closestIndex : -1;
     ticks.forEach((tick, index) => {
-      const distance = Math.hypot(x - width / 2, pointerY - tick.y);
+      const distance = distances[index];
       const chase = distance < CHASE_RADIUS;
       tick.scale.setTarget(chase ? BREATHE : 1);
-      tick.alpha.setTarget(chase ? 1 : NEIGHBOR_DIM);
-      if (chase && !dragScrubbing && hudIndex !== index) showHud(index);
-      if (!chase && hudIndex === index) hideHud();
+      const neighbor = hoverIndex >= 0 && Math.abs(index - hoverIndex) <= NEIGHBOR_LIFT_RADIUS;
+      tick.alpha.setTarget(index === hoverIndex ? 1 : neighbor ? NEIGHBOR_LIFT : NEIGHBOR_DIM);
+      const influence = chase ? Math.max(0, 1 - distance / CHASE_RADIUS) : 0;
+      const magnetic = Math.max(-MAGNETIC_PULL, Math.min(MAGNETIC_PULL, (pointerY - tick.y) * influence * 0.08));
+      tick.offset.setTarget(magnetic);
+      if (index === hoverIndex && !dragScrubbing && hudIndex !== index) showHud(index);
     });
+    if (hoverIndex < 0) hideHud();
     active = true;
     ticker.add(job);
   };
@@ -224,6 +213,7 @@ export function initRail(): RailController | null {
     for (const tick of ticks) {
       tick.scale.setTarget(1);
       tick.alpha.setTarget(1);
+      tick.offset.setTarget(0);
     }
   };
 
@@ -231,8 +221,14 @@ export function initRail(): RailController | null {
   const showHud = (index: number): void => {
     hudIndex = index;
     const tick = ticks[index];
-    hud.innerHTML = `<strong>${tick.label}</strong><span>${tick.detail}</span>`;
-    hud.style.setProperty("--hud-y", `${tick.y}px`);
+    const title = document.createElement("strong");
+    title.textContent = tick.label;
+    const snippet = document.createElement("span");
+    snippet.textContent = tick.preview;
+    const context = document.createElement("small");
+    context.textContent = tick.detail;
+    hud.replaceChildren(title, snippet, context);
+    hud.style.setProperty("--hud-y", `${tick.y + tick.offset.value}px`);
     hud.classList.add("is-open");
     hud.classList.remove("is-detail");
     window.clearTimeout(hudStagger);
@@ -267,7 +263,7 @@ export function initRail(): RailController | null {
     let best = 0;
     let bestDistance = Infinity;
     ticks.forEach((tick, index) => {
-      const distance = Math.abs(tick.y - y);
+      const distance = Math.abs(tick.y + tick.offset.value - y);
       if (distance < bestDistance) {
         bestDistance = distance;
         best = index;
@@ -276,7 +272,7 @@ export function initRail(): RailController | null {
     jumpTo(best);
   });
 
-  // Drag scrubs the page; the fill settles under the hand.
+  // Drag scrubs the page; the compact stack settles under the hand.
   rail.addEventListener("pointerdown", (event) => {
     dragScrubbing = true;
     rail.setPointerCapture(event.pointerId);
@@ -295,7 +291,7 @@ export function initRail(): RailController | null {
   const scrubTo = (clientY: number): void => {
     const rect = rail.getBoundingClientRect();
     const y = clientY - rect.top;
-    const progress = Math.min(1, Math.max(0, (y - TOP_INSET) / (height - TOP_INSET - BOTTOM_INSET)));
+    const progress = Math.min(1, Math.max(0, (y - stackTop) / Math.max(1, stackBottom - stackTop)));
     const max = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo(0, progress * max);
   };

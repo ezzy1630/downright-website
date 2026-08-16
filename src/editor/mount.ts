@@ -51,6 +51,11 @@ function editorExtensions(
       },
     ]),
     livedown(),
+    // Keep the source surface inside the travelling window at phone widths.
+    // CodeMirror's wrapping extension updates line measurements and caret
+    // mapping together; CSS-only wrapping leaves long markdown lines clipped
+    // while the editor still believes they occupy one horizontal row.
+    EditorView.lineWrapping,
     EditorView.updateListener.of((update) => {
       if (update.selectionSet || update.docChanged) onSelection(update.view);
       if (!update.docChanged) return;
