@@ -15,7 +15,6 @@ const architectureClaims = [
   "One window for reading, editing, and source",
   "No WebView anywhere",
   "Downright never changes a byte of your file",
-  "Re-reads the whole file, restyles only what moved",
 ];
 const annotations: [selector: string, label: string, detail: string][] = [
   [".doc-math--block", "Math", "Real symbols, inline and block. No screenshots."],
@@ -63,7 +62,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
     </section>
 
     {/* 8.2 — The gap, doubled */}
-    <section class="gap-section section-anchor" id="gap" data-act="gap" data-band="0.5" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
+    <section class="gap-section section-anchor" id="gap" data-act="gap" data-rest="gap" data-band="0.5" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
       {/* The sweep: one pinned stage where the raw bytes become the page.
           Both halves of every block are live DOM from the same store. The
           stage owns its own scroll length so beat two never overlaps it. */}
@@ -104,7 +103,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       </div>
       </div>
 
-      <div class="gap-wall" data-rest="gap" data-fingerprint="agent-wall" aria-label="An agent's Markdown output">
+      <div class="gap-wall" data-fingerprint="agent-wall" aria-label="An agent's Markdown output">
         <h3 class="gap-wall__heading">{copy.gap.beatTwoHeading}</h3>
         <p class="gap-wall__line">{copy.gap.beatTwoLine}</p>
         <div class="gap-wall__scroller" data-agent-wall data-agent-wall-scroll tabindex="0" aria-label="Real agent-generated Markdown from a refactoring session"></div>
@@ -112,12 +111,12 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
     </section>
 
     {/* 8.5 — The agent visit: the climax */}
-    <section class="page-section agent-section section-anchor" id="agent" data-act="agent" data-band="0.4" data-rail-section data-section-label="The agent visit" data-section-detail="Review the write" data-theme-zone>
+    <section class="page-section agent-section section-anchor" id="agent" data-act="agent" data-rest="agent" data-band="0.4" data-rail-section data-section-label="The agent visit" data-section-detail="Review the write" data-theme-zone>
       <div class="section-intro act-reveal">
         <h2>{copy.agent.heading}</h2>
         <p>{copy.agent.body}</p>
       </div>
-      <div class="agent-stage" data-agent-stage data-rest="agent">
+      <div class="agent-stage" data-agent-stage>
         <div class="agent-stage__document" data-agent-document>
           <div class="window-slot window-slot--agent" data-window-slot="agent"></div>
         </div>
@@ -166,7 +165,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
             </tbody>
           </table>
         </div>
-        <p class="benchmark-session act-reveal" data-session-row>Type in the window above and your own parse time joins this table.</p>
+        <p class="benchmark-session act-reveal" data-session-row>Your median parse this visit: waiting for a keystroke. Type in the living document and the measured result joins this table.</p>
         <div class="benchmark-notes act-reveal">
           <p><strong>Corpus</strong> {benchmarks.corpus}. <strong>Date</strong> {benchmarks.date}. <strong>Machine</strong> {benchmarks.machine}.</p>
           <p>{benchmarks.qualification} Missing: {benchmarks.limitations.join(", ")}.</p>
@@ -183,6 +182,11 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <a href={facts.repository} target="_blank" rel="noreferrer">Read the repository <span aria-hidden="true">↗</span></a>
         </div>
         <ul class="architecture-list act-reveal">{architectureClaims.map((claim) => <li>{claim}</li>)}</ul>
+        <div class="architecture-mode act-reveal" role="tablist" aria-label="Read or source view">
+          <span>One surface, two honest faces</span>
+          <button type="button" role="tab" aria-selected="true" data-architecture-view="document">Document</button>
+          <button type="button" role="tab" aria-selected="false" data-architecture-view="source">Source</button>
+        </div>
         <p class="architecture-punctuation act-reveal">{copy.architecture.punctuation}</p>
       </div>
     </section>
@@ -240,18 +244,12 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
     </section>
 
     {/* 8.10 — The close */}
-    <section class="close-section section-anchor" id="close" data-act="close" data-rest="close" data-band="0.3" data-rail-section data-section-label="Free and open" data-section-detail="MIT, no account" data-theme-zone>
+    <section class="close-section section-anchor" id="close" data-act="close" data-rest="close" data-fingerprint="close" data-band="0.3" data-rail-section data-section-label="Free and open" data-section-detail="MIT, no account" data-theme-zone>
       <div class="close-section__inner act-reveal">
         <h2>{copy.close.heading}</h2>
         <p>{copy.close.body}</p>
         <DownloadButton />
         <small>macOS {facts.minimumMacOS}+ · direct download · {facts.artifactName} when verified · or <code>brew install --cask downright</code></small>
-        <ul class="close-facts" data-fingerprint="close-facts">
-          <li><strong>MIT</strong><span>open-source license</span></li>
-          <li><strong>0</strong><span>telemetry · cookies · servers</span></li>
-          <li><strong>{facts.minimumMacOS}+</strong><span>native, no WebView</span></li>
-          <li><strong>⌘⇧E</strong><span>this page keeps its source too</span></li>
-        </ul>
         <p class="close-sponsor" data-fingerprint="sponsor">Built by one person, funded by people, not telemetry. If Downright earns its place in your dock — <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">sponsor it</a>.</p>
         <div class="film-handoff" data-fingerprint="handoff" aria-label="Send this page to your Mac">
           <p class="film-handoff__line">Downright lives on your Mac. Send it there.</p>

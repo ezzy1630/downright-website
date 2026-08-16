@@ -41,6 +41,9 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 initThemeEngine();
+// Build the mobile beats before share/download wiring so dynamically-created
+// handoff and CTA controls use the same handlers as the desktop controls.
+initFilm();
 initGlass();
 initFlip();
 initWindowControls();
@@ -49,6 +52,8 @@ initPalette();
 initShare();
 initDownloadFunnel();
 magnetize();
+// Film detection precedes lazy scene mounting: gap and travel otherwise build
+// desktop choreography into the seven-beat mobile composition.
 initTravel();
 initReveal();
 
@@ -99,7 +104,19 @@ whenNear("gap", initGap);
 whenNear("agent", () => initAgent(rail));
 whenNear("reach", initReach);
 whenNear("speed", initSpeed);
-initFilm();
+
+for (const control of document.querySelectorAll<HTMLButtonElement>("[data-architecture-view]")) {
+  control.addEventListener("click", () => {
+    const windowEl = document.querySelector<HTMLElement>("[data-window]");
+    const view = control.dataset.architectureView;
+    if (!windowEl || (view !== "document" && view !== "source")) return;
+    windowEl.dataset.view = view;
+    windowEl.style.setProperty("--segment-index", view === "source" ? "2" : "0");
+    for (const sibling of document.querySelectorAll<HTMLButtonElement>("[data-architecture-view]")) {
+      sibling.setAttribute("aria-selected", String(sibling === control));
+    }
+  });
+}
 
 // The living document: real the moment the visitor means to touch it.
 for (const heroWindow of document.querySelectorAll<HTMLElement>("[data-editor-window]")) {

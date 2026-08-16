@@ -54,7 +54,7 @@ function joinSession(): void {
   if (!row) return;
   const median = medianParseMs();
   if (!median) {
-    row.textContent = "Type in the hero document — your measured parse joins this table.";
+    row.textContent = "Your median parse this visit: waiting for a keystroke. Type in the living document to measure it.";
     return;
   }
   const budget = benchmarks.rows.find((candidate) => candidate.measurement.includes("Source edit"))?.target ?? "8 ms";

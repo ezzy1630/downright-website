@@ -255,6 +255,7 @@ export class WindowDirector {
 let director: WindowDirector | null = null;
 
 export function initTravel(): void {
+  if (document.documentElement.dataset.film === "true") return;
   const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
   if (!windowEl) return;
   director = new WindowDirector(windowEl);
