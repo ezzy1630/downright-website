@@ -5,7 +5,6 @@ import DownloadButton from "../components/DownloadButton.astro";
 import AppWindow from "../components/AppWindow.astro";
 import { benchmarks, copy, facts, themes } from "../data/site";
 
-const osVersion = "macOS 26";
 const benchmarkNames = ["Parse 100 KB", "Source edit and paragraph map", "Text diff, external rewrite", "End-to-end semantic convergence", "Syntax highlight, 10 KB Swift"];
 const benchmarkRows = benchmarkNames
   .map((name) => benchmarks.rows.find((row) => row.measurement === name))
@@ -131,7 +130,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         </div>
         <div class="review-panel" data-review-panel aria-hidden="true"></div>
       </div>
-      <div class="agent-contextual" data-contextual-cta hidden>
+      <div class="agent-contextual" data-contextual-cta data-crop-ok hidden>
         <p>{copy.agent.contextual}</p>
         <DownloadButton />
       </div>

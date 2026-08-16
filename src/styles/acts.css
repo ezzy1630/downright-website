@@ -396,10 +396,9 @@
   text-transform: uppercase;
 }
 
-/* ── The hard-cut entrance ─────────────────────────────────────────────
-   Act text stays below the readability floor until the previous act has
-   scrolled clear, then steps in over a short band. Driven by --act-reveal
-   (computed in src/scenes/reveal.ts); opacity + a small rise only. */
+/* ── Continuous scene handoff ──────────────────────────────────────────
+   Acts keep their native document geometry. The reveal marker can still
+   drive rail/choreography, but no section is removed from the scroll path. */
 [data-enhanced="true"] .act-reveal {
   opacity: 1;
   translate: none;
@@ -407,15 +406,9 @@
 [data-enhanced="false"] .act-reveal,
 .no-js .act-reveal { opacity: 1; translate: none; }
 
-/* v4 composition rules: an act owns the viewport, so a previous headline
-   cannot sit behind the next window. Visibility keeps the page's native
-   scroll geometry while removing the visual leak and all hit targets from
-   inactive acts. */
+/* Keep adjacent scenes in flow. Hiding an inactive act created a blank
+   teleport at the reading line and made the outgoing scene vanish early. */
 html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="true"]) {
-  visibility: hidden;
-  pointer-events: none;
-}
-html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"] {
   visibility: visible;
 }
 
@@ -485,9 +478,8 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   line-height: 1.32;
 }
 
-/* The lede is a hard-cut entrance, not a crossfade: it stays below the
-   readability floor until the hero has fully cleared, then steps in over the
-   first 8% of the sweep. Out it goes as the closing line takes over. */
+/* The lede follows the sweep progress while its parent remains in the native
+   document flow, so the hero can hand off to the next scene without a void. */
 .sweep__lede {
   --lede-in: clamp(0, calc(var(--sweep-progress, 0) * 12.5), 1);
   --lede-out: clamp(0, calc((0.62 - var(--sweep-progress, 0)) * 5), 1);
@@ -603,7 +595,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   word-break: break-word;
 }
 
-.sweep-block__rendered { width: 100%; min-height: 0; padding: 0; }
+.sweep-block__rendered { width: 100%; min-height: 0; padding: 0; opacity: 0; }
 .sweep-block__rendered > :first-child { margin-top: 0; }
 .sweep-block + .sweep-block { margin-top: 14px; }
 
@@ -1001,7 +993,11 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   color: var(--band-text-secondary);
   cursor: pointer;
   font: inherit;
+  transition: background-color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), color var(--motion-hover) var(--ease-decelerate), translate var(--motion-hover) var(--ease-snap);
 }
+.architecture-mode button:hover,
+.architecture-mode button:focus-visible { border-color: var(--band-heading); color: var(--band-heading); translate: 0 -1px; }
+.architecture-mode button:active { translate: 0 1px; }
 .architecture-mode button[aria-selected="true"] {
   border-color: var(--band-heading);
   color: var(--band-heading);
@@ -1247,9 +1243,11 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   cursor: pointer;
   font-size: 13px;
   text-align: left;
+  transition: background-color var(--motion-hover) var(--ease-decelerate), color var(--motion-hover) var(--ease-decelerate), translate var(--motion-hover) var(--ease-snap);
 }
 
 .palette-row kbd { color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
+.palette-row:hover { background: color-mix(in oklab, var(--accent) 8%, transparent); color: var(--heading); translate: 2px 0; }
 .palette-row.is-cursor { background: color-mix(in oklab, var(--accent) 12%, transparent); color: var(--heading); }
 
 .shortcut-sheet { width: min(420px, calc(100vw - 40px)); padding: 22px 26px; border-radius: var(--radius-window); color: var(--text); }

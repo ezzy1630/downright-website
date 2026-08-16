@@ -6,7 +6,7 @@
  * it is one dialog element and a static action list — no framework.
  */
 
-import { themes, facts } from "../data/site";
+import { themes, facts, brewCommand } from "../data/site";
 import { switchTheme } from "./spill";
 import { sound } from "../kernel/sound";
 import { setInPageReduce } from "../kernel/switchboard";
@@ -97,7 +97,7 @@ export function buildActions(): Action[] {
       group: "Install",
       run: (close) => {
         close();
-        void navigator.clipboard.writeText("brew install --cask downright");
+        void navigator.clipboard.writeText(brewCommand);
       },
     },
     {

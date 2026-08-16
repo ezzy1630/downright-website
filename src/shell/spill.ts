@@ -18,32 +18,16 @@ const STORAGE_KEY = "downright-theme";
 const WAVE_SPAN = 0.12;
 const WAVE_DURATION = MOTION.durations.standard;
 
-/** The tokens each zone springs — the six that read as "the paper re-inked".
- *  Names are the real CSS custom properties; the rest switch via [data-theme]. */
-const ZONE_TOKENS = {
-  "--bg": "background",
-  "--surface": "surface",
-  "--text": "text",
-  "--text-secondary": "textSecondary",
-  "--rule": "rule",
-  "--accent": "accent",
-} as const;
-
-type ZoneToken = keyof typeof ZONE_TOKENS;
-const TOKEN_NAMES = Object.keys(ZONE_TOKENS) as ZoneToken[];
-
 function themeById(id: string): AppTheme | undefined {
   return themes.find((theme) => theme.id === id);
 }
 
-function paletteValue(theme: AppTheme, token: ZoneToken): string {
-  return String(theme.palette[ZONE_TOKENS[token]] ?? theme.palette.background);
-}
-
 /** Zones: the surfaces the wave crosses, in DOM order. */
 function zones(): HTMLElement[] {
-  const found = [...document.querySelectorAll<HTMLElement>("[data-theme-zone]")];
-  return found.length ? found : [document.documentElement];
+  const root = document.documentElement;
+  const found = [...document.querySelectorAll<HTMLElement>("[data-theme-zone]")]
+    .filter((zone) => zone !== document.body && zone !== root);
+  return [root, ...found];
 }
 
 /** Warm Dark is the house ground — the default for every first visit. A
@@ -51,6 +35,8 @@ function zones(): HTMLElement[] {
 const DEFAULT_THEME = "warm-dark";
 
 let currentId = DEFAULT_THEME;
+let detachWave: (() => void) | null = null;
+let tokenNames: string[] = [];
 
 export function currentTheme(): string {
   return currentId;
@@ -67,14 +53,28 @@ function effectiveTheme(id: string): AppTheme {
   return themeById(resolved) ?? themeById("paper-light")!;
 }
 
+/** Generated theme colors are already present as CSS custom properties. Read
+ * the live stylesheet so JS ships no duplicate palette table. */
+function refreshTokenNames(): void {
+  const styles = getComputedStyle(document.documentElement);
+  tokenNames = Array.from(styles).filter((name) => name.startsWith("--") && styles.getPropertyValue(name).trim().startsWith("#"));
+}
+
 function clearInline(zone: HTMLElement): void {
-  for (const token of TOKEN_NAMES) zone.style.removeProperty(token);
+  for (const token of tokenNames) zone.style.removeProperty(token);
+}
+
+function stopWave(): void {
+  detachWave?.();
+  detachWave = null;
 }
 
 /** Instant apply: flip the data-theme and drop any wave overrides. */
 function applyInstant(theme: AppTheme): void {
+  stopWave();
   const root = document.documentElement;
   root.dataset.theme = currentId;
+  refreshTokenNames();
   root.style.colorScheme = theme.appearance === "dark" ? "dark" : "light";
   for (const zone of zones()) clearInline(zone);
   const meta = document.querySelector('meta[name="theme-color"]');
@@ -87,14 +87,30 @@ function startWave(target: AppTheme, originX: number, originY: number): void {
     return;
   }
 
+  stopWave();
   const zoneEls = zones();
-  // Capture each zone's current values BEFORE the data-theme flip.
+  if (!tokenNames.length) refreshTokenNames();
+  // Capture and pin each zone's current values BEFORE the data-theme flip.
+  // This is the important ordering guarantee: the target stylesheet can load
+  // underneath the inline "from" values without painting a mixed palette.
   const fromValues = zoneEls.map((zone) => {
-    const values = {} as Record<ZoneToken, string>;
-    for (const token of TOKEN_NAMES) {
-      values[token] = getComputedStyle(zone).getPropertyValue(token).trim() || paletteValue(target, token);
-    }
-    return values;
+    const styles = getComputedStyle(zone);
+    return tokenNames.map((token) => {
+      const value = styles.getPropertyValue(token).trim();
+      zone.style.setProperty(token, value);
+      return value;
+    });
+  });
+
+  // Read target colors from the generated stylesheet instead of shipping a
+  // second palette table in JS. Band aliases follow these source tokens.
+  const root = document.documentElement;
+  for (const zone of zoneEls) clearInline(zone);
+  root.dataset.theme = currentId;
+  const targetStyle = getComputedStyle(root);
+  const targetValues = tokenNames.map((token) => targetStyle.getPropertyValue(token).trim());
+  zoneEls.forEach((zone, index) => {
+    tokenNames.forEach((token, tokenIndex) => zone.style.setProperty(token, fromValues[index][tokenIndex]));
   });
 
   let maxDistance = 1;
@@ -105,31 +121,24 @@ function startWave(target: AppTheme, originX: number, originY: number): void {
     return distance;
   });
 
-  // Flip the non-sprung tokens instantly, then hold each zone at "from"
-  // inline so nothing flashes before its own turn in the wave.
-  const root = document.documentElement;
-  root.dataset.theme = currentId;
-  root.style.colorScheme = target.appearance === "dark" ? "dark" : "light";
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", target.palette.background);
-
+  // Flip the stylesheet only after every color is pinned to its old value.
+  // Non-color geometry can change with the theme without exposing a mixed ink.
   interface Live {
     zone: HTMLElement;
-    springs: { token: ZoneToken; spring: SpringColor }[];
+    springs: { token: string; spring: SpringColor }[];
     delay: number;
   }
   const live: Live[] = zoneEls.map((zone, index) => {
-    const springs = TOKEN_NAMES.map((token) => {
-      const spring = new SpringColor(fromValues[index][token], WAVE_DURATION);
-      spring.setTarget(paletteValue(target, token));
-      zone.style.setProperty(token, spring.value);
+    const springs = tokenNames.map((token, tokenIndex) => {
+      const spring = new SpringColor(fromValues[index][tokenIndex], WAVE_DURATION);
+      spring.setTarget(targetValues[tokenIndex]);
       return { token, spring };
     });
     return { zone, springs, delay: (distances[index] / maxDistance) * WAVE_SPAN };
   });
 
   let elapsed = 0;
-  ticker.add((dt) => {
+  const wave = (dt: number): boolean => {
     elapsed += dt;
     let moving = false;
     for (const entry of live) {
@@ -148,9 +157,14 @@ function startWave(target: AppTheme, originX: number, originY: number): void {
     if (!moving) {
       // Hand the colors back to the stylesheet — clean, no stale overrides.
       for (const entry of live) clearInline(entry.zone);
+      root.style.colorScheme = target.appearance === "dark" ? "dark" : "light";
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", target.palette.background);
+      detachWave = null;
     }
     return moving;
-  });
+  };
+  detachWave = ticker.add(wave);
 }
 
 export function switchTheme(id: string, origin?: { x: number; y: number }): void {
@@ -180,6 +194,16 @@ export function initThemeEngine(): void {
   for (const control of document.querySelectorAll<HTMLElement>("[data-theme-option]")) {
     control.setAttribute("aria-selected", String(control.dataset.themeOption === currentId));
   }
+
+  for (const container of document.querySelectorAll<HTMLElement>("[data-theme-control]")) {
+    const trigger = container.querySelector<HTMLButtonElement>(".theme-control__trigger");
+    const panel = container.querySelector<HTMLElement>(".theme-panel");
+    if (!trigger || !panel) continue;
+    panel.addEventListener("toggle", () => {
+      trigger.setAttribute("aria-expanded", String(panel.matches(":popover-open")));
+    });
+  }
+
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     if (currentId === "system") applyInstant(effectiveTheme("system"));
   });

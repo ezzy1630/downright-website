@@ -206,6 +206,18 @@ check("the switch lands on the chosen theme", sp.root === "nord", "root=" + sp.r
 check("the spill animates (not an instant swap)", sp.distinct > 2, "distinct frames=" + sp.distinct);
 check("the choice persists", sp.persisted === "nord", String(sp.persisted));
 
+const lightBand = await cdp.evaluate(`(async () => {
+  const card = document.querySelector('[data-theme-option="paper-light"]');
+  const r = card.getBoundingClientRect();
+  card.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: r.left + 10, clientY: r.top + 10 }));
+  await new Promise((resolve) => setTimeout(resolve, 650));
+  const band = document.querySelector('.dark-band');
+  const style = getComputedStyle(band);
+  return JSON.stringify({ theme: document.documentElement.dataset.theme, band: style.backgroundColor, token: style.getPropertyValue('--band-bg').trim() });
+})()`);
+const lb = JSON.parse(lightBand);
+check("light themes keep bands on the page ground", lb.theme === "paper-light" && lb.token === "#f7f4ee" && lb.band === "rgb(247, 244, 238)", JSON.stringify(lb));
+
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} passed`);
 ws.close();

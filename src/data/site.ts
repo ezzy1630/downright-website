@@ -19,6 +19,7 @@ export const motion = motionPayload;
 export { sampleMarkdown };
 
 export const entityDescription = "Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.";
+export const brewCommand = "brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright";
 
 export const sections = [
   { id: "hero", label: "Start", detail: "The native Markdown app" },

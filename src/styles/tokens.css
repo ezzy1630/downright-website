@@ -43,12 +43,14 @@
   --syntax-diff-header: #6b6259;
   --cta-fill: #307afe;
   --cta-ink: #181513;
-  --band-bg: #171614;
-  --band-surface: #24211e;
-  --band-text: #e3ddd5;
-  --band-text-secondary: #aca297;
-  --band-heading: #f4eee5;
-  --band-rule: #3d3832;
+  /* Bands use the page ground so scene handoffs do not flash a second panel.
+     Their cards, rules, and typography still carry the visual hierarchy. */
+  --band-bg: var(--bg);
+  --band-surface: var(--surface);
+  --band-text: var(--text);
+  --band-text-secondary: var(--text-secondary);
+  --band-heading: var(--heading);
+  --band-rule: var(--rule);
   --motion-quick: 0.12s;
   --motion-standard: 0.2s;
   --motion-deliberate: 0.32s;

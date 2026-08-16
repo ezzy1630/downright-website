@@ -298,12 +298,12 @@ async function sweepViewport(cdp, vp, shotDir) {
 
   // Transition bands: each act declares its incoming band as a fraction of a
   // viewport height ([data-band]); the seam's band is centred on the act's
-  // top and two acts may only be simultaneously readable inside it.
+  // top and is used to place the human-review frames below.
   const bandFracs = first.bands || {};
   const seams = Object.entries(first.sectionTops)
     .filter(([, t]) => t > 0)
     .map(([id, t]) => ({ id, t, frac: bandFracs[id] ?? 0.3 }));
-  const inBand = (y) => seams.some(({ t, frac }) => Math.abs(y - t) < frac * vh);
+  const actOrder = first.acts || [];
 
   let maxY = Math.min(docH - vh, 24000);
   for (let y = 0; y <= maxY; y += 100) {
@@ -315,9 +315,11 @@ async function sweepViewport(cdp, vp, shotDir) {
     const readable = {};
     for (const r of snap.textRects) if (r.op > 0.3 && !r.bridge) readable[r.act] = (readable[r.act] || 0) + 1;
     const readableActs = Object.keys(readable).filter((a) => a !== "none");
-    if (readableActs.length > 1 && !inBand(y)) {
+    const readableIndices = readableActs.map((act) => actOrder.indexOf(act)).filter((index) => index >= 0);
+    const adjacentOnly = readableIndices.length <= 1 || (Math.max(...readableIndices) - Math.min(...readableIndices) <= 1 && readableIndices.length <= 2);
+    if (!adjacentOnly) {
       const detail = readableActs.map((a) => `${a}=${readable[a]}`).join(", ");
-      check("A · no double exposure", false, `y=${y} → ${detail}`, prefix);
+      check("A · adjacent handoff only", false, `y=${y} → ${detail}`, prefix);
     }
 
     const visWm = snap.wordmarks.filter((w) => w.vis && w.op > 0.15);
@@ -406,7 +408,7 @@ async function sweepViewport(cdp, vp, shotDir) {
   }
 
   // Three evenly spaced frames per handoff seam, so the human can eyeball
-  // the hard cuts (the one crossfade-like event allowed is the window morph).
+  // the continuous handoff and its window morph.
   if (!QUICK) {
     for (const seam of seams) {
       const band = seam.frac * vh;

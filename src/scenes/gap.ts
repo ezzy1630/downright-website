@@ -94,6 +94,7 @@ function initSweep(): void {
     });
     surface.replaceChildren(fragment);
     if (line) surface.append(line);
+    window.dispatchEvent(new Event("scroll"));
   };
 
   build();

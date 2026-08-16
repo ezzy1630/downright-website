@@ -1,9 +1,7 @@
 /**
- * Give the viewport one act at a time. The previous implementation let two
- * neighboring acts remain partially legible during a long opacity band; that
- * is exactly how a headline ended up under the header and a second scene
- * leaked into the next frame. The page still scrolls natively, but ownership
- * is a binary state at the viewport's reading line.
+ * Mark the act at the reading line without taking neighboring acts out of
+ * document flow. The marker powers the rail and scene choreography; native
+ * scrolling owns continuity between scenes.
  */
 
 const READING_LINE = 0.46;

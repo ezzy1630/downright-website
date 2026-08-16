@@ -24,21 +24,17 @@ import { initFilm } from "../scenes/film";
 import { initTravel } from "../shell/travel";
 import { initReveal } from "../scenes/reveal";
 import { hydrateOnIntent } from "../editor/hydration";
+import { brewCommand } from "../data/site";
 
 sound.restore();
 
 // Diagnostics that respect view-source: the first uncaught error is recorded
 // on <html data-error> so a broken scene is visible without a console.
-window.addEventListener("error", (event) => {
+const markError = (message: string): void => {
   const root = document.documentElement;
-  if (!root.dataset.error) {
-    root.dataset.error = `${event.message} @ ${(event.filename ?? "").split("/").pop()}:${event.lineno}`;
-  }
-});
-window.addEventListener("unhandledrejection", (event) => {
-  const root = document.documentElement;
-  if (!root.dataset.error) root.dataset.error = `promise: ${String(event.reason).slice(0, 140)}`;
-});
+  if (!root.dataset.error) root.dataset.error = message;
+};
+window.addEventListener("error", (event) => markError(event.message));
 
 initThemeEngine();
 // Build the mobile beats before share/download wiring so dynamically-created
@@ -134,12 +130,20 @@ function setupChrome(): void {
   if (header && toggle && menu) {
     const close = () => {
       toggle.setAttribute("aria-expanded", "false");
-      menu.hidden = true;
+      menu.classList.remove("is-open");
+      window.setTimeout(() => {
+        if (toggle.getAttribute("aria-expanded") !== "true") menu.hidden = true;
+      }, 120);
     };
     toggle.addEventListener("click", () => {
       const open = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!open));
-      menu.hidden = open;
+      if (open) {
+        close();
+        return;
+      }
+      toggle.setAttribute("aria-expanded", "true");
+      menu.hidden = false;
+      requestAnimationFrame(() => menu.classList.add("is-open"));
     });
     menu.querySelectorAll("a").forEach((link) => link.addEventListener("click", close));
     document.addEventListener("keydown", (event) => {
@@ -158,7 +162,7 @@ function setupChrome(): void {
   const brew = document.querySelector<HTMLButtonElement>("[data-brew]");
   brew?.addEventListener("click", async () => {
     try {
-      await navigator.clipboard.writeText("brew install --cask downright");
+      await navigator.clipboard.writeText(brewCommand);
       const label = brew.textContent;
       brew.textContent = "copied ✓";
       window.setTimeout(() => {

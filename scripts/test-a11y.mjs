@@ -165,13 +165,15 @@ const check = (name, ok, detail = "") => {
     trigger.focus();
     trigger.click();
     await new Promise((r) => setTimeout(r, 120));
+    const panelOpen = document.querySelector('.theme-panel')?.matches(':popover-open') === true;
     const option = document.querySelector('[data-theme-option="nord"]');
     if (!option) return { err: 'no nord option' };
     option.focus();
     option.click();
     await new Promise((r) => setTimeout(r, 900));
-    return { theme: document.documentElement.dataset.theme };
+    return { theme: document.documentElement.dataset.theme, panelOpen };
   })()`);
+  check("keyboard · theme panel opens", themeChanged.panelOpen === true, JSON.stringify(themeChanged));
   check("keyboard · theme control re-inks", themeChanged.theme === "nord", JSON.stringify(themeChanged));
 
   // Download: focus + Enter fires the support panel (DMG stubbed).
