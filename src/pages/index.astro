@@ -107,18 +107,12 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           ))}
         </ul>
 
-        <div class="sweep__window" data-sweep-window data-fingerprint="sweep" data-crop-ok>
-          <div class="sweep__bar">
-            <span class="traffic-lights traffic-lights--ql" aria-hidden="true"><i></i></span>
-            <span class="traffic-lights traffic-lights--app" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="sweep__title">sample.md</span>
-            <span class="sweep__action sweep__action--ql">Open with…</span>
-            <span class="sweep__action sweep__action--app">Downright · Live</span>
-          </div>
-          <div class="sweep__surface" data-sweep-surface>
-            <i class="sweep__line" data-sweep-line aria-hidden="true"></i>
-          </div>
-        </div>
+        {/* The sweep's window IS the window — the same node the hero showed,
+            re-parented into the pinned stage by the travel director. Its chrome
+            morphs from macOS's plain Quick Look sheet to full Downright as the
+            render line passes. The film builds its own simpler sheet inside
+            this slot (travel is desktop-only). */}
+        <div class="sweep__slot window-slot window-slot--gap" data-window-slot="gap"></div>
 
         <p class="sweep__capture">
           <span>{copy.gap.capture}</span>{" "}

@@ -60,15 +60,40 @@ interface Annotation {
 
 function initSweep(): void {
   const stage = document.querySelector<HTMLElement>("[data-sweep]");
-  const surface = document.querySelector<HTMLElement>("[data-sweep-surface]");
-  const windowEl = document.querySelector<HTMLElement>("[data-sweep-window]");
-  const line = document.querySelector<HTMLElement>("[data-sweep-line]");
   const section = document.querySelector<HTMLElement>("[data-sweep-stage]");
-  if (!stage || !surface || !windowEl || !section) return;
+  // The sweep surface is the traveling window's read pane — the same node the
+  // hero showed, re-parented into the pinned stage. The sweep owns that layer
+  // while the window is parked here (the travel director's store paint stands
+  // down for it), and hands it back washed when the window flies on.
+  const appWindow = document.querySelector<HTMLElement>("[data-editor-window]");
+  if (!stage || !section || !appWindow) return;
 
   const blocks: SweepBlock[] = [];
+  const notes: Annotation[] = [];
+  const line = document.createElement("i");
+  line.className = "sweep__line";
+  line.setAttribute("aria-hidden", "true");
+
+  const readPane = (): HTMLElement | null =>
+    appWindow.querySelector<HTMLElement>("[data-document-read]");
+  const surface = (): HTMLElement | null =>
+    appWindow.querySelector<HTMLElement>("[data-document-read] [data-static-document]");
+
+  const bindAnnotations = (): void => {
+    notes.length = 0;
+    for (const note of document.querySelectorAll<HTMLElement>("[data-annotation]")) {
+      const selector = note.dataset.annotation;
+      if (!selector) continue;
+      const index = blocks.findIndex((block) => block.rendered.querySelector(selector));
+      if (index < 0) continue;
+      notes.push({ note, at: blocks[index].at + BLOCK_RAMP * 0.6, fired: false });
+    }
+  };
 
   const build = (): void => {
+    if (appWindow.dataset.slot !== "gap") return;
+    const pane = surface();
+    if (!pane) return;
     const source = renderSampleBlocks(doc.current.text);
     const fragment = document.createDocumentFragment();
     blocks.length = 0;
@@ -92,30 +117,16 @@ function initSweep(): void {
         at: SWEEP_START + (index / Math.max(1, source.length)) * (1 - SWEEP_START - BLOCK_RAMP),
       });
     });
-    surface.replaceChildren(fragment);
-    if (line) surface.append(line);
+    pane.replaceChildren(fragment);
+    readPane()?.append(line);
+    bindAnnotations();
     window.dispatchEvent(new Event("scroll"));
   };
 
-  build();
-  doc.subscribe(build);
-
-  // The margin annotations name each capability at the moment the sweep
-  // renders it — the act's teaching line, earned rather than asserted. Each
-  // one is keyed to the block that actually contains its selector, so they
-  // fire in document order and never fire twice.
-  const notes: Annotation[] = [];
-  for (const note of document.querySelectorAll<HTMLElement>("[data-annotation]")) {
-    const selector = note.dataset.annotation;
-    if (!selector) continue;
-    const index = blocks.findIndex((block) => block.rendered.querySelector(selector));
-    if (index < 0) continue;
-    notes.push({ note, at: blocks[index].at + BLOCK_RAMP * 0.6, fired: false });
-  }
-
-  if (reducedMotion()) {
-    // Static composed frame: the first half stays raw, the rest stays
-    // rendered, so the before/after reads top-to-bottom with zero motion.
+  // Reduced motion gets a static composed frame: the first half stays raw,
+  // the rest stays rendered, so the before/after reads top-to-bottom with
+  // zero motion.
+  const applyStatic = (): void => {
     stage.dataset.sweepStatic = "true";
     blocks.forEach((block, index) => {
       const done = index >= Math.floor(blocks.length / 2);
@@ -123,8 +134,36 @@ function initSweep(): void {
       block.rendered.style.opacity = done ? "1" : "0";
     });
     stage.style.setProperty("--sweep-progress", "1");
-    windowEl.dataset.chrome = "app";
+    appWindow.dataset.chrome = "app";
     for (const note of notes) note.note.classList.add("is-bloomed", "is-static");
+  };
+
+  // The window's arrival is the sweep's cue: the travel director re-parents it
+  // into the gap slot and sets data-slot, and this observer takes the read
+  // layer over on the same microtask — no frame ever shows the plain document
+  // inside the pinned stage. Departure washes the layer back to the plain
+  // document (the director's store paint), so the sweep drops its references
+  // and pulls the render line out of the pane.
+  new MutationObserver(() => {
+    if (appWindow.dataset.slot === "gap") {
+      if (blocks.length) return;
+      build();
+      if (reducedMotion()) applyStatic();
+    } else if (blocks.length) {
+      blocks.length = 0;
+      line.remove();
+    }
+  }).observe(appWindow, { attributeFilter: ["data-slot"] });
+  // A deep link can land the window in the gap before this scene mounts.
+  if (appWindow.dataset.slot === "gap" && !blocks.length) {
+    build();
+    if (reducedMotion()) applyStatic();
+  }
+
+  doc.subscribe(build);
+
+  if (reducedMotion()) {
+    if (blocks.length) applyStatic();
     return;
   }
 
@@ -135,7 +174,9 @@ function initSweep(): void {
     if (Math.abs(progress - last) < 0.0008) return;
     last = progress;
     stage.style.setProperty("--sweep-progress", progress.toFixed(4));
-    windowEl.dataset.chrome = progress >= CHROME_AT ? "app" : "ql";
+    if (appWindow.dataset.slot === "gap") {
+      appWindow.dataset.chrome = progress >= CHROME_AT ? "app" : "ql";
+    }
 
     for (const block of blocks) {
       const turn = Math.min(1, Math.max(0, (progress - block.at) / BLOCK_RAMP));

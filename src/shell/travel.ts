@@ -2,9 +2,11 @@
  * The traveling window — the Living Document made literal. Exactly one app
  * window exists on the page. It starts in the hero (prerendered, the LCP),
  * and as the visitor scrolls it FLIP-morphs between the acts that want it:
- * hero → agent → themes. The window is a single DOM node, so
- * the editor, the undo stack, and the caret all survive the journey, and
- * every act renders the same bytes from the kernel store — no static
+ * hero → gap → agent → themes. In the gap it poses as macOS's plain Quick
+ * Look sheet (data-chrome="ql") and grows its full chrome back as the render
+ * line passes — the sweep scene owns that morph. The window is a single DOM
+ * node, so the editor, the undo stack, and the caret all survive the journey,
+ * and every act renders the same bytes from the kernel store — no static
  * duplicates, ever.
  *
  * Flight rules:
@@ -23,7 +25,7 @@ import { reducedMotion } from "../kernel/switchboard";
 import { doc } from "../kernel/store";
 import { renderSampleMarkdown } from "../data/site";
 
-export type SlotId = "hero" | "agent" | "theme";
+export type SlotId = "hero" | "gap" | "agent" | "theme";
 
 interface Slot {
   id: SlotId;
@@ -56,6 +58,11 @@ export class WindowDirector {
         section: "hero",
         host: () => document.querySelector<HTMLElement>(".hero__window"),
         before: () => document.querySelector<HTMLElement>(".hero__annotation"),
+      },
+      {
+        id: "gap",
+        section: "gap",
+        host: () => document.querySelector<HTMLElement>("[data-window-slot=gap]"),
       },
       {
         id: "agent",
@@ -91,9 +98,12 @@ export class WindowDirector {
     // The one exception: the agent scene owns the read layer while the reader
     // is in its act and the visit is not idle — mid-rewrite AND after it
     // resolves, since the word-level change marks live in that markup and a
-    // repaint erases them.
+    // repaint erases them. The gap scene owns it the same way: its two-state
+    // blocks (raw | rendered halves stacked) live in the read layer, and the
+    // sweep rebuilds them itself through the store subscription.
     const agentOwns = doc.current.agent !== "idle" && this.current === "agent";
-    if (!agentOwns) {
+    const gapOwns = this.current === "gap";
+    if (!agentOwns && !gapOwns) {
       const surface = this.readLayer();
       if (surface) surface.innerHTML = renderSampleMarkdown(doc.current.text);
     }
@@ -143,6 +153,12 @@ export class WindowDirector {
     // The hero is the only split slot; every other act receives the same
     // window as a document-only surface, so no two acts repeat a composition.
     this.window.dataset.view = target === "hero" ? "split" : "document";
+
+    // The gap receives the window as macOS's plain preview sheet; the sweep
+    // promotes it to full chrome as the render line passes. Every other slot
+    // gets the window's own chrome back.
+    if (target === "gap") this.window.dataset.chrome = "ql";
+    else delete this.window.dataset.chrome;
 
     // Every arrival opens at the top of the document.
     const read = this.window.querySelector<HTMLElement>("[data-document-read]");

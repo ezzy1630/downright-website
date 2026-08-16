@@ -253,9 +253,26 @@ function initInsertEditChip(): void {
 
 function initSweepThumb(): void {
   const sweep = document.querySelector<HTMLElement>("[data-sweep]");
-  const surface = document.querySelector<HTMLElement>("[data-sweep-surface]");
-  if (!sweep || !surface || surface.dataset.filmSweep === "built") return;
-  surface.dataset.filmSweep = "built";
+  const slot = document.querySelector<HTMLElement>("[data-window-slot=gap]");
+  if (!sweep || !slot || slot.dataset.filmSweep === "built") return;
+  slot.dataset.filmSweep = "built";
+  // The desktop re-parents THE window into this slot; the film has no travel,
+  // so it builds the simpler sheet inline — same chrome story (Quick Look
+  // first, Downright after the line passes), lighter bones.
+  slot.innerHTML = `<div class="sweep__window" data-sweep-window data-fingerprint="sweep" data-crop-ok>
+    <div class="sweep__bar">
+      <span class="traffic-lights traffic-lights--ql" aria-hidden="true"><i></i></span>
+      <span class="traffic-lights traffic-lights--app" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="sweep__title">sample.md</span>
+      <span class="sweep__action sweep__action--ql">Open with…</span>
+      <span class="sweep__action sweep__action--app">Downright · Live</span>
+    </div>
+    <div class="sweep__surface" data-sweep-surface>
+      <i class="sweep__line" data-sweep-line aria-hidden="true"></i>
+    </div>
+  </div>`;
+  const surface = slot.querySelector<HTMLElement>("[data-sweep-surface]");
+  if (!surface) return;
   const source = renderSampleBlocks(doc.current.text);
   const fragment = document.createDocumentFragment();
   const blocks: { raw: HTMLElement; rendered: HTMLElement; at: number }[] = [];

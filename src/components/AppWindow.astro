@@ -45,6 +45,10 @@ const { editable = false, flip = true, label = "sample.md", view = "document" } 
           <small data-dirty-label hidden>— Edited</small>
         </span>
         <div class="app-window__bar-controls">
+          {/* The Quick Look face: when the window poses as macOS's plain
+              preview sheet (data-chrome="ql", the gap act), its own chrome
+              stands down and the sheet's one action stands up. */}
+          <span class="app-window__ql-action" aria-hidden="true">Open with…</span>
           {flip && (
             <div class="app-window__segmented" role="tablist" aria-label="Window mode">
               <button type="button" role="tab" aria-selected={view === "document" ? "true" : "false"} data-view-button="document">Document</button>

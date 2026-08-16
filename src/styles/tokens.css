@@ -75,10 +75,12 @@
   --measure: 70ch;
   --page-max: 1800px;
   --content-max: 1120px;
-  --radius-chip: 4px;
-  --radius-button: 8px;
-  --radius-panel: 10px;
-  --radius-window: 12px;
+  /* Radii intentionally run softer than the app chrome (Motion.swift) —
+     the site's skin is the marketing surface, not the product surface. */
+  --radius-chip: 7px;
+  --radius-button: 12px;
+  --radius-panel: 16px;
+  --radius-window: 20px;
   --focus-ring: color-mix(in oklab, var(--accent) 40%, transparent);
   --window-shadow: 0 22px 52px -26px color-mix(in srgb, #1a1512 58%, transparent);
 }
