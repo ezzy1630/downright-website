@@ -1,0 +1,22 @@
+---
+import AnswerPage from "../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../data/seo";
+---
+
+<AnswerPage title="Downright engineering | Native Markdown rendering" trail="Engineering" updated={reviewedLabel} description={pageMeta.engineering.description} markdownPath={pageMeta.engineering.markdownPath ?? "/engineering.md"}>
+  <p>Downright is a native macOS Markdown editor and viewer. Its design keeps raw text as the source of truth and adds rendering, editing, file watching, Quick Look, and terminal access around that file.</p>
+
+  <h2>Native rendering</h2>
+  <p>The app uses AppKit and TextKit 2 for the document surface, with native layout for Markdown decoration. There is no WebView, browser runtime, remote renderer, or required project database between the file and the page.</p>
+
+  <h2>One document, multiple views</h2>
+  <p>Document, Split, and Source Focus views share the same text storage. Selection, undo, source/display mapping, and reading position are treated as part of the document rather than separate copies that can drift.</p>
+
+  <h2>External writes</h2>
+  <p>A file watcher detects writes from other processes and routes them through an explicit review path. The renderer can mark changed words while preserving the user's dirty local edit instead of replacing it silently.</p>
+
+  <h2>System integration</h2>
+  <p>The same source supports the Downright app, Quick Look preview, Finder thumbnails, Spotlight metadata, and the <code>down</code> command. The app is useful for one file before it becomes a workspace.</p>
+
+  <p class="answer-sources">Read the implementation details in the <a href="https://github.com/ezzy1630/Downright/blob/main/Docs/ARCHITECTURE.md" target="_blank" rel="noreferrer">architecture document</a> and inspect the <a href="https://github.com/ezzy1630/Downright" target="_blank" rel="noreferrer">source repository</a>.</p>
+</AnswerPage>

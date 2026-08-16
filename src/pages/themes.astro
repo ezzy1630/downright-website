@@ -11,13 +11,12 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import AppWindow from "../components/AppWindow.astro";
 import { copy, themes, themeColorEntries } from "../data/site";
+import { pageMeta, reviewedOn } from "../data/seo";
 ---
 
 <BaseLayout
-  title="Themes | Downright"
-  description={copy.description}
-  markdownPath="/themes.md"
-  imagePath="/og/themes.svg"
+  {...pageMeta.themes}
+  dateModified={reviewedOn}
 >
   <main class="subpage themes-page" data-theme-zone>
     <section class="subpage-hero">

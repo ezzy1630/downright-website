@@ -32,8 +32,8 @@ If Node.js 18 or newer is already installed, run:
 npx --yes downright-installer
 ```
 
-Both paths install the signed release into `/Applications` and keep Sparkle
-updates enabled.
+Both paths install the same rolling signed main-channel DMG into
+`/Applications` and keep Sparkle updates enabled.
 
 ## Is there a Homebrew cask?
 
@@ -43,7 +43,8 @@ Yes. Install the production app from the public tap:
 brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright
 ```
 
-It installs Downright into `/Applications` and keeps Sparkle updates. The
+It resolves to the same rolling DMG as the website, curl, and npm paths, installs
+Downright into `/Applications`, and keeps Sparkle updates. The
 tap-free `brew install --cask downright` form still depends on official
 Homebrew Cask review.
 

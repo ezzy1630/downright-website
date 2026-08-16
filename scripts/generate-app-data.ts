@@ -181,7 +181,7 @@ function tokenCss(themes, motion) {
     "  --band-bg: var(--bg);", "  --band-surface: var(--surface);", "  --band-text: var(--text);",
     "  --band-text-secondary: var(--text-secondary);", "  --band-heading: var(--heading);", "  --band-rule: var(--rule);",
   ];
-  return `/* Generated from /Volumes/Neural/Downright/Sources/MarkdownRender/Themes and Motion.swift. */\n:root {\n${cssFor(lightFallback, lightFallback)}\n${bandLines.join("\n")}\n${motionLines.join("\n")}\n${curveLines.join("\n")}\n  --font-display: "New York", "Iowan Old Style", Newsreader, Georgia, serif;\n  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Inter, Arial, sans-serif;\n  --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;\n  --measure: 70ch;\n  --page-max: 1800px;\n  --content-max: 1120px;\n  --radius-chip: 4px;\n  --radius-button: 8px;\n  --radius-panel: 10px;\n  --radius-window: 12px;\n  --focus-ring: color-mix(in oklab, var(--accent) 40%, transparent);\n  --window-shadow: 0 22px 52px -26px color-mix(in srgb, #1a1512 58%, transparent);\n}\n\n${blocks.join("\n\n")}\n`;
+  return `/* Generated from the native app's theme and motion sources. */\n:root {\n${cssFor(lightFallback, lightFallback)}\n${bandLines.join("\n")}\n${motionLines.join("\n")}\n${curveLines.join("\n")}\n  --font-display: "New York", "Iowan Old Style", Newsreader, Georgia, serif;\n  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Inter, Arial, sans-serif;\n  --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, monospace;\n  --measure: 70ch;\n  --page-max: 1800px;\n  --content-max: 1120px;\n  --radius-chip: 4px;\n  --radius-button: 8px;\n  --radius-panel: 10px;\n  --radius-window: 12px;\n  --focus-ring: color-mix(in oklab, var(--accent) 40%, transparent);\n  --window-shadow: 0 22px 52px -26px color-mix(in srgb, #1a1512 58%, transparent);\n}\n\n${blocks.join("\n\n")}\n`;
 }
 
 async function main() {
@@ -198,14 +198,15 @@ async function main() {
   const plist = await read(join(appRoot, "Config/Downright-Info.plist"));
   const versionSource = await read(join(appRoot, "Config/version.env"));
   const version = versionSource.match(/^MARKETING_VERSION=(.+)$/m)?.[1]?.trim() ?? "unknown";
+  const currentProjectVersion = versionSource.match(/^CURRENT_PROJECT_VERSION=(.+)$/m)?.[1]?.trim() ?? "unknown";
   const repositoryRaw = command(["git", "config", "--get", "remote.origin.url"]);
   const repository = repositoryRaw.replace(/^git@github\.com:/, "https://github.com/").replace(/\.git$/, "") || null;
-// The signed, notarized DMG ships on the latest GitHub release; the download
+// The signed, notarized DMG ships on the rolling latest GitHub release; the download
 // button is wired hot to it (an env override can still pin a specific URL).
 const downloadUrl = process.env.PUBLIC_DOWNLOAD_URL?.trim()
   || `https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg`;
 // Sponsorship is an invitation, never a gate: the owner's GitHub Sponsors.
-const owner = repository.split("/").at(-2) ?? "ezzy1630";
+const owner = repository?.split("/").at(-2) ?? "ezzy1630";
 const sponsorsUrl = `https://github.com/sponsors/${owner}`;
   const sourceCommit = command(["git", "rev-parse", "HEAD"], "unknown");
   const dirty = Boolean(command(["git", "status", "--porcelain"]));
@@ -215,7 +216,7 @@ const sponsorsUrl = `https://github.com/sponsors/${owner}`;
   await writeJson("benchmarks.json", { ...parseBenchmarkPayload(performance), sourceCommit, generatedAt });
   await writeJson("changelog.json", { ...parseChangelog(changelog), sourceCommit, generatedAt });
   await writeJson("facts.json", {
-    sourceCommit, generatedAt, sourceWorkingTreeDirty: dirty, version, minimumMacOS: "14.0", license: "MIT", artifactName: "Downright.dmg",
+    sourceCommit, generatedAt, sourceWorkingTreeDirty: dirty, version, currentProjectVersion, minimumMacOS: "14.0", license: "MIT", artifactName: "Downright.dmg",
     repository, sponsorsUrl, supportedExtensions: parseExtensions(plist), downloadUrl,
   });
   await writeJson("motion.json", motion);

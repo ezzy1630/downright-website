@@ -1,0 +1,22 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="Markdown workflow for Claude Code on macOS" trail="Claude Code" updated={reviewedLabel} description={pageMeta.claudeCode.description} markdownPath={pageMeta.claudeCode.markdownPath ?? "/markdown-for-agents/claude-code.md"}>
+  <p>Claude Code works with files in a repository. Downright gives those Markdown files a native Mac reading and review surface without adding a vault, sync service, or provider-specific plugin.</p>
+
+  <h2>Keep the important files visible</h2>
+  <p>Open a plan, README, changelog, or project note in Downright before asking Claude Code to work. The file remains ordinary Markdown, so the agent and the person are looking at the same source.</p>
+
+  <h2>Review external writes</h2>
+  <p>When Claude Code rewrites the open file, Downright detects the external change and marks the changed words. You can inspect the result in context, keep local edits, or accept the agent's version.</p>
+
+  <h2>Useful repository files</h2>
+  <ul>
+    <li><code>CLAUDE.md</code> for project-specific agent guidance.</li>
+    <li><code>README.md</code> for the public project contract.</li>
+    <li>Plan and task Markdown files for work that needs human review.</li>
+    <li><code>CHANGELOG.md</code> and release notes for durable project history.</li>
+  </ul>
+</AnswerPage>

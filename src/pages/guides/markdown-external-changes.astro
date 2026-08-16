@@ -1,0 +1,24 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="Review Markdown files changed by another process" trail="External Markdown changes" updated={reviewedLabel} description={pageMeta.externalChanges.description} markdownPath={pageMeta.externalChanges.markdownPath ?? "/guides/markdown-external-changes.md"}>
+  <p>When Claude Code, Codex, a script, an editor, or another process rewrites an open Markdown file, the safe behavior is to show the change and let the reader decide. Downright treats the external rewrite as a review event rather than silently discarding local work.</p>
+
+  <h2>What happens in Downright</h2>
+  <ol>
+    <li>The app notices that the file changed outside the current document session.</li>
+    <li>It compares the local and external versions and marks changed words in the rendered document.</li>
+    <li>The document stays available while you inspect the rewrite.</li>
+    <li>You choose whether to keep your version or take the external version.</li>
+  </ol>
+
+  <h2>Why this matters for coding agents</h2>
+  <p>Agents often rewrite plans, task lists, README files, and implementation notes while a person is reading them. A normal file watcher can refresh the screen, but a refresh is not a review. Word-level changes preserve the question that matters: what did the agent actually alter?</p>
+
+  <h2>Keep the source in charge</h2>
+  <p>Downright decorates the original text storage. It does not normalize the document into a separate database or upload it to a server. The file path, bytes, and user decision remain part of the workflow.</p>
+
+  <p class="answer-sources">Related: <a href="/markdown-for-agents/claude-code/">Claude Code workflow</a>, <a href="/markdown-for-agents/codex/">Codex workflow</a>, and <a href="/engineering/">native rendering architecture</a>.</p>
+</AnswerPage>

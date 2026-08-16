@@ -46,7 +46,6 @@ initDrop();
 initPalette();
 initShare();
 initDownloadFunnel();
-initTerminalInstall();
 magnetize();
 // Film detection precedes lazy scene mounting: gap and travel otherwise build
 // desktop choreography into the seven-beat mobile composition.
@@ -188,75 +187,6 @@ function setupChrome(): void {
     status.hidden = true;
     status.classList.remove("is-open");
   });
-}
-
-function initTerminalInstall(): void {
-  const timers = new WeakMap<HTMLButtonElement, number>();
-
-  for (const install of document.querySelectorAll<HTMLElement>(".terminal-install")) {
-    const trigger = install.querySelector<HTMLButtonElement>(".terminal-install__trigger");
-    const menu = install.querySelector<HTMLElement>(".terminal-install__menu");
-    if (!trigger || !menu) continue;
-
-    const setOpen = (open: boolean): void => {
-      if (open) {
-        const spaceBelow = window.innerHeight - trigger.getBoundingClientRect().bottom;
-        const menuHeight = menu.getBoundingClientRect().height;
-        install.dataset.menuPlacement = menuHeight + 16 > spaceBelow ? "above" : "below";
-        install.dataset.open = "true";
-        trigger.setAttribute("aria-expanded", "true");
-        menu.setAttribute("aria-hidden", "false");
-        menu.removeAttribute("inert");
-        return;
-      }
-
-      install.dataset.open = "false";
-      trigger.setAttribute("aria-expanded", "false");
-      menu.setAttribute("aria-hidden", "true");
-      menu.setAttribute("inert", "");
-    };
-
-    trigger.addEventListener("click", () => setOpen(install.dataset.open !== "true"));
-    document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape" || install.dataset.open !== "true") return;
-      setOpen(false);
-      trigger.focus();
-    });
-  }
-
-  for (const option of document.querySelectorAll<HTMLButtonElement>("[data-install-command]")) {
-    const label = option.querySelector<HTMLElement>("[data-install-label]");
-    if (!label) continue;
-
-    const defaultLabel = label.textContent?.trim() || "Copy";
-    option.addEventListener("click", async () => {
-      const command = option.dataset.installCommand;
-      if (!command) return;
-
-      const previousTimer = timers.get(option);
-      if (previousTimer) window.clearTimeout(previousTimer);
-
-      if (!navigator.clipboard) {
-        option.dataset.copyState = "unavailable";
-        label.textContent = "Select command";
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(command);
-        option.dataset.copyState = "copied";
-        label.textContent = "Copied";
-      } catch {
-        option.dataset.copyState = "unavailable";
-        label.textContent = "Try again";
-      }
-
-      timers.set(option, window.setTimeout(() => {
-        delete option.dataset.copyState;
-        label.textContent = defaultLabel;
-      }, 1800));
-    });
-  }
 }
 
 setupChrome();

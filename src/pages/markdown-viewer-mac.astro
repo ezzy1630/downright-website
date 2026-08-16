@@ -1,10 +1,11 @@
 ---
 import AnswerPage from "../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../data/seo";
 
-const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
+const updated = reviewedLabel;
 ---
 
-<AnswerPage title="How to preview and read Markdown on a Mac" trail="Markdown viewer" updated={updated} markdownPath="/markdown-viewer-mac.md">
+<AnswerPage title="How to preview and read Markdown on a Mac" trail="Markdown viewer" updated={updated} description={pageMeta.viewer.description} markdownPath={pageMeta.viewer.markdownPath ?? "/markdown-viewer-mac.md"}>
   <p>Markdown is plain text, but a plain-text preview is not always a good reading surface. On a Mac, Finder and Quick Look are useful for a fast glance. A long README, a refactor note, or an agent-generated document deserves a more deliberate viewer.</p>
 
   <h2>Use Quick Look for the glance</h2>
@@ -21,5 +22,5 @@ const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric
     <li>Need a web-published note or a vault? Choose a tool built for that workflow instead.</li>
   </ul>
 
-  <p class="answer-sources">Product facts: <a href="/privacy">privacy</a>, <a href="/known-gaps">release evidence</a>, and the <a href="https://github.com/ezzy1630/Downright" target="_blank" rel="noreferrer">native source repository</a>.</p>
+  <p class="answer-sources">Product facts: <a href="/privacy/">privacy</a>, <a href="/known-gaps/">release evidence</a>, and the <a href="https://github.com/ezzy1630/Downright" target="_blank" rel="noreferrer">native source repository</a>.</p>
 </AnswerPage>

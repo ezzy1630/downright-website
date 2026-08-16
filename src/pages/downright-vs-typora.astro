@@ -1,10 +1,11 @@
 ---
 import AnswerPage from "../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../data/seo";
 
-const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
+const updated = reviewedLabel;
 ---
 
-<AnswerPage title="Downright vs Typora" trail="Downright vs Typora" updated={updated} markdownPath="/downright-vs-typora.md">
+<AnswerPage title="Downright vs Typora" trail="Downright vs Typora" updated={updated} description={pageMeta.typora.description} markdownPath={pageMeta.typora.markdownPath ?? "/downright-vs-typora.md"}>
   <p>Downright and Typora are both serious Markdown editors. They make different promises about the center of the experience.</p>
 
   <h2>Choose Downright if…</h2>
@@ -25,5 +26,5 @@ const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric
   <h2>The practical difference</h2>
   <p>Typora is a focused writing environment. Downright is a file-aware review surface. Downright keeps the source view close, treats external writes as a first-class event, and makes the unchanged file the authority. Neither choice is universally better. Choose the one that matches the work you actually do.</p>
 
-  <p class="answer-sources">Compare the publishers directly: <a href="https://store.typora.io/" target="_blank" rel="noreferrer">Typora pricing and FAQ</a> and <a href="/markdown-editor-mac-free">the full editor comparison</a>.</p>
+  <p class="answer-sources">Compare the publishers directly: <a href="https://store.typora.io/" target="_blank" rel="noreferrer">Typora pricing and FAQ</a> and <a href="/markdown-editor-mac-free/">the full editor comparison</a>.</p>
 </AnswerPage>

@@ -1,11 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { copy, facts } from "../data/site";
+import { facts } from "../data/site";
+import { pageMeta, reviewedOn } from "../data/seo";
 
 const hasPublicArtifact = Boolean(facts.downloadUrl);
 ---
 
-<BaseLayout title="Known gaps | Downright" description={copy.description} markdownPath="/known-gaps.md" imagePath="/og/index.svg">
+<BaseLayout {...pageMeta.knownGaps} dateModified={reviewedOn}>
   <main class="subpage legal-page known-gaps-page">
     <section class="subpage-hero">
       <p class="subpage-hero__path">Downright / Known gaps</p>
@@ -17,9 +18,9 @@ const hasPublicArtifact = Boolean(facts.downloadUrl);
       <ul>
         <li><strong>Domain:</strong> <code>downright.cc</code> is the verified production domain, connected to Vercel through Porkbun DNS.</li>
         <li><strong>Artifact:</strong> <code>{facts.artifactName}</code> is available at {hasPublicArtifact ? <a href={facts.downloadUrl} target="_blank" rel="noreferrer">the public GitHub Release URL</a> : "no signed, notarized, stapled public URL is configured"}.</li>
-        <li><strong>One-line install:</strong> the hosted <code>curl</code> installer and npm launcher use the same checksum- and signature-verified release path.</li>
-        <li><strong>Homebrew:</strong> the public <a href="https://github.com/ezzy1630/homebrew-downright" target="_blank" rel="noreferrer">tap</a> installs the production DMG; official Homebrew Cask review remains separate.</li>
-        <li><strong>Repository:</strong> <a href={facts.repository ?? "/"}>{facts.repository ?? "not configured"}</a> is the source remote; public address confirmation remains open.</li>
+        <li><strong>One-line install:</strong> the hosted <code>curl</code> installer and npm launcher use the same checksum- and signature-verified rolling release path as the direct DMG.</li>
+        <li><strong>Homebrew:</strong> the public <a href="https://github.com/ezzy1630/homebrew-downright" target="_blank" rel="noreferrer">tap</a> resolves to that same rolling DMG; official Homebrew Cask review remains separate.</li>
+        <li><strong>Repository:</strong> <a href={facts.repository ?? "/"}>{facts.repository ?? "not configured"}</a> is the public source remote.</li>
         <li><strong>Brand:</strong> the app-derived vector mark is canonical; the tactile native raster remains product artwork.</li>
       </ul>
 
@@ -29,7 +30,7 @@ const hasPublicArtifact = Boolean(facts.downloadUrl);
 
       <h2>Payload provenance</h2>
       <p>Native source commit <code>{facts.sourceCommit}</code>. Payload generated <code>{new Date(facts.generatedAt).toISOString()}</code>. Native working tree dirty at generation: <strong>{facts.sourceWorkingTreeDirty ? "yes; unrelated source changes were preserved" : "no"}</strong>.</p>
-      <p>The technical budgets, accessibility audits, Markdown mirrors, <code>llms.txt</code>, RSS, and social OG images are generated and verified locally. The public artifact was verified on the release Mac; clean-machine download and install verification remains pending.</p>
+      <p>The technical budgets, accessibility audits, Markdown mirrors, <code>llms.txt</code>, RSS, and OG images are generated and verified locally. Checksum, signature, notarization, and stapling evidence exists for the public artifact; clean-machine download and install verification remains pending.</p>
     </article>
   </main>
 </BaseLayout>

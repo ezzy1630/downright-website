@@ -36,8 +36,8 @@ Free. Open source. MIT. No account. Your Markdown stays on your Mac.
 ## Source
 
 - Repository: https://github.com/ezzy1630/Downright
-- App payload commit: 5abc2b68a356dc04f13ae647300efd0b86899342
-- App payload generated: 2026-08-16T05:04:29.596Z
+- App payload commit: 85964fb05a9b2a43191da667370801c78a841411
+- App payload generated: 2026-08-16T17:44:32.772Z
 - Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
 
 Download: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg

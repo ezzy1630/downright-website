@@ -1,0 +1,27 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="How to preview Markdown with Quick Look on a Mac" trail="Quick Look Markdown" updated={reviewedLabel} description={pageMeta.quickLook.description} markdownPath={pageMeta.quickLook.markdownPath ?? "/guides/quick-look-markdown.md"}>
+  <p>To preview a Markdown file on a Mac, select it in Finder and press Space. Quick Look gives you a fast glance without opening an editor. When the document needs full rendering, editing, or review of an external rewrite, open the same file in Downright.</p>
+
+  <h2>Use Finder and Space for the glance</h2>
+  <ol>
+    <li>Open a Finder window and select the <code>.md</code> file.</li>
+    <li>Press Space to open Quick Look.</li>
+    <li>Press Space again to close the preview.</li>
+  </ol>
+  <p>Quick Look is ideal for checking a README, plan, or short note. It is not a full editing surface, and a narrow Finder preview can make long documents harder to read.</p>
+
+  <h2>Use Downright for the document</h2>
+  <p>Downright provides a native reading and editing surface for the same local file. Headings, tables, callouts, tasks, footnotes, math, Mermaid, and code stay together. The source remains the authority.</p>
+  <p>When another process changes the open file, Downright marks the external rewrite and lets you keep your local version or take the other version instead of silently replacing dirty work.</p>
+
+  <h2>Quick decision</h2>
+  <ul>
+    <li><strong>Two-second check:</strong> Finder and Quick Look.</li>
+    <li><strong>Read or edit a long file:</strong> Downright.</li>
+    <li><strong>Review an agent rewrite:</strong> Downright with the file open.</li>
+  </ul>
+</AnswerPage>

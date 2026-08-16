@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { changelog, copy, facts } from "../data/site";
+import { changelog, facts } from "../data/site";
+import { pageMeta, reviewedOn } from "../data/seo";
 
 type ChangelogEntry = (typeof changelog.entries)[number];
 type ChangelogGroup = { version: string; date: string; entries: ChangelogEntry[] };
@@ -12,7 +13,7 @@ for (const entry of changelog.entries) {
 }
 ---
 
-<BaseLayout title="Changelog | Downright" description={copy.description} markdownPath="/changelog.md" imagePath="/og/changelog.svg">
+<BaseLayout {...pageMeta.changelog} dateModified={reviewedOn}>
   <main class="subpage changelog-page">
     <section class="subpage-hero">
       <p class="subpage-hero__path">Downright / Changelog</p>

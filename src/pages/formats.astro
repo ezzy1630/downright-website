@@ -1,0 +1,25 @@
+---
+import AnswerPage from "../components/AnswerPage.astro";
+import { facts } from "../data/site";
+import { pageMeta, reviewedLabel } from "../data/seo";
+---
+
+<AnswerPage title="Markdown formats supported by Downright" trail="Formats" updated={reviewedLabel} description={pageMeta.formats.description} markdownPath={pageMeta.formats.markdownPath ?? "/formats.md"}>
+  <p>Downright opens ordinary Markdown files directly from the filesystem. It supports the extensions used by project documentation, coding-agent instructions, notebooks, and technical notes.</p>
+
+  <h2>File extensions</h2>
+  <p>{facts.supportedExtensions.map((extension) => `.${extension}`).join(", ")}</p>
+
+  <h2>Rendered document features</h2>
+  <ul>
+    <li>CommonMark and GitHub-flavored Markdown structure.</li>
+    <li>Headings, lists, block quotes, tables, links, images, and footnotes.</li>
+    <li>Tasks and GitHub-style callouts.</li>
+    <li>Fenced code blocks with native syntax highlighting.</li>
+    <li>Math and Mermaid diagrams rendered in the document.</li>
+    <li>Front matter and file-path references such as <code>Document.swift:42</code>.</li>
+  </ul>
+
+  <h2>What stays unchanged</h2>
+  <p>Rendering decorates the source text. Downright does not convert the file into a proprietary document database, silently normalize its bytes, or require a workspace before opening it.</p>
+</AnswerPage>

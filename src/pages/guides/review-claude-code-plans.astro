@@ -1,0 +1,27 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="How to review Claude Code plans in Markdown" trail="Review Claude Code plans" updated={reviewedLabel} description={pageMeta.claudePlans.description} markdownPath={pageMeta.claudePlans.markdownPath ?? "/guides/review-claude-code-plans.md"}>
+  <p>Claude Code plans are easiest to review when they remain ordinary Markdown files in the repository. Open the plan in Downright, read the rendered structure, and keep the file visible while Claude Code or another process updates it.</p>
+
+  <h2>A simple review loop</h2>
+  <ol>
+    <li>Open the plan file in Downright before the agent starts changing it.</li>
+    <li>Use headings, tasks, links, and the outline to understand the intended work.</li>
+    <li>Let the agent update the same file when the plan evolves.</li>
+    <li>Inspect the highlighted external changes before choosing Keep Mine or Take Theirs.</li>
+    <li>Use Source Focus when the exact Markdown syntax or path matters.</li>
+  </ol>
+
+  <h2>What to check before accepting a plan</h2>
+  <ul>
+    <li>Does the plan name the actual files and acceptance surface?</li>
+    <li>Are implementation, verification, and remaining blockers separate?</li>
+    <li>Did the agent change scope, assumptions, or destructive actions?</li>
+    <li>Are commands and test gates written precisely enough to rerun?</li>
+  </ul>
+
+  <p>Downright is not a chat panel or an agent controller. It is the native document surface for reviewing the file the agent is changing.</p>
+</AnswerPage>

@@ -1,0 +1,27 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="Downright vs Marked" trail="Downright vs Marked" updated={reviewedLabel} description={pageMeta.marked.description} markdownPath={pageMeta.marked.markdownPath ?? "/compare/marked.md"}>
+  <p>Marked is a dedicated Markdown preview application for Mac workflows that already have an editor. Downright combines preview, editing, source inspection, and external-change review in one native app.</p>
+
+  <h2>Choose Downright if…</h2>
+  <ul>
+    <li>You need to edit the Markdown as well as read its rendered form.</li>
+    <li>You want a native file watcher and word-level review for agent rewrites.</li>
+    <li>You want Quick Look, Finder, Spotlight, and the <code>down</code> CLI in the same product.</li>
+    <li>You prefer a free MIT-licensed application with no account requirement.</li>
+  </ul>
+
+  <h2>Choose Marked if…</h2>
+  <ul>
+    <li>You already have a writing editor and want a dedicated preview companion.</li>
+    <li>You value Marked's existing export, style, and editor integration workflow.</li>
+  </ul>
+
+  <h2>The practical difference</h2>
+  <p>Marked is a preview specialist. Downright is a file-aware Markdown workspace for reading, editing, rendering, and reviewing files that other processes may change.</p>
+
+  <p class="answer-sources">Source: <a href="https://marked2app.com/" target="_blank" rel="noreferrer">Marked</a> and the <a href="/markdown-editor-mac-free/">full editor comparison</a>.</p>
+</AnswerPage>

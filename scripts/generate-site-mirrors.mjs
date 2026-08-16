@@ -8,6 +8,21 @@ const readJson = (name) => readFile(join(dataRoot, name), "utf8").then(JSON.pars
 const plain = (value) => value.replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
 const entityDescription = "Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.";
 const [themes, benchmarks, facts, changelog] = await Promise.all(["themes.json", "benchmarks.json", "facts.json", "changelog.json"].map(readJson));
+const answerRoutes = [
+  ["/guides/quick-look-markdown/", "How to preview Markdown with Quick Look on a Mac"],
+  ["/guides/open-md-file-mac/", "How to open a .md file on a Mac"],
+  ["/guides/markdown-external-changes/", "Review Markdown files changed by another process"],
+  ["/guides/review-claude-code-plans/", "How to review Claude Code plans in Markdown"],
+  ["/markdown-for-agents/claude-code/", "Markdown workflow for Claude Code on macOS"],
+  ["/markdown-for-agents/codex/", "Markdown workflow for Codex on macOS"],
+  ["/markdown-for-agents/agents-md/", "How to read and review AGENTS.md files on a Mac"],
+  ["/compare/macdown/", "Downright vs MacDown"],
+  ["/compare/marked/", "Downright vs Marked"],
+  ["/formats/", "Markdown formats supported by Downright"],
+  ["/engineering/", "Downright engineering"],
+  ["/benchmarks/", "Downright Markdown rendering benchmarks"],
+  ["/press/", "Downright press and product facts"],
+];
 
 const index = `# Downright
 
@@ -88,11 +103,11 @@ This is the current launch record for the approved site plan. The site does not 
 
 ## Release inputs
 
-- Domain: https://downright.cc is the verified production domain, connected to Vercel through Porkbun DNS.
+- Domain: https://downright.cc is the verified production domain.
 - Artifact: ${facts.artifactName} is available at ${facts.downloadUrl || "no signed, notarized, stapled public URL is configured"}.
-- One-line install: curl -fsSL https://downright.cc/install | bash, or npx --yes downright-installer; both use the same verified release path.
-- Homebrew: the public tap at https://github.com/ezzy1630/homebrew-downright installs the production DMG with brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright; tap-free official Homebrew Cask review remains separate.
-- Repository: ${facts.repository ?? "not configured"} is the source remote; public address confirmation remains open.
+- One-line install: curl -fsSL https://downright.cc/install | bash, or npx --yes downright-installer; both use the same first-party installer path and rolling DMG.
+- Homebrew: the public tap at https://github.com/ezzy1630/homebrew-downright resolves to the same rolling DMG with brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright; tap-free official Homebrew Cask review remains separate.
+- Repository: ${facts.repository ?? "not configured"} is the public source remote.
 - Brand: the app-derived vector mark is canonical; the tactile native raster remains product artwork.
 
 ## Native evidence
@@ -107,7 +122,7 @@ The approved Quick Look, Finder, conflict, density, structural zoom, theme, spli
 - Payload generated: ${facts.generatedAt}
 - Native working tree dirty at generation: ${facts.sourceWorkingTreeDirty ? "yes; unrelated source changes were preserved" : "no"}
 
-The technical site budgets, accessibility audits, Markdown mirrors, llms.txt, RSS, and social OG images are generated and verified locally. Clean-machine download and install verification remains pending the artifact URL.
+The technical site budgets, accessibility audits, Markdown mirrors, llms.txt, RSS, and OG images are generated and verified locally. Checksum, signature, notarization, and stapling evidence exists for the public artifact; clean-machine download and install verification remains pending.
 `;
 
 const llms = `# Downright
@@ -119,15 +134,18 @@ ${entityDescription} It integrates with Finder, Quick Look, and the down command
 ## Routes
 
 - https://downright.cc/ - product argument and interactive document demos
-- https://downright.cc/themes - six source-derived themes
-- https://downright.cc/changelog - generated native-app changelog
-- https://downright.cc/privacy - privacy promises
-- https://downright.cc/known-gaps - current release and evidence gaps
-- https://downright.cc/markdown-viewer-mac - how to preview and read Markdown on a Mac
-- https://downright.cc/markdown-editor-mac-free - free Markdown editors compared
-- https://downright.cc/downright-vs-typora - Downright and Typora
-- https://downright.cc/downright-vs-obsidian - Downright and Obsidian
-- https://downright.cc/faq - product FAQ
+- https://downright.cc/download/ - signed macOS download and install choices
+- https://downright.cc/releases/1.0.16/ - current release record
+- https://downright.cc/themes/ - six source-derived themes
+- https://downright.cc/changelog/ - generated native-app changelog
+- https://downright.cc/privacy/ - privacy promises
+- https://downright.cc/known-gaps/ - current release and evidence gaps
+- https://downright.cc/markdown-viewer-mac/ - how to preview and read Markdown on a Mac
+- https://downright.cc/markdown-editor-mac-free/ - free Markdown editors compared
+- https://downright.cc/downright-vs-typora/ - Downright and Typora
+- https://downright.cc/downright-vs-obsidian/ - Downright and Obsidian
+- https://downright.cc/faq/ - product FAQ
+${answerRoutes.map(([path, title]) => `- https://downright.cc${path} - ${title}`).join("\n")}
 - https://downright.cc/install - checksum- and signature-verifying macOS installer
 - https://downright.cc/index.md - Markdown version of the homepage
 - https://downright.cc/themes.md - Markdown theme data
@@ -136,7 +154,6 @@ ${entityDescription} It integrates with Finder, Quick Look, and the down command
 
 ## Source and evidence
 
-- Native source: /Volumes/Neural/Downright
 - App payload commit: ${facts.sourceCommit}
 - Payload generated: ${facts.generatedAt}
 - Benchmark corpus: ${benchmarks.corpus}
@@ -151,11 +168,11 @@ ${entityDescription} It integrates with Finder, Quick Look, and the down command
 - Supported extensions: ${facts.supportedExtensions.map((extension) => `.${extension}`).join(" ")}
 - Download artifact: ${facts.artifactName}
 - Download URL: ${facts.downloadUrl || "not configured until a signed and notarized artifact is verified"}
-- Curl install: curl -fsSL https://downright.cc/install | bash
-- npm install: npx --yes downright-installer
+- Curl install: curl -fsSL https://downright.cc/install | bash (same rolling DMG)
+- npm install: npx --yes downright-installer (same first-party installer and rolling DMG)
 
 Homebrew tap: https://github.com/ezzy1630/homebrew-downright
-Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright
+Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright (same rolling DMG)
 The tap-free cask command remains pending official Homebrew Cask review. Its verified production domain is https://downright.cc.
 `;
 

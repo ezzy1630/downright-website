@@ -1,8 +1,7 @@
 # Downright website
 
-Standalone Astro site for Downright. The native app checkout at
-`/Volumes/Neural/Downright` remains the source of product claims; this project
-contains the marketing surface only.
+Standalone Astro site for Downright. The native app repository remains the
+source of product claims; this project contains the marketing surface only.
 
 Downright is a free, open-source, native Markdown editor and viewer for macOS.
 It renders files exactly, reviews agent rewrites live, never modifies your
@@ -47,29 +46,30 @@ npm run preview
 
 ## Download release
 
-Set `PUBLIC_DOWNLOAD_URL` to the stable signed, notarized, stapled macOS
-artifact only after it has been verified. `.env.example` points at the latest
-GitHub Release `Downright.dmg` alias, so the CTA follows the newest published
-main-branch release; it stays gated if the value is absent.
+The generated app facts point at the rolling signed, notarized, stapled macOS
+artifact alias after release verification. Every verified push to the app's
+`main` branch publishes the next build through that alias. `PUBLIC_DOWNLOAD_URL` remains
+available when a deployment needs to pin a specific immutable asset.
 
 ## Pages
 
 - `/` — product homepage
-- `/changelog` — source-grounded product updates
-- `/themes` — six semantic theme palettes
-- `/known-gaps` — current release and native-evidence gaps
+- `/download/` — signed release and installation methods
+- `/releases/1.0.16/` — current release record
+- `/changelog/` — source-grounded product updates
+- `/themes/` — six semantic theme palettes
+- `/known-gaps/` — current release and native-evidence gaps
 - `/index.md`, `/changelog.md`, `/themes.md`, `/llms.txt` — machine-readable content
 
 ## Guide routes
 
-The answer pages are /markdown-viewer-mac, /markdown-editor-mac-free,
-/downright-vs-typora, /downright-vs-obsidian, and /faq.
+The answer pages cover Markdown viewing, opening `.md` files, Quick Look,
+external agent changes, Claude Code, Codex, AGENTS.md, comparisons, formats,
+engineering, benchmarks, press facts, and the FAQ.
 
 ## Known gaps
 
-The site intentionally publishes its remaining launch gaps at `/known-gaps` and
-`/known-gaps.md`: the public tap is live while official Homebrew Cask review,
-the public repo address and mark evolution remain open, and the native
-Quick Look/Finder/conflict/agent capture sessions are not present in the current
-Verification inventory. Clean-machine release verification remains a separate
-gate. No product evidence is fabricated to cover those gaps.
+The site intentionally publishes its remaining launch gaps at `/known-gaps/` and
+`/known-gaps.md`. The public tap resolves to the same rolling artifact while official Homebrew Cask review and
+clean-machine release verification remain separate gates. No product evidence
+is fabricated to cover those gaps.

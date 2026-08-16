@@ -1,4 +1,4 @@
-/* Generated from /Volumes/Neural/Downright/Sources/MarkdownRender/Themes and Motion.swift. */
+/* Generated from the native app's theme and motion sources. */
 :root {
   --bg: #f7f4ee;
   --surface: #fffdfa;
@@ -43,8 +43,7 @@
   --syntax-diff-header: #6b6259;
   --cta-fill: #307afe;
   --cta-ink: #181513;
-  /* Bands use the page ground so scene handoffs do not flash a second panel.
-     Their cards, rules, and typography still carry the visual hierarchy. */
+  /* Bands are quieter surfaces, not a second hard-coded dark theme. */
   --band-bg: var(--bg);
   --band-surface: var(--surface);
   --band-text: var(--text);

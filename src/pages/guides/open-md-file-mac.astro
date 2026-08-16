@@ -1,0 +1,21 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="How to open a .md file on a Mac" trail="Open .md files" updated={reviewedLabel} description={pageMeta.openMarkdown.description} markdownPath={pageMeta.openMarkdown.markdownPath ?? "/guides/open-md-file-mac.md"}>
+  <p>A <code>.md</code> file is a plain-text Markdown document. On macOS, you can preview it in Finder, open it with Downright, or send it to the app from Terminal. The best choice depends on whether you need a glance, a rendered document, or an edit.</p>
+
+  <h2>Open a Markdown file from Finder</h2>
+  <p>Select the file and press Space for Quick Look. To open it in Downright, double-click it after choosing Downright as the default Markdown app, or use <strong>Open With → Downright</strong>.</p>
+
+  <h2>Open a Markdown file from Terminal</h2>
+  <pre><code>down README.md</code></pre>
+  <p>The <code>down</code> command opens the file in Downright. The app also supports piped Markdown and inspection commands such as:</p>
+  <pre><code>printf '# Draft\n' | down\ndown read --json README.md\ndown outline --json README.md</code></pre>
+
+  <h2>Why use a native Markdown app?</h2>
+  <p>Downright keeps the raw file as the source of truth while rendering the document around it. That matters for project notes, README files, plans, and files that another tool may rewrite while you are reading.</p>
+
+  <p class="answer-sources">Download the app from <a href="/download/">the official installation page</a> or read the <a href="/guides/markdown-external-changes/">external-change guide</a>.</p>
+</AnswerPage>

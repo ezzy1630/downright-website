@@ -1,7 +1,7 @@
 {
   "source": "Sources/MarkdownRender/Themes",
-  "sourceCommit": "5abc2b68a356dc04f13ae647300efd0b86899342",
-  "generatedAt": "2026-08-16T05:04:29.596Z",
+  "sourceCommit": "85964fb05a9b2a43191da667370801c78a841411",
+  "generatedAt": "2026-08-16T17:44:32.772Z",
   "themes": [
     {
       "id": "paper-light",

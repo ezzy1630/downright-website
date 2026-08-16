@@ -2,6 +2,62 @@
 
 Generated from the native app CHANGELOG.md payload.
 
+## Unreleased · Fixed
+
+Fixed a crash on ordinary prose. Any document containing a one-character word before :digits - "John 3:16", "meet at 9:30", ` a:1 ` - fatally trapped the path-token scanner during the per-keystroke reparse.
+
+## Unreleased · Fixed
+
+Fixed code-fence recovery. A closing fence may now carry trailing spaces or tabs (legal CommonMark) instead of being swallowed into the code content, and a same-character run shorter than the opening fence inside an unclosed longer fence is content, not a phantom closer.
+
+## Unreleased · Fixed
+
+Fixed footnote recovery inside fenced example code. The source scanner no longer ends a fence on an info string ( `ruby inside `` ), which used to leak footnote-looking lines out of code blocks.
+
+## Unreleased · Fixed
+
+Fixed section moves in mixed-ending files. moveSection now recognizes terminators by width and preserves the separator's exact bytes; a CRLF blank separator used to be invisible to the walk, gluing the moved sections together. Table realigns and list looseness are width-aware for the same reason, and re-levelling a setext heading keeps its emphasis and code markers instead of the plain-text title.
+
+## Unreleased · Fixed
+
+Closed a stored-XSS hole in HTML export. Wikilink targets now pass the same scheme allowlist as ordinary links: [[javascript:alert(1)//]] used to export as a live javascript: URL (the .html suffix sits behind a // comment, so it did not neutralize the payload).
+
+## Unreleased · Fixed
+
+Fixed down export. Multi-line paragraphs and code blocks exported as one line of visible \n garbage; the writer now emits real newlines.
+
+## Unreleased · Fixed
+
+Fixed a main-thread freeze in the image lightbox. Remote (and large local) images now decode off the main thread; a slow server no longer hangs the app inside the click handler.
+
+## Unreleased · Fixed
+
+Fixed watcher events after close. A file-watcher event already in flight when its document closed scheduled one more external-write pass on the closed document; and an in-place link hop whose target vanished mid-flight now reopens the previous document instead of leaving a window that no longer tracks external writes.
+
+## Unreleased · Fixed
+
+Hardened the release chain: the Apple API key and Developer ID certificate materialize under mktemp/RUNNER_TEMP instead of fixed /tmp paths, the Sparkle key ceremony no longer runs a binary discovered by globbing /tmp, the ephemeral signing keychain is deleted on every path, and CI/release install a checksum-pinned xcodegen (2.46.0) instead of a floating Homebrew head, shipping its SettingPresets alongside the binary so the generated project keeps ONLY_ACTIVE_ARCH=YES (a binary-only install dropped it and made the acceptance build fail on universal app extensions).
+
+## Unreleased · Fixed
+
+Fixed a workspace-sidebar crash on colliding filenames. The link graph keyed files by a normalized path that folds a\b.md into a/b.md (and a hidden .x.md into x.md); uniqueKeysWithValues trapped on the first duplicate. Lookup is now collision-tolerant and prefers the already-normalized path deterministically.
+
+## Unreleased · Fixed
+
+Fixed "Allow for Folder" over-granting on a directory. Consenting from a directory token stored the directory's *parent*, authorizing every sibling; a directory target now grants itself, and revoke targets the same folder.
+
+## Unreleased · Fixed
+
+Fixed trust grants silently revoking earlier ones. A second grant for the same path replaced the first instead of extending it, so folder-read and editor-launch kept ping-ponging; grants now union their effects.
+
+## Unreleased · Fixed
+
+Fixed a hard-wrap reflow overrun on stale documents. The continuation-indent walk indexed the buffer by an unclamped paragraph range and could read one character past the end after an external rewrite; it now clamps to the buffer length.
+
+## Unreleased · Fixed
+
+Fixed agent hook install/uninstall matching the command only. A foreign PostToolUse entry that runs down notify under another matcher used to block a needed install and be deleted by an uninstall; both now match on matcher and command together.
+
 ## Unreleased · Added
 
 First-run setup panel. Downright now installs itself. On first launch it offers to become the default Markdown app and to install the down command line tool, and - with no decision to make - registers its Quick Look extensions with Launch Services and pluginkit and resets Quick Look's caches so existing .md files pick up real Finder icons. Everything here previously lived only in Scripts/install.sh, which runs for people building from source and for nobody else: the shipping path of download the DMG, drag to Applications, double-click performed none of it.
@@ -258,4 +314,4 @@ Clicking a link, footnote, task, or heading teleported the camera. Every in-docu
 
 Stray shading blocks beside and below code blocks. TextKit 2 composites each layout fragment as an independent, lazily-rendered surface, and the code block's closing fence claimed a tinted surface taller than its own band (to make room for its copy control) - a fill that reached past the block's edge and wasn't always painted over when the neighbouring fragment didn't redraw in the same pass. The band now paints exactly its own frame: header and footer round only their *outer* corners, the edges they share with code lines are square and butt flush, and the footer's copy control collapses to fit its thin band instead of forcing the fill to overhang (geometry regression-pinned).
 
-Source commit: 5abc2b68a356dc04f13ae647300efd0b86899342
+Source commit: 85964fb05a9b2a43191da667370801c78a841411

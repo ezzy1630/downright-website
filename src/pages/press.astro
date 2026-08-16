@@ -1,0 +1,26 @@
+---
+import AnswerPage from "../components/AnswerPage.astro";
+import { facts } from "../data/site";
+import { pageMeta, reviewedLabel } from "../data/seo";
+---
+
+<AnswerPage title="Downright press and product facts" trail="Press and facts" updated={reviewedLabel} description={pageMeta.press.description} markdownPath={pageMeta.press.markdownPath ?? "/press.md"}>
+  <p>Downright is a free, open-source native Markdown editor and viewer for macOS. It is designed for files people and coding agents change together.</p>
+
+  <h2>One-sentence description</h2>
+  <p>Downright renders local Markdown exactly, reviews external agent rewrites live, and keeps the source file in charge.</p>
+
+  <h2>Product facts</h2>
+  <ul>
+    <li><strong>Platform:</strong> macOS {facts.minimumMacOS} and newer.</li>
+    <li><strong>License:</strong> {facts.license}.</li>
+    <li><strong>Source:</strong> <a href={facts.repository ?? "/"}>open source on GitHub</a>.</li>
+    <li><strong>Architecture:</strong> native AppKit and TextKit 2; no WebView.</li>
+    <li><strong>Integrations:</strong> Finder, Quick Look, Spotlight, Services, App Intents, and the <code>down</code> CLI.</li>
+    <li><strong>Privacy:</strong> no account or telemetry required; files remain local during ordinary use.</li>
+    <li><strong>Formats:</strong> {facts.supportedExtensions.map((extension) => `.${extension}`).join(", ")}.</li>
+  </ul>
+
+  <h2>Useful links</h2>
+  <p><a href="/download/">Download</a> · <a href="/releases/1.0.16/">release facts</a> · <a href="/engineering/">engineering</a> · <a href="/benchmarks/">benchmarks</a> · <a href="/privacy/">privacy</a></p>
+</AnswerPage>

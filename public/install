@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Install the latest signed Downright release from GitHub.
+# Install the latest signed Downright main-channel build from GitHub.
 #
 # This is the remote installer used by https://downright.cc/install and by the
-# npm launcher. It deliberately downloads the stable DMG and its published
+# npm launcher. It deliberately downloads the rolling main-channel DMG and its published
 # checksum, then verifies the mounted app before replacing an existing copy.
 set -euo pipefail
 
@@ -55,7 +55,7 @@ if pgrep -f "^${APP_DEST}/Contents/MacOS/Downright$" >/dev/null 2>&1; then
 fi
 
 mkdir -p "$MOUNT_DIR"
-log "Downloading the latest Downright release"
+log "Downloading the latest Downright main-channel build"
 curl -fsSL --retry 3 --retry-delay 1 "$RELEASE_BASE_URL/Downright.dmg" -o "$DMG_PATH"
 curl -fsSL --retry 3 --retry-delay 1 "$RELEASE_BASE_URL/Downright.dmg.sha256" -o "$CHECKSUM_PATH"
 

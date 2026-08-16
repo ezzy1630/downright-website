@@ -1,0 +1,31 @@
+---
+import AnswerPage from "../components/AnswerPage.astro";
+import { benchmarks } from "../data/site";
+import { pageMeta, reviewedLabel } from "../data/seo";
+---
+
+<AnswerPage title="Downright Markdown rendering benchmarks" trail="Benchmarks" updated={reviewedLabel} description={pageMeta.benchmarks.description} markdownPath={pageMeta.benchmarks.markdownPath ?? "/benchmarks.md"}>
+  <p>Downright publishes a baseline benchmark rather than a universal speed promise. The corpus, date, target, and missing measurements stay beside every number.</p>
+
+  <h2>Corpus and qualification</h2>
+  <ul>
+    <li><strong>Corpus:</strong> {benchmarks.corpus}</li>
+    <li><strong>Date:</strong> {benchmarks.date}</li>
+    <li><strong>Qualification:</strong> {benchmarks.qualification}</li>
+    <li><strong>Not measured:</strong> {benchmarks.limitations.join(", ")}</li>
+  </ul>
+
+  <h2>Current baseline</h2>
+  <div class="answer-table-wrap">
+    <table class="answer-table">
+      <caption>Native app baseline; not a cross-machine guarantee.</caption>
+      <thead><tr><th scope="col">Measurement</th><th scope="col">p50</th><th scope="col">p95</th><th scope="col">Target</th></tr></thead>
+      <tbody>
+        {benchmarks.rows.map((row) => <tr><th scope="row">{row.measurement}</th><td>{row.p50}</td><td>{row.p95}</td><td>{row.target}</td></tr>)}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>How to use the numbers</h2>
+  <p>Use the benchmark to detect regressions in the same corpus and build path. Do not treat it as a promise about every Mac, document, display refresh rate, or window size. The app's release checks keep the methodology and limitations visible.</p>
+</AnswerPage>

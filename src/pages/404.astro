@@ -3,6 +3,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { copy } from "../data/site";
 ---
 
-<BaseLayout title="Not found | Downright" description={copy.description}>
+<BaseLayout title="Not found | Downright" description={copy.description} noindex>
   <main class="subpage not-found-page"><section class="subpage-hero"><p class="subpage-hero__path">Downright / 404</p><h1>This page is not in the document.</h1><p>The route does not exist. Return to the native Markdown app's homepage.</p><a class="button button--primary" href="/">Back to Downright <span aria-hidden="true">↗</span></a></section></main>
 </BaseLayout>

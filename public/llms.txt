@@ -7,15 +7,30 @@ Downright is a free, open-source, native Markdown editor and viewer for macOS. I
 ## Routes
 
 - https://downright.cc/ - product argument and interactive document demos
-- https://downright.cc/themes - six source-derived themes
-- https://downright.cc/changelog - generated native-app changelog
-- https://downright.cc/privacy - privacy promises
-- https://downright.cc/known-gaps - current release and evidence gaps
-- https://downright.cc/markdown-viewer-mac - how to preview and read Markdown on a Mac
-- https://downright.cc/markdown-editor-mac-free - free Markdown editors compared
-- https://downright.cc/downright-vs-typora - Downright and Typora
-- https://downright.cc/downright-vs-obsidian - Downright and Obsidian
-- https://downright.cc/faq - product FAQ
+- https://downright.cc/download/ - signed macOS download and install choices
+- https://downright.cc/releases/1.0.16/ - current release record
+- https://downright.cc/themes/ - six source-derived themes
+- https://downright.cc/changelog/ - generated native-app changelog
+- https://downright.cc/privacy/ - privacy promises
+- https://downright.cc/known-gaps/ - current release and evidence gaps
+- https://downright.cc/markdown-viewer-mac/ - how to preview and read Markdown on a Mac
+- https://downright.cc/markdown-editor-mac-free/ - free Markdown editors compared
+- https://downright.cc/downright-vs-typora/ - Downright and Typora
+- https://downright.cc/downright-vs-obsidian/ - Downright and Obsidian
+- https://downright.cc/faq/ - product FAQ
+- https://downright.cc/guides/quick-look-markdown/ - How to preview Markdown with Quick Look on a Mac
+- https://downright.cc/guides/open-md-file-mac/ - How to open a .md file on a Mac
+- https://downright.cc/guides/markdown-external-changes/ - Review Markdown files changed by another process
+- https://downright.cc/guides/review-claude-code-plans/ - How to review Claude Code plans in Markdown
+- https://downright.cc/markdown-for-agents/claude-code/ - Markdown workflow for Claude Code on macOS
+- https://downright.cc/markdown-for-agents/codex/ - Markdown workflow for Codex on macOS
+- https://downright.cc/markdown-for-agents/agents-md/ - How to read and review AGENTS.md files on a Mac
+- https://downright.cc/compare/macdown/ - Downright vs MacDown
+- https://downright.cc/compare/marked/ - Downright vs Marked
+- https://downright.cc/formats/ - Markdown formats supported by Downright
+- https://downright.cc/engineering/ - Downright engineering
+- https://downright.cc/benchmarks/ - Downright Markdown rendering benchmarks
+- https://downright.cc/press/ - Downright press and product facts
 - https://downright.cc/install - checksum- and signature-verifying macOS installer
 - https://downright.cc/index.md - Markdown version of the homepage
 - https://downright.cc/themes.md - Markdown theme data
@@ -24,9 +39,8 @@ Downright is a free, open-source, native Markdown editor and viewer for macOS. I
 
 ## Source and evidence
 
-- Native source: /Volumes/Neural/Downright
-- App payload commit: 5abc2b68a356dc04f13ae647300efd0b86899342
-- Payload generated: 2026-08-16T05:04:29.596Z
+- App payload commit: 85964fb05a9b2a43191da667370801c78a841411
+- Payload generated: 2026-08-16T17:44:32.772Z
 - Benchmark corpus: 120,825 characters / 4,885 lines
 - Benchmark date: 2026-08-06
 - Benchmark qualification: Baseline only. Not a cross-machine claim.
@@ -39,9 +53,9 @@ Downright is a free, open-source, native Markdown editor and viewer for macOS. I
 - Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
 - Download artifact: Downright.dmg
 - Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
-- Curl install: curl -fsSL https://downright.cc/install | bash
-- npm install: npx --yes downright-installer
+- Curl install: curl -fsSL https://downright.cc/install | bash (same rolling DMG)
+- npm install: npx --yes downright-installer (same first-party installer and rolling DMG)
 
 Homebrew tap: https://github.com/ezzy1630/homebrew-downright
-Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright
+Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright (same rolling DMG)
 The tap-free cask command remains pending official Homebrew Cask review. Its verified production domain is https://downright.cc.

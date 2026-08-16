@@ -1,10 +1,11 @@
 ---
 import AnswerPage from "../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../data/seo";
 
-const updated = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
+const updated = reviewedLabel;
 ---
 
-<AnswerPage title="Free Markdown editors for macOS compared" trail="Free editors" updated={updated} markdownPath="/markdown-editor-mac-free.md">
+<AnswerPage title="Free Markdown editors for macOS compared" trail="Free editors" updated={updated} description={pageMeta.editors.description} markdownPath={pageMeta.editors.markdownPath ?? "/markdown-editor-mac-free.md"}>
   <p>There is no single best Markdown editor for every Mac user. The useful question is what the app treats as primary: a file, a writing surface, a vault, or a publishing workflow.</p>
 
   <div class="answer-table-wrap">

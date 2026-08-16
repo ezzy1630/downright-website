@@ -1,0 +1,33 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import { facts } from "../../data/site";
+import { pageMeta, reviewedLabel, reviewedOn } from "../../data/seo";
+---
+
+<BaseLayout {...pageMeta.release} dateModified={reviewedOn} breadcrumbs={[{ name: "Home", path: "/" }, { name: "Releases" }, { name: "1.0.16" }]}>
+  <main class="subpage legal-page answer-page">
+    <section class="subpage-hero">
+      <p class="subpage-hero__path"><a href="/">Downright</a> / Releases / 1.0.16</p>
+      <h1>Downright 1.0.16</h1>
+      <p>A signed and notarized native Markdown editor and viewer for macOS 14 or newer, with Quick Look, Finder integration, Sparkle updates, and the <code>down</code> CLI.</p>
+      <p class="answer-meta">Reviewed {reviewedLabel}</p>
+    </section>
+
+    <article class="legal-copy answer-copy">
+      <DownloadButton label="Download latest signed build" />
+      <h2>Release facts</h2>
+      <ul>
+        <li><strong>Version:</strong> {facts.version}</li>
+        <li><strong>Minimum system:</strong> macOS {facts.minimumMacOS}+</li>
+        <li><strong>License:</strong> {facts.license}</li>
+        <li><strong>Artifact:</strong> <code>{facts.artifactName}</code></li>
+        <li><strong>Source:</strong> <a href={facts.repository ?? "/"}>public GitHub repository</a></li>
+      </ul>
+
+      <h2>Install and update</h2>
+      <p>Install the rolling DMG directly or use the <a href="/download/">curl, npm, or public Homebrew tap</a>; all four paths resolve to the same latest artifact. The installed production app keeps its Sparkle updater, which receives each verified main-channel build. Sparkle update archives are separate from the human-facing DMG.</p>
+      <p class="answer-sources">Checksum and signing evidence are tracked in the <a href="/known-gaps/">release record</a> and the <a href="https://github.com/ezzy1630/Downright/releases" target="_blank" rel="noreferrer">GitHub Releases</a> page.</p>
+    </article>
+  </main>
+</BaseLayout>

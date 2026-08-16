@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DownloadButton from "../components/DownloadButton.astro";
+import { brewCommand, curlCommand, facts, npmCommand } from "../data/site";
+import { pageMeta, reviewedLabel, reviewedOn } from "../data/seo";
+---
+
+<BaseLayout {...pageMeta.download} dateModified={reviewedOn} breadcrumbs={[{ name: "Home", path: "/" }, { name: "Download" }]}>
+  <main class="subpage legal-page answer-page">
+    <section class="subpage-hero">
+      <p class="subpage-hero__path"><a href="/">Downright</a> / Download</p>
+      <h1>Download the native Markdown app for macOS.</h1>
+      <p>Downright is free, open source, and built for macOS 14 or newer. The signed release keeps Markdown local, renders it exactly, and reviews changes made by coding agents.</p>
+      <p class="answer-meta">Release {facts.version} · Reviewed {reviewedLabel}</p>
+    </section>
+
+    <article class="legal-copy answer-copy">
+      <div class="hero__actions"><DownloadButton label="Download signed DMG" /></div>
+
+      <h2>Install with the method you already use</h2>
+      <p><strong>Direct download:</strong> open the DMG, move Downright to Applications, and launch it once to finish system integration.</p>
+      <pre><code>{curlCommand}</code></pre>
+      <p><strong>curl:</strong> the first-party installer verifies the published checksum and app signature, installs into Applications, registers Quick Look and Finder integration, and links the <code>down</code> and <code>md</code> commands when possible.</p>
+      <pre><code>{npmCommand}</code></pre>
+      <p><strong>npm:</strong> the published <code>downright-installer</code> launcher requires Node.js 18 or newer and invokes the same first-party macOS installer.</p>
+      <pre><code>{brewCommand}</code></pre>
+      <p><strong>Homebrew:</strong> the public tap installs the same rolling main-channel DMG as the direct, curl, and npm paths. The tap-qualified command is available now; the tap-free official Cask command remains a separate Homebrew review.</p>
+
+      <p>All four acquisition paths converge on the same <code>Downright.dmg</code>. After installation, the signed production app checks the Sparkle appcast; each verified push to the app's <code>main</code> branch publishes the next update.</p>
+
+      <h2>What you get</h2>
+      <ul>
+        <li>Native AppKit and TextKit 2 rendering with no WebView.</li>
+        <li>Document, Split, and Source views over the same file.</li>
+        <li>Live review when Claude Code, Codex, a script, or another process rewrites an open file.</li>
+        <li>Finder thumbnails, Quick Look previews, Spotlight metadata, and terminal commands.</li>
+        <li>Math, Mermaid, tables, tasks, callouts, footnotes, code, and common Markdown extensions.</li>
+      </ul>
+
+      <p class="answer-sources">Artifact: <a href={facts.downloadUrl ?? "/releases/1.0.16/"}>Downright.dmg</a> · <a href="/known-gaps/">release evidence</a> · <a href="/privacy/">privacy</a></p>
+    </article>
+  </main>
+</BaseLayout>

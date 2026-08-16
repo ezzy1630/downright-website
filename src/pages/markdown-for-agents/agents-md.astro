@@ -1,0 +1,22 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="How to read and review AGENTS.md files on a Mac" trail="AGENTS.md" updated={reviewedLabel} description={pageMeta.agentsMd.description} markdownPath={pageMeta.agentsMd.markdownPath ?? "/markdown-for-agents/agents-md.md"}>
+  <p><code>AGENTS.md</code> files are Markdown instructions for coding agents and the people working with them. They are plain files in the repository, so Finder, Quick Look, Terminal, and Downright can all open them.</p>
+
+  <h2>Read the file in context</h2>
+  <p>Use Quick Look for a short check. Open the file in Downright when you need headings, code, lists, links, and a stable reading surface. The app does not move the instructions into a separate project database.</p>
+
+  <h2>Review instruction changes</h2>
+  <p>Keep <code>AGENTS.md</code> open while an agent or teammate updates it. Downright can show external changes at the word level so a new command, scope boundary, or destructive-action rule does not disappear inside a full-file refresh.</p>
+
+  <h2>Related files</h2>
+  <ul>
+    <li><code>AGENTS.md</code> — repository or directory instructions.</li>
+    <li><code>CLAUDE.md</code> — Claude Code project guidance.</li>
+    <li><code>README.md</code> — public project usage and limits.</li>
+    <li><code>CONTRIBUTING.md</code> — contribution and verification rules.</li>
+  </ul>
+</AnswerPage>

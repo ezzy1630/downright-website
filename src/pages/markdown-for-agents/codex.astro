@@ -1,0 +1,20 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="Markdown workflow for Codex on macOS" trail="Codex" updated={reviewedLabel} description={pageMeta.codex.description} markdownPath={pageMeta.codex.markdownPath ?? "/markdown-for-agents/codex.md"}>
+  <p>Codex can inspect and change repository files. A native Markdown viewer makes the surrounding plans, instructions, reports, and README files readable while the work is happening.</p>
+
+  <h2>Use files as the handoff surface</h2>
+  <p>Keep implementation plans, acceptance criteria, test results, and remaining blockers in Markdown. Open the file in Downright and use its rendered view for reading, Source Focus for exact syntax, and the outline for navigation.</p>
+
+  <h2>See what changed</h2>
+  <p>If Codex rewrites an open document, Downright shows the external update instead of treating it as an unexplained refresh. Review the changed words, then choose the version that should become the file's source.</p>
+
+  <h2>Useful commands</h2>
+  <pre><code>down plan.md
+down read --json README.md
+down outline --json AGENTS.md</code></pre>
+  <p>The CLI and the app operate on the same local Markdown files. No account or cloud workspace is required.</p>
+</AnswerPage>

@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { copy } from "../data/site";
+import { pageMeta, reviewedOn } from "../data/seo";
 ---
 
-<BaseLayout title="Privacy | Downright" description={copy.description} markdownPath="/privacy.md" imagePath="/og/privacy.svg">
+<BaseLayout {...pageMeta.privacy} dateModified={reviewedOn}>
   <main class="subpage legal-page">
     <section class="subpage-hero">
       <p class="subpage-hero__path">Downright / Privacy</p>

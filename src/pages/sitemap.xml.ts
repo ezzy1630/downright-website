@@ -1,21 +1,10 @@
 import type { APIContext } from "astro";
-
-const paths = [
-  "/",
-  "/themes",
-  "/changelog",
-  "/privacy",
-  "/known-gaps",
-  "/markdown-viewer-mac",
-  "/markdown-editor-mac-free",
-  "/downright-vs-typora",
-  "/downright-vs-obsidian",
-  "/faq",
-];
+import { siteRouteDates } from "../data/seo";
 
 export function GET({ site }: APIContext) {
   const base = site?.toString().replace(/\/$/, "") ?? "https://downright.cc";
-  const lastmod = new Date().toISOString().slice(0, 10);
-  const urls = paths.map((path) => `<url><loc>${base}${path}</loc><lastmod>${lastmod}</lastmod></url>`).join("");
+  const urls = Object.entries(siteRouteDates)
+    .map(([path, lastmod]) => `<url><loc>${base}${path}</loc><lastmod>${lastmod}</lastmod></url>`)
+    .join("");
   return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`, { headers: { "Content-Type": "application/xml; charset=utf-8" } });
 }

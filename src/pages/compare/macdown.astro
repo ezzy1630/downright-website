@@ -1,0 +1,27 @@
+---
+import AnswerPage from "../../components/AnswerPage.astro";
+import { pageMeta, reviewedLabel } from "../../data/seo";
+---
+
+<AnswerPage title="Downright vs MacDown" trail="Downright vs MacDown" updated={reviewedLabel} description={pageMeta.macdown.description} markdownPath={pageMeta.macdown.markdownPath ?? "/compare/macdown.md"}>
+  <p>Downright and MacDown are both open-source Mac Markdown projects. They serve different moments: MacDown is a compact editor and preview pair, while Downright is built around a native document surface that also reviews external changes.</p>
+
+  <h2>Choose Downright if…</h2>
+  <ul>
+    <li>You want one adaptive surface for reading, editing, and Source Focus.</li>
+    <li>You want Quick Look, Finder thumbnails, Spotlight metadata, and a terminal command.</li>
+    <li>You review Markdown rewritten by Claude Code, Codex, scripts, or other tools.</li>
+    <li>You want a current native AppKit/TextKit 2 project with a source-preserving renderer.</li>
+  </ul>
+
+  <h2>Choose MacDown if…</h2>
+  <ul>
+    <li>You want a small, familiar split editor and preview workflow.</li>
+    <li>You prefer the MacDown project and its established Markdown editing model.</li>
+  </ul>
+
+  <h2>The practical difference</h2>
+  <p>Both projects are file-first and open source. Downright puts more weight on system integration and live review of external writes; MacDown stays a straightforward editor and preview application.</p>
+
+  <p class="answer-sources">Source: <a href="https://github.com/MacDownApp/macdown" target="_blank" rel="noreferrer">MacDown repository</a> and the <a href="/markdown-editor-mac-free/">full editor comparison</a>.</p>
+</AnswerPage>

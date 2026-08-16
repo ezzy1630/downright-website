@@ -14,6 +14,7 @@
     "preview": "astro preview",
     "audit:contrast": "node scripts/audit-contrast.mjs",
     "audit:budgets": "node scripts/audit-budgets.mjs",
+    "audit:seo": "node scripts/audit-seo.mjs",
     "test:editor": "node scripts/test-editor.mjs",
     "test:theme": "node scripts/test-theme.mjs",
     "test:acts": "node scripts/test-acts.mjs",

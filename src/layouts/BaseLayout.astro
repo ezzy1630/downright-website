@@ -6,6 +6,7 @@ import BrandMark from "../components/BrandMark.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import ThemeControl from "../components/ThemeControl.astro";
 import { copy, facts } from "../data/site";
+import type { Breadcrumb } from "../data/seo";
 
 interface Props {
   title?: string;
@@ -13,6 +14,12 @@ interface Props {
   pageClass?: string;
   markdownPath?: string;
   imagePath?: string;
+  pageType?: "website" | "article";
+  datePublished?: string;
+  dateModified?: string;
+  breadcrumbs?: Breadcrumb[];
+  additionalSchema?: Record<string, unknown>[];
+  noindex?: boolean;
 }
 
 const {
@@ -21,30 +28,91 @@ const {
   pageClass = "",
   markdownPath = "/index.md",
   imagePath = "/og/index.svg",
+  pageType = "website",
+  datePublished,
+  dateModified,
+  breadcrumbs = [],
+  additionalSchema = [],
+  noindex = false,
 } = Astro.props;
 const repository = facts.repository;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://downright.cc").toString();
-const appSchema = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
+const siteUrl = Astro.site ?? new URL("https://downright.cc/");
+const siteRoot = siteUrl.toString().replace(/\/$/, "");
+const normalizedPath = Astro.url.pathname === "/" ? "/" : `/${Astro.url.pathname.replace(/^\/+|\/+$/g, "")}/`;
+const canonical = new URL(normalizedPath, siteUrl).toString();
+const absolute = (path: string) => new URL(path, siteUrl).toString();
+const imageUrl = absolute(imagePath);
+const organization = {
+  "@type": "Organization",
+  "@id": `${siteRoot}#organization`,
   name: "Downright",
-  description: copy.description,
-  url: canonical,
-  operatingSystem: "macOS " + facts.minimumMacOS + "+",
-  applicationCategory: "DeveloperApplication",
-  isAccessibleForFree: true,
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-    url: facts.downloadUrl,
-  },
-  downloadUrl: facts.downloadUrl,
-  license: "MIT",
-  softwareVersion: facts.version,
-  author: { "@type": "Person", name: "Ezzy Rappeport" },
+  url: siteRoot,
+  logo: absolute("/assets/downright-app-icon.png"),
   ...(repository ? { sameAs: [repository] } : {}),
 };
+const software = {
+  "@type": "SoftwareApplication",
+  "@id": `${siteRoot}#software`,
+  name: "Downright",
+  description: copy.description,
+  url: siteRoot,
+  operatingSystem: `macOS ${facts.minimumMacOS}+`,
+  applicationCategory: "DeveloperApplication",
+  isAccessibleForFree: true,
+  downloadUrl: facts.downloadUrl || undefined,
+  license: "MIT",
+  softwareVersion: facts.version,
+  publisher: { "@id": `${siteRoot}#organization` },
+  ...(facts.downloadUrl ? { offers: { "@type": "Offer", price: "0", priceCurrency: "USD", url: facts.downloadUrl } } : {}),
+};
+const sourceCode = repository ? {
+  "@type": "SoftwareSourceCode",
+  "@id": `${siteRoot}#source`,
+  name: "Downright source code",
+  codeRepository: repository,
+  programmingLanguage: "Swift",
+  license: "https://opensource.org/license/mit/",
+  isPartOf: { "@id": `${siteRoot}#software` },
+} : null;
+const webpage = {
+  "@type": pageType === "article" ? ["Article", "WebPage"] : "WebPage",
+  "@id": `${canonical}#webpage`,
+  url: canonical,
+  name: title,
+  description,
+  isPartOf: { "@id": `${siteRoot}#website` },
+  about: { "@id": `${siteRoot}#software` },
+  ...(datePublished ? { datePublished } : {}),
+  ...(dateModified ? { dateModified } : {}),
+  ...(pageType === "article" ? { author: { "@id": `${siteRoot}#organization` }, image: imageUrl } : {}),
+};
+const breadcrumbSchema = breadcrumbs.length > 0 ? {
+  "@type": "BreadcrumbList",
+  "@id": `${canonical}#breadcrumbs`,
+  itemListElement: breadcrumbs.map((breadcrumb, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: breadcrumb.name,
+    ...(breadcrumb.path ? { item: absolute(breadcrumb.path) } : {}),
+  })),
+} : null;
+const schemaGraph = [
+  organization,
+  {
+    "@type": "WebSite",
+    "@id": `${siteRoot}#website`,
+    name: "Downright",
+    url: siteRoot,
+    description: copy.description,
+    publisher: { "@id": `${siteRoot}#organization` },
+    inLanguage: "en-US",
+  },
+  software,
+  sourceCode,
+  webpage,
+  breadcrumbSchema,
+  ...additionalSchema,
+].filter(Boolean);
 const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
 ---
 
@@ -68,27 +136,34 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? "noindex,follow" : "index,follow"} />
+    <meta name="author" content="Downright" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#171614" />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" type="text/markdown" href={new URL(markdownPath, Astro.site ?? "https://downright.cc")} title="Markdown version" />
+    <link rel="alternate" type="text/markdown" href={absolute(markdownPath)} title="Markdown version" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="preload" href="/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 900px)" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={pageType} />
     <meta property="og:site_name" content="Downright" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={new URL(imagePath, Astro.site ?? "https://downright.cc")} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:alt" content={`${title} — Downright`} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(imagePath, Astro.site ?? "https://downright.cc")} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={`${title} — Downright`} />
+    {datePublished && <meta property="article:published_time" content={datePublished} />}
+    {dateModified && <meta property="article:modified_time" content={dateModified} />}
+    {dateModified && <meta name="last-modified" content={dateModified} />}
     <title>{title}</title>
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(appSchema)}></script>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({ "@context": "https://schema.org", "@graph": schemaGraph })}></script>
     <script is:inline>
       // Warm Dark is the house ground: every first visit lands on #171614.
       // A chosen theme persists and wins; "system" is one of the choices,
@@ -124,8 +199,10 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
       <div class="site-header__inner">
         <BrandMark />
         <nav class="site-nav" aria-label="Primary navigation">
-          <a href="/themes">Themes</a>
-          <a href="/changelog">Changelog</a>
+          <a href="/download/">Download</a>
+          <a href="/themes/">Themes</a>
+          <a href="/guides/quick-look-markdown/">Guides</a>
+          <a href="/changelog/">Changelog</a>
           {repository && <a href={repository} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>}
         </nav>
         <div class="site-header__actions">
@@ -140,8 +217,10 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         </button>
       </div>
       <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" hidden data-mobile-menu>
-        <a href="/themes">Themes</a>
-        <a href="/changelog">Changelog</a>
+        <a href="/download/">Download</a>
+        <a href="/themes/">Themes</a>
+        <a href="/guides/quick-look-markdown/">Guides</a>
+        <a href="/changelog/">Changelog</a>
         {repository && <a href={repository} target="_blank" rel="noreferrer">GitHub</a>}
         <div class="mobile-menu__download"><small>Free · MIT · macOS {facts.minimumMacOS}+ — the download lives on your Mac: share this page to it below.</small></div>
       </nav>
@@ -168,27 +247,28 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
       <form method="dialog"><button>Close</button></form>
     </dialog>
 
-    <div class="release-status glass" id="release-status" role="status" aria-live="polite" data-release-status hidden>
-      <div><strong>The signed macOS release is not configured yet.</strong><span>The download starts the moment a notarized artifact is verified at the release URL.</span></div>
+    {!facts.downloadUrl && <div class="release-status glass" id="release-status" role="status" aria-live="polite" data-release-status>
+      <div><strong>The signed macOS release is not configured yet.</strong><span>The download will start when a notarized artifact is verified at the release URL.</span></div>
       <button type="button" aria-label="Dismiss release status" data-release-dismiss>Close</button>
-    </div>
+    </div>}
 
     <footer class="site-footer" data-theme-zone>
       <div class="site-footer__top">
         <BrandMark compact />
         <nav aria-label="Footer navigation">
           {repository && <a href={repository} target="_blank" rel="noreferrer">Repository</a>}
-          <a href="/changelog">Changelog</a>
+          <a href="/changelog/">Changelog</a>
           {facts.sponsorsUrl && <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">Sponsor</a>}
-          <a href="/themes">Themes</a>
-          <a href="/privacy">Privacy</a>
+          <a href="/themes/">Themes</a>
+          <a href="/privacy/">Privacy</a>
           <span>{facts.license} licence</span>
           <span class="site-footer__label">Guides</span>
-          <a href="/markdown-viewer-mac">Markdown viewer</a>
-          <a href="/markdown-editor-mac-free">Free editors</a>
-          <a href="/downright-vs-typora">Vs Typora</a>
-          <a href="/downright-vs-obsidian">Vs Obsidian</a>
-          <a href="/faq">FAQ</a>
+          <a href="/markdown-viewer-mac/">Markdown viewer</a>
+          <a href="/markdown-editor-mac-free/">Free editors</a>
+          <a href="/markdown-for-agents/claude-code/">Agent workflows</a>
+          <a href="/downright-vs-typora/">Vs Typora</a>
+          <a href="/downright-vs-obsidian/">Vs Obsidian</a>
+          <a href="/faq/">FAQ</a>
         </nav>
       </div>
       <p class="site-footer__absence">

@@ -1,25 +1,37 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { reviewedLabel, reviewedOn } from "../data/seo";
 
 interface Props {
   title: string;
   trail: string;
   updated: string;
   markdownPath: string;
+  description?: string;
+  imagePath?: string;
+  modifiedDate?: string;
   schema?: Record<string, unknown>;
 }
 
-const { title, trail, updated, markdownPath, schema } = Astro.props;
+const { title, trail, updated, markdownPath, description, imagePath, modifiedDate = reviewedOn, schema } = Astro.props;
 const pageTitle = title + " | Downright";
 ---
 
-<BaseLayout title={pageTitle} markdownPath={markdownPath}>
-  {schema && <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)}></script>}
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  markdownPath={markdownPath}
+  imagePath={imagePath}
+  pageType="article"
+  dateModified={modifiedDate}
+  breadcrumbs={[{ name: "Home", path: "/" }, { name: "Guides" }, { name: trail }]}
+  additionalSchema={schema ? [schema] : undefined}
+>
   <main class="subpage legal-page answer-page">
     <section class="subpage-hero">
-      <p class="subpage-hero__path">Downright / Guides / {trail}</p>
+      <p class="subpage-hero__path"><a href="/">Downright</a> / Guides / {trail}</p>
       <h1>{title}</h1>
-      <p class="answer-meta">Updated {updated}</p>
+      <p class="answer-meta">Reviewed {updated || reviewedLabel}</p>
     </section>
     <article class="legal-copy answer-copy">
       <slot />
