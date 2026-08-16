@@ -6,7 +6,7 @@ This is the current launch record for the approved site plan. The site does not 
 
 - Domain: https://downright.cc is the verified production domain, connected to Vercel through Porkbun DNS.
 - Artifact: Downright.dmg is available at https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg.
-- One-line install: curl -fsSL https://downright.cc/install | bash, or npx --yes @ezzy/downright-installer; both use the same verified release path.
+- One-line install: curl -fsSL https://downright.cc/install | bash, or npx --yes downright-installer; both use the same verified release path.
 - Homebrew: the public tap at https://github.com/ezzy1630/homebrew-downright installs the production DMG with brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright; tap-free official Homebrew Cask review remains separate.
 - Repository: https://github.com/ezzy1630/Downright is the source remote; public address confirmation remains open.
 - Brand: the app-derived vector mark is canonical; the tactile native raster remains product artwork.

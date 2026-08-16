@@ -40,7 +40,7 @@ Downright is a free, open-source, native Markdown editor and viewer for macOS. I
 - Download artifact: Downright.dmg
 - Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
 - Curl install: curl -fsSL https://downright.cc/install | bash
-- npm install: npx --yes @ezzy/downright-installer
+- npm install: npx --yes downright-installer
 
 Homebrew tap: https://github.com/ezzy1630/homebrew-downright
 Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright

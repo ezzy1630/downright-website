@@ -29,7 +29,7 @@ curl -fsSL https://downright.cc/install | bash
 If Node.js 18 or newer is already installed, run:
 
 ```bash
-npx --yes @ezzy/downright-installer
+npx --yes downright-installer
 ```
 
 Both paths install the signed release into `/Applications` and keep Sparkle
