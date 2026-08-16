@@ -506,7 +506,7 @@ async function sweepFunnel(cdp) {
   const film = await sponsorCensus(cdp);
   // On the film the serif close line is desktop furniture; the close beat's
   // sponsor ask is the tertiary handoff action beside the GitHub star.
-  check("G · film sponsor placement", film.total === 2 && film.places.includes("film") && film.places.includes("footer") && !film.places.includes("close") && !film.places.includes("header") && !film.places.includes("panel"), JSON.stringify(film), prefix);
+  check("G · film sponsor placement", film.total === 3 && film.places.includes("close") && film.places.includes("film") && film.places.includes("footer") && !film.places.includes("header") && !film.places.includes("panel"), JSON.stringify(film), prefix);
 }
 
 await ensureChrome();

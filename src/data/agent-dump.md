@@ -4,7 +4,7 @@
 
 Refactored the renderer pipeline to isolate decoration from parsing, replaced
 the ad-hoc cache with a keyed image store, and updated 14 files. Behavior is
-unchanged; 61 tests pass. Three public signatures moved; every call site is
+unchanged; **61 tests pass**. Three public signatures moved; every call site is
 updated in this changeset.
 
 ## Files touched

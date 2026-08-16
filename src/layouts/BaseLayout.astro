@@ -256,19 +256,24 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
       <div class="site-footer__top">
         <BrandMark compact />
         <nav aria-label="Footer navigation">
-          {repository && <a href={repository} target="_blank" rel="noreferrer">Repository</a>}
-          <a href="/changelog/">Changelog</a>
-          {facts.sponsorsUrl && <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">Sponsor</a>}
-          <a href="/themes/">Themes</a>
-          <a href="/privacy/">Privacy</a>
-          <span>{facts.license} licence</span>
-          <span class="site-footer__label">Guides</span>
-          <a href="/markdown-viewer-mac/">Markdown viewer</a>
-          <a href="/markdown-editor-mac-free/">Free editors</a>
-          <a href="/markdown-for-agents/claude-code/">Agent workflows</a>
-          <a href="/downright-vs-typora/">Vs Typora</a>
-          <a href="/downright-vs-obsidian/">Vs Obsidian</a>
-          <a href="/faq/">FAQ</a>
+          <span class="site-footer__group">
+            <span class="site-footer__label">Product</span>
+            {repository && <a href={repository} target="_blank" rel="noreferrer">Repository</a>}
+            <a href="/changelog/">Changelog</a>
+            {facts.sponsorsUrl && <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">Sponsor</a>}
+            <a href="/themes/">Themes</a>
+            <a href="/privacy/">Privacy</a>
+            <span class="site-footer__license">{facts.license} licence</span>
+          </span>
+          <span class="site-footer__group">
+            <span class="site-footer__label">Guides</span>
+            <a href="/markdown-viewer-mac/">Markdown viewer</a>
+            <a href="/markdown-editor-mac-free/">Free editors</a>
+            <a href="/markdown-for-agents/claude-code/">Agent workflows</a>
+            <a href="/downright-vs-typora/">Vs Typora</a>
+            <a href="/downright-vs-obsidian/">Vs Obsidian</a>
+            <a href="/faq/">FAQ</a>
+          </span>
         </nav>
       </div>
       <p class="site-footer__absence">

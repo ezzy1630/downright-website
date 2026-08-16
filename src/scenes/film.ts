@@ -310,7 +310,8 @@ function initSweepThumb(): void {
     if (event.key === "ArrowRight" || event.key === "ArrowUp") { event.preventDefault(); paint(Math.min(1, current + 0.05)); }
     if (event.key === "ArrowLeft" || event.key === "ArrowDown") { event.preventDefault(); paint(Math.max(0, current - 0.05)); }
   });
-  if (reducedMotion()) paint(1);
+  if (document.documentElement.dataset.film === "true") paint(0);
+  else if (reducedMotion()) paint(1);
   else {
     let played = false;
     const observer = new IntersectionObserver((entries) => {
