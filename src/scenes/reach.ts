@@ -9,6 +9,7 @@
 import { ticker } from "../kernel/ticker";
 import { PointerTracker } from "../kernel/pointer";
 import { reducedMotion } from "../kernel/switchboard";
+import { MOTION, SpringRect } from "../kernel/springs";
 import { renderSampleMarkdown } from "../data/site";
 import agentDumpSource from "../data/agent-dump.md?raw";
 import { doc } from "../kernel/store";
@@ -238,13 +239,94 @@ function initVerlet(): void {
   let openCard: FileCard | null = null;
   let quickLookOrigin: HTMLElement | null = null;
 
-  function closeQuickLook(): void {
-    if (openCard) openCard.element.setAttribute("aria-expanded", "false");
-    openCard = null;
+  /* The overlay is born from the card that opened it and returns there on
+     close — the panel springs its true rect (center + size), so the content
+     keeps its proportions while the sheet grows out of the file, exactly the
+     way the system preview feels when it opens from an icon. */
+  let cancelPanelFlight: (() => void) | null = null;
+
+  function panel(): HTMLElement | null {
+    return quickLook?.querySelector<HTMLElement>(".quick-look__panel") ?? null;
+  }
+
+  function flyPanel(from: DOMRect, to: DOMRect, onDone: () => void): void {
+    const target = panel();
+    if (!target) { onDone(); return; }
+    cancelPanelFlight?.();
+    const flight = new SpringRect(
+      from.left + from.width / 2,
+      from.top + from.height / 2,
+      from.width,
+      from.height,
+      MOTION.durations.deliberate,
+      0.14,
+    );
+    flight.setTarget(to.left + to.width / 2, to.top + to.height / 2, to.width, to.height);
+    const cancel = ticker.add((dt) => {
+      const moving = flight.advance(dt);
+      target.style.left = `${(flight.x.value - flight.width.value / 2).toFixed(2)}px`;
+      target.style.top = `${(flight.y.value - flight.height.value / 2).toFixed(2)}px`;
+      target.style.width = `${flight.width.value.toFixed(2)}px`;
+      target.style.height = `${flight.height.value.toFixed(2)}px`;
+      if (!moving) {
+        target.style.left = "";
+        target.style.top = "";
+        target.style.width = "";
+        target.style.height = "";
+        target.style.position = "";
+        target.style.margin = "";
+        cancelPanelFlight = null;
+        onDone();
+      }
+      return moving;
+    });
+    cancelPanelFlight = () => {
+      cancel();
+      target.style.left = "";
+      target.style.top = "";
+      target.style.width = "";
+      target.style.height = "";
+      target.style.position = "";
+      target.style.margin = "";
+      cancelPanelFlight = null;
+    };
+  }
+
+  function pinPanelTo(rect: DOMRect): void {
+    const target = panel();
+    if (!target) return;
+    target.style.position = "fixed";
+    target.style.margin = "0";
+    target.style.left = `${rect.left}px`;
+    target.style.top = `${rect.top}px`;
+    target.style.width = `${rect.width}px`;
+    target.style.height = `${rect.height}px`;
+  }
+
+  function hideQuickLook(): void {
     quickLook?.classList.remove("is-open");
     quickLook?.setAttribute("hidden", "");
     quickLookOrigin?.focus({ preventScroll: true });
     quickLookOrigin = null;
+  }
+
+  function closeQuickLook(): void {
+    if (openCard) openCard.element.setAttribute("aria-expanded", "false");
+    const card = openCard;
+    openCard = null;
+    if (!reducedMotion() && card) {
+      // Return to where it came from — the card's CURRENT rect, so a card
+      // that drifted under the physics while open still catches its sheet.
+      const target = panel();
+      if (target) {
+        const from = target.getBoundingClientRect();
+        pinPanelTo(from);
+        flyPanel(from, card.element.getBoundingClientRect(), hideQuickLook);
+        return;
+      }
+    }
+    cancelPanelFlight?.();
+    hideQuickLook();
   }
 
   function openQuickLook(card: FileCard, origin: HTMLElement = card.element): void {
@@ -252,6 +334,7 @@ function initVerlet(): void {
     const body = quickLook.querySelector<HTMLElement>("[data-quick-look-body]");
     if (!body) return;
     openCard?.element.setAttribute("aria-expanded", "false");
+    cancelPanelFlight?.();
     body.innerHTML = renderSampleMarkdown(sourceFor(card));
     quickLook.querySelector<HTMLElement>("[data-quick-look-title]")!.textContent = card.name;
     quickLook.removeAttribute("hidden");
@@ -261,6 +344,17 @@ function initVerlet(): void {
     quickLookOrigin = origin;
     quickLook.querySelector<HTMLButtonElement>("[data-quick-look-close]")?.focus();
     sound.whoosh();
+    if (!reducedMotion()) {
+      const target = panel();
+      if (target) {
+        // Freeze the natural rect, pin the panel over the card, then let the
+        // sheet grow out of the file — all in one frame, before any paint.
+        const to = target.getBoundingClientRect();
+        const from = card.element.getBoundingClientRect();
+        pinPanelTo(from);
+        flyPanel(from, to, () => {});
+      }
+    }
   }
 
   quickLook?.addEventListener("click", (event) => {
