@@ -90,7 +90,7 @@ This is the current launch record for the approved site plan. The site does not 
 
 ## Release inputs
 
-- Domain: https://downright.cc is the intended public domain; Vercel and DNS confirmation remains pending.
+- Domain: https://downright.cc is the verified production domain, connected to Vercel through Porkbun DNS.
 - Artifact: ${facts.artifactName} is available at ${facts.downloadUrl || "no signed, notarized, stapled public URL is configured"}.
 - Homebrew: no cask is claimed until one exists and is verified.
 - Repository: ${facts.repository ?? "not configured"} is the source remote; public address confirmation remains open.
@@ -152,7 +152,7 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 - Download artifact: ${facts.artifactName}
 - Download URL: ${facts.downloadUrl || "not configured until a signed and notarized artifact is verified"}
 
-The site does not claim a Homebrew cask or confirmed domain beyond the current https://downright.cc deployment assumption.
+The site does not claim a Homebrew cask. Its verified production domain is https://downright.cc.
 `;
 
 await mkdir(publicRoot, { recursive: true });

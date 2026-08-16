@@ -34,4 +34,4 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 - Download artifact: Downright.dmg
 - Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
 
-The site does not claim a Homebrew cask or confirmed domain beyond the current https://downright.cc deployment assumption.
+The site does not claim a Homebrew cask. Its verified production domain is https://downright.cc.
