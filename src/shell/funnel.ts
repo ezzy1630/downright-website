@@ -7,7 +7,7 @@
  */
 
 import { facts } from "../data/site";
-import { downloadToast } from "./toast";
+import { downloadPanel } from "./toast";
 import { MOTION, SpringScalar } from "../kernel/springs";
 import { ticker } from "../kernel/ticker";
 
@@ -33,7 +33,7 @@ export function initDownloadFunnel(): void {
       anchor.rel = "noreferrer";
       anchor.download = facts.artifactName;
       anchor.click();
-      downloadToast(facts.artifactName, facts.repository);
+      downloadPanel(facts.artifactName, facts.repository, facts.sponsorsUrl);
     });
   }
 }

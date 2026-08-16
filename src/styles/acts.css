@@ -1249,6 +1249,44 @@
 .glass-toast span { color: var(--text-secondary); font-size: 12px; }
 .glass-toast a { color: var(--link); }
 
+/* The post-download panel (§8.1): slightly larger, bottom-centre, the one
+   ask on desktop. It lives outside the toast-host's end-aligned column. */
+.glass-toast--download {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  width: fit-content;
+  min-width: 0;
+  max-width: min(560px, calc(100vw - 44px));
+  margin-inline: auto;
+  gap: 12px;
+  padding: 16px 18px;
+}
+.glass-toast--download .glass-toast__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.glass-toast--download .glass-toast__head strong { font-size: 14px; }
+.glass-toast--download [data-toast-dismiss] {
+  padding: 4px 7px;
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.glass-toast--download [data-toast-dismiss]:hover { color: var(--heading); }
+.glass-toast--download .glass-toast__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.glass-toast--download .glass-toast__actions a { font-size: 13px; }
+
 .drop-veil {
   position: fixed;
   inset: 0;
@@ -1317,7 +1355,8 @@
    desktop furniture. On the film the gap is the thumb scrub and the close is
    the handoff — these two would only crowd the beats below them. */
 [data-film="true"] .gap-wall,
-[data-film="true"] .close-facts {
+[data-film="true"] .close-facts,
+[data-film="true"] .close-sponsor {
   display: none;
 }
 

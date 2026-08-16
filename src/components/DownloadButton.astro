@@ -19,6 +19,8 @@ const downloadUrl = import.meta.env.PUBLIC_DOWNLOAD_URL?.trim() || facts.downloa
   type="button"
   class:list={["button", "button--primary", "download-button", { "button--compact": compact }]}
   data-download
+  data-download-url={downloadUrl}
+  data-artifact={facts.artifactName}
   data-magnet
   aria-label={`${label} — ${facts.artifactName}, free, MIT licence`}>
   <span>{label}</span>

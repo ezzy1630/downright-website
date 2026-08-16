@@ -252,6 +252,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <li><strong>{facts.minimumMacOS}+</strong><span>native, no WebView</span></li>
           <li><strong>⌘⇧E</strong><span>this page keeps its source too</span></li>
         </ul>
+        <p class="close-sponsor" data-fingerprint="sponsor">Built by one person, funded by people, not telemetry. If Downright earns its place in your dock — <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">sponsor it</a>.</p>
         <div class="film-handoff" data-fingerprint="handoff" aria-label="Send this page to your Mac">
           <p class="film-handoff__line">Downright lives on your Mac. Send it there.</p>
           <button type="button" class="film-handoff__primary" data-share="share">AirDrop this page to your Mac</button>
@@ -259,6 +260,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
             <button type="button" data-share="copy">Copy link</button>
             <button type="button" data-share="mail">Mail it to yourself</button>
             {facts.repository && <a href={facts.repository} target="_blank" rel="noreferrer">★ Star</a>}
+            {facts.sponsorsUrl && <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">♥ Sponsor</a>}
           </div>
           <p class="film-handoff__note">No email, no server. On iPhone the first option in the share sheet is AirDrop.</p>
         </div>

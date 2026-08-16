@@ -156,6 +156,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         <nav aria-label="Footer navigation">
           {repository && <a href={repository} target="_blank" rel="noreferrer">Repository</a>}
           <a href="/changelog">Changelog</a>
+          {facts.sponsorsUrl && <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">Sponsor</a>}
           <a href="/themes">Themes</a>
           <a href="/privacy">Privacy</a>
           <span>{facts.license} licence</span>

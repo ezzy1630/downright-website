@@ -56,13 +56,24 @@ async function ensureChrome() {
 class CDP {
   constructor(ws) {
     this.ws = ws; this.id = 0; this.pending = new Map();
+    this.events = { requests: [], responses: [], failures: [], console: [], exceptions: [], log: [] };
     ws.addEventListener("message", (e) => {
       const m = JSON.parse(e.data);
       if (m.id && this.pending.has(m.id)) {
         const { res, rej } = this.pending.get(m.id); this.pending.delete(m.id);
         m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result);
+      } else if (m.method) {
+        if (m.method === "Network.requestWillBeSent") this.events.requests.push(m.params.request.url);
+        else if (m.method === "Network.responseReceived") this.events.responses.push({ url: m.params.response.url, status: m.params.response.status });
+        else if (m.method === "Network.loadingFailed") this.events.failures.push({ url: m.params.request?.url ?? m.params.blockedReason, error: m.params.errorText });
+        else if (m.method === "Runtime.consoleAPICalled") this.events.console.push({ type: m.params.type, args: (m.params.args || []).map((a) => a.value ?? a.description ?? "") });
+        else if (m.method === "Runtime.exceptionThrown") this.events.exceptions.push(m.params.exceptionDetails?.text ?? "exception");
+        else if (m.method === "Log.entryAdded") this.events.log.push({ level: m.params.entry?.level, text: m.params.entry?.text });
       }
     });
+  }
+  resetEvents() {
+    this.events = { requests: [], responses: [], failures: [], console: [], exceptions: [], log: [] };
   }
   send(method, params = {}) {
     const id = ++this.id;
@@ -390,6 +401,83 @@ async function sweepViewport(cdp, vp, shotDir) {
   report.viewports[prefix] = { docH, steps: steps.length, restStates: restIds.length };
 }
 
+/* ── G · the funnel (download, sponsor placements, no third-party/console
+   noise). The real DMG click is stubbed so the sweep never navigates away or
+   hits GitHub; the anchor's href + download attribute are asserted instead. */
+const EXPECTED_DMG = "https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg";
+const EXPECTED_REPO = "https://github.com/ezzy1630/Downright";
+const EXPECTED_SPONSORS = "https://github.com/sponsors/ezzy1630";
+
+async function goto(cdp, url) {
+  await cdp.send("Page.navigate", { url });
+  await sleep(2600);
+  await cdp.evaluate(`(() => { try { localStorage.setItem('downright-theme','warm-dark'); sessionStorage.clear(); } catch{} return true; })()`);
+  await cdp.send("Page.reload", { ignoreCache: true });
+  await sleep(2800);
+}
+
+async function sponsorCensus(cdp) {
+  return await cdp.evaluate(`(() => {
+    const vis = (a) => (typeof a.checkVisibility === 'function' ? a.checkVisibility() : true);
+    const links = [...document.querySelectorAll('a[href*="github.com/sponsors"]')].filter(vis);
+    const host = (a) => a.closest('[data-site-header]') ? 'header' : a.closest('.site-footer') ? 'footer' : a.closest('.close-sponsor') ? 'close' : a.closest('.glass-toast--download') ? 'panel' : a.closest('.film-handoff') ? 'film' : 'other';
+    return { total: links.length, places: links.map(host), hrefs: links.map((a) => a.getAttribute('href')) };
+  })()`);
+}
+
+async function sweepFunnel(cdp) {
+  const prefix = "funnel";
+  await cdp.send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+  await goto(cdp, "http://localhost:4321/");
+
+  const dl = await cdp.evaluate(`(() => {
+    const b = document.querySelector('[data-download]');
+    return b ? { url: b.dataset.downloadUrl || null, artifact: b.dataset.artifact || null } : null;
+  })()`);
+  check("G · download URL resolves", !!dl && dl.url === EXPECTED_DMG, dl ? String(dl.url) : "no [data-download]", prefix);
+  check("G · download carries artifact", !!dl && dl.artifact === "Downright.dmg", dl ? String(dl.artifact) : "", prefix);
+
+  // Static sponsor census: footer + close act, nowhere else, none in header.
+  const before = await sponsorCensus(cdp);
+  check("G · sponsor placements (rest)", before.total === 2 && before.places.includes("footer") && before.places.includes("close") && !before.places.includes("header"), JSON.stringify(before), prefix);
+  check("G · sponsor URL correct", before.hrefs.every((h) => h === EXPECTED_SPONSORS), before.hrefs.join(","), prefix);
+
+  // Click the download with the anchor stubbed: assert DMG href + download
+  // semantics, the panel appears exactly once, and it carries star + fund.
+  const fired = await cdp.evaluate(`(async () => {
+    const clicked = [];
+    const orig = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function () { clicked.push({ href: this.getAttribute('href'), download: this.getAttribute('download') }); };
+    try {
+      document.querySelector('[data-download]').click();
+      await new Promise((r) => setTimeout(r, 180));
+      const panel = document.querySelector('.glass-toast--download');
+      let flag = null; try { flag = sessionStorage.getItem('downright-download-panel-shown'); } catch {}
+      const panelLinks = panel ? [...panel.querySelectorAll('a')].map((a) => a.getAttribute('href')) : [];
+      const first = { clicked: [...clicked], flag, panel: !!panel, panelLinks };
+      document.querySelector('[data-download]').click();
+      await new Promise((r) => setTimeout(r, 80));
+      first.panelCount = document.querySelectorAll('.glass-toast--download').length;
+      return first;
+    } finally { HTMLAnchorElement.prototype.click = orig; }
+  })()`);
+  check("G · click → DMG href + download attr", !!fired && fired.clicked.length === 1 && fired.clicked[0].href === EXPECTED_DMG && fired.clicked[0].download === "Downright.dmg", fired ? JSON.stringify(fired.clicked) : "", prefix);
+  check("G · panel appears once/session", !!fired && fired.flag === "1" && fired.panel === true && fired.panelCount === 1, fired ? `flag=${fired.flag} panel=${fired.panel} count=${fired.panelCount}` : "", prefix);
+  check("G · panel carries star + fund", !!fired && fired.panelLinks.length === 2 && fired.panelLinks.includes(EXPECTED_REPO) && fired.panelLinks.includes(EXPECTED_SPONSORS), fired ? JSON.stringify(fired.panelLinks) : "", prefix);
+
+  const after = await sponsorCensus(cdp);
+  check("G · sponsor placements (panel open)", after.total === 3 && after.places.includes("panel") && after.places.includes("footer") && after.places.includes("close") && !after.places.includes("header"), JSON.stringify(after), prefix);
+
+  // Film close beat carries the tertiary Sponsor action (§8.3).
+  await cdp.send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
+  await goto(cdp, "http://localhost:4321/?film");
+  const film = await sponsorCensus(cdp);
+  // On the film the serif close line is desktop furniture (hidden, like the
+  // close-facts grid); the close beat's sponsor ask is the tertiary handoff
+  // action beside the GitHub star.
+  check("G · film sponsor placement", film.total === 2 && film.places.includes("film") && film.places.includes("footer") && !film.places.includes("close") && !film.places.includes("header") && !film.places.includes("panel"), JSON.stringify(film), prefix);
+}
+
 await ensureChrome();
 const targets = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();
 const page = targets.find((t) => t.type === "page");
@@ -409,6 +497,26 @@ for (const vp of VIEWPORTS) {
   console.log(`\n▶ ${vp.name} ${vp.width}×${vp.height}${vp.film ? " (film)" : ""}`);
   await sweepViewport(cdp, vp, shotRoot);
 }
+
+console.log(`\n▶ funnel`);
+await sweepFunnel(cdp);
+
+// G — network hygiene: same-origin only, no 404s, no failed requests, and a
+// silent console across the entire sweep (the DMG click is stubbed, so no
+// GitHub hit is expected or allowed).
+const thirdParty = cdp.events.requests.filter((u) =>
+  !u.startsWith("http://localhost:4321/") && !u.startsWith("data:") && !u.startsWith("blob:") && !u.startsWith("chrome"));
+check("G · zero third-party requests", thirdParty.length === 0, [...new Set(thirdParty)].join(", "), "network");
+const notFound = cdp.events.responses.filter((r) => r.status >= 400);
+check("G · no 404s", notFound.length === 0, [...new Set(notFound.map((r) => `${r.status} ${r.url}`))].slice(0, 6).join(", "), "network");
+const failedReq = cdp.events.failures.filter((f) => !/ERR_ABORTED|net::ERR_ABORTED/.test(f.error || ""));
+check("G · no failed requests", failedReq.length === 0, JSON.stringify(failedReq.slice(0, 3)), "network");
+const consoleNoise = [
+  ...cdp.events.console.filter((c) => c.type === "error" || c.type === "warning"),
+  ...cdp.events.exceptions,
+  ...cdp.events.log.filter((l) => l.level === "error" || l.level === "warning"),
+];
+check("G · zero console errors/warnings", consoleNoise.length === 0, JSON.stringify(consoleNoise.slice(0, 4)), "network");
 
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} assertions passed`);

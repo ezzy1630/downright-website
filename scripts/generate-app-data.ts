@@ -203,6 +203,9 @@ async function main() {
 // button is wired hot to it (an env override can still pin a specific URL).
 const downloadUrl = process.env.PUBLIC_DOWNLOAD_URL?.trim()
   || `https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg`;
+// Sponsorship is an invitation, never a gate: the owner's GitHub Sponsors.
+const owner = repository.split("/").at(-2) ?? "ezzy1630";
+const sponsorsUrl = `https://github.com/sponsors/${owner}`;
   const sourceCommit = command(["git", "rev-parse", "HEAD"], "unknown");
   const dirty = Boolean(command(["git", "status", "--porcelain"]));
   const generatedAt = new Date().toISOString();
@@ -212,7 +215,7 @@ const downloadUrl = process.env.PUBLIC_DOWNLOAD_URL?.trim()
   await writeJson("changelog.json", { ...parseChangelog(changelog), sourceCommit, generatedAt });
   await writeJson("facts.json", {
     sourceCommit, generatedAt, sourceWorkingTreeDirty: dirty, version, minimumMacOS: "14.0", license: "MIT", artifactName: "Downright.dmg",
-    repository, supportedExtensions: parseExtensions(plist), downloadUrl,
+    repository, sponsorsUrl, supportedExtensions: parseExtensions(plist), downloadUrl,
   });
   await writeJson("motion.json", motion);
   await writeFile(join(outputRoot, "sample.md"), sample);
