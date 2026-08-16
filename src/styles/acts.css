@@ -367,81 +367,142 @@
 .terminal-install {
   position: relative;
   z-index: 4;
-  flex: 1 1 260px;
-  min-width: min(100%, 260px);
+  min-width: 0;
 }
 
 .terminal-install__trigger {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  max-width: 100%;
-  min-height: 44px;
-  padding: 10px 14px;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  gap: 10px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-button);
-  background: transparent;
-  color: var(--text-secondary);
+  background: color-mix(in oklab, var(--surface) 42%, transparent);
+  color: var(--heading);
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.45;
-  overflow-wrap: anywhere;
   text-align: left;
-  cursor: pointer;
-  transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate);
+  transition: background-color var(--motion-hover) var(--ease-decelerate), color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), translate var(--motion-press-out) var(--ease-snap), box-shadow var(--motion-hover) var(--ease-decelerate);
 }
 
 .terminal-install__trigger::-webkit-details-marker { display: none; }
-.terminal-install__trigger::after {
-  margin-left: auto;
-  color: var(--text-faint);
-  content: "+";
-  font-size: 15px;
-  line-height: 1.25;
+.terminal-install__trigger:hover,
+.terminal-install[open] .terminal-install__trigger {
+  border-color: color-mix(in oklab, var(--accent) 72%, var(--rule));
+  background: color-mix(in oklab, var(--accent) 7%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 10%, transparent);
 }
-.terminal-install[open] .terminal-install__trigger::after { content: "−"; }
-.terminal-install__trigger:hover { color: var(--heading); border-color: var(--accent); }
-.terminal-install__trigger:active { translate: 0 1px; border-color: var(--accent); }
-.terminal-install__trigger > span:first-child { color: var(--link); }
+.terminal-install__trigger:active { translate: 0 1px; }
+.terminal-install__prompt {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  place-items: center;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  color: var(--link);
+  font-size: 13px;
+  line-height: 1;
+}
+.terminal-install__label {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: -0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.terminal-install__toggle {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  margin-left: 2px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  color: var(--text-faint);
+  rotate: 45deg;
+  translate: 0 -2px;
+  transition: color var(--motion-hover) var(--ease-decelerate), rotate var(--motion-standard) var(--ease-snap), translate var(--motion-standard) var(--ease-snap);
+}
+.terminal-install[open] .terminal-install__toggle {
+  color: var(--link);
+  rotate: 225deg;
+  translate: 0 2px;
+}
 
 .terminal-install__menu {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  right: 0;
   display: grid;
-  width: min(560px, calc(100vw - 32px));
+  width: min(520px, calc(100vw - 32px), calc(100% + 172px));
   gap: 6px;
   padding: 8px;
   border: 1px solid var(--rule);
-  border-radius: var(--radius-button);
-  background: var(--surface);
+  border-radius: var(--radius-panel);
+  background: color-mix(in oklab, var(--surface) 96%, transparent);
   box-shadow: var(--window-shadow);
+  opacity: 0;
+  pointer-events: none;
+  scale: 0.985;
+  transform-origin: top right;
+  translate: 0 -6px;
+  transition: opacity var(--motion-standard) var(--ease-decelerate), scale var(--motion-standard) var(--ease-snap), translate var(--motion-standard) var(--ease-snap);
 }
+
+.terminal-install[open] .terminal-install__menu {
+  opacity: 1;
+  pointer-events: auto;
+  scale: 1;
+  translate: 0;
+}
+
+.terminal-install__menu-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 8px 7px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.terminal-install__menu-head span:last-child { color: var(--text-secondary); text-transform: none; letter-spacing: 0; }
 
 .terminal-install__option {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   min-width: 0;
-  padding: 10px;
+  min-height: 44px;
+  padding: 8px 10px;
   border: 1px solid var(--rule);
-  border-radius: calc(var(--radius-button) - 2px);
+  border-radius: var(--radius-button);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
   font: inherit;
   text-align: left;
-  transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), background var(--motion-hover) var(--ease-decelerate);
+  transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), background-color var(--motion-hover) var(--ease-decelerate), translate var(--motion-press-out) var(--ease-snap);
 }
 
 .terminal-install__option:hover,
 .terminal-install__option:focus-visible {
-  border-color: var(--accent);
-  background: var(--surface-raised);
+  border-color: color-mix(in oklab, var(--accent) 72%, var(--rule));
+  background: color-mix(in oklab, var(--accent) 7%, var(--surface));
   color: var(--heading);
 }
+.terminal-install__option:active { translate: 0 1px; }
+.terminal-install__option[data-copy-state="copied"] { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 10%, var(--surface)); }
 
 .terminal-install__method,
 .terminal-install__copy {
@@ -462,7 +523,27 @@
 }
 
 .terminal-install__option:hover code,
-.terminal-install__option:focus-visible code { color: var(--heading); }
+.terminal-install__option:focus-visible code,
+.terminal-install__option[data-copy-state="copied"] code { color: var(--heading); }
+.terminal-install__option[data-copy-state="copied"] .terminal-install__copy { color: var(--accent); }
+
+@media (max-width: 480px) {
+  .terminal-install__menu { left: 0; width: 100%; transform-origin: top left; }
+  .terminal-install__option { grid-template-columns: auto minmax(0, 1fr); }
+  .terminal-install__copy { grid-column: 2; justify-self: start; margin-top: -3px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-install__menu,
+  .terminal-install__trigger,
+  .terminal-install__toggle,
+  .terminal-install__option { transition: none; }
+}
+
+[data-reduced-motion="true"] .terminal-install__menu,
+[data-reduced-motion="true"] .terminal-install__trigger,
+[data-reduced-motion="true"] .terminal-install__toggle,
+[data-reduced-motion="true"] .terminal-install__option { transition: none; }
 
 /* ── Eyebrows ─────────────────────────────────────────────────────────
    Muted mono, uppercase, wide. Never the accent — an accent eyebrow is on

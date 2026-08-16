@@ -46,6 +46,7 @@ initDrop();
 initPalette();
 initShare();
 initDownloadFunnel();
+initTerminalInstall();
 magnetize();
 // Film detection precedes lazy scene mounting: gap and travel otherwise build
 // desktop choreography into the seven-beat mobile composition.
@@ -187,6 +188,44 @@ function setupChrome(): void {
     status.hidden = true;
     status.classList.remove("is-open");
   });
+}
+
+function initTerminalInstall(): void {
+  const timers = new WeakMap<HTMLButtonElement, number>();
+
+  for (const option of document.querySelectorAll<HTMLButtonElement>("[data-install-command]")) {
+    const label = option.querySelector<HTMLElement>("[data-install-label]");
+    if (!label) continue;
+
+    const defaultLabel = label.textContent?.trim() || "Copy";
+    option.addEventListener("click", async () => {
+      const command = option.dataset.installCommand;
+      if (!command) return;
+
+      const previousTimer = timers.get(option);
+      if (previousTimer) window.clearTimeout(previousTimer);
+
+      if (!navigator.clipboard) {
+        option.dataset.copyState = "unavailable";
+        label.textContent = "Select command";
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(command);
+        option.dataset.copyState = "copied";
+        label.textContent = "Copied";
+      } catch {
+        option.dataset.copyState = "unavailable";
+        label.textContent = "Try again";
+      }
+
+      timers.set(option, window.setTimeout(() => {
+        delete option.dataset.copyState;
+        label.textContent = defaultLabel;
+      }, 1800));
+    });
+  }
 }
 
 setupChrome();

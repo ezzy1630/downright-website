@@ -39,21 +39,26 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <DownloadButton />
           <details class="terminal-install">
             <summary class="terminal-install__trigger" data-magnet>
-              <span aria-hidden="true">$</span>
-              <span>Install via Terminal</span>
+              <span class="terminal-install__prompt" aria-hidden="true">$</span>
+              <span class="terminal-install__label">Install via Terminal</span>
+              <span class="terminal-install__toggle" aria-hidden="true"></span>
             </summary>
             <div class="terminal-install__menu" role="group" aria-label="Terminal installation commands">
-              <button type="button" class="terminal-install__option" data-install-command={brewCommand} onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.installCommand || '').catch(() => {})">
+              <div class="terminal-install__menu-head" aria-hidden="true">
+                <span>Choose an install path</span>
+                <span>Click a command to copy</span>
+              </div>
+              <button type="button" class="terminal-install__option" data-install-command={brewCommand} aria-label="Copy Homebrew install command">
                 <span class="terminal-install__method">Homebrew</span>
                 <code>{brewCommand}</code>
                 <span class="terminal-install__copy" data-install-label>Copy</span>
               </button>
-              <button type="button" class="terminal-install__option" data-install-command={npmCommand} onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.installCommand || '').catch(() => {})">
+              <button type="button" class="terminal-install__option" data-install-command={npmCommand} aria-label="Copy npm install command">
                 <span class="terminal-install__method">npm</span>
                 <code>{npmCommand}</code>
                 <span class="terminal-install__copy" data-install-label>Copy</span>
               </button>
-              <button type="button" class="terminal-install__option" data-install-command={curlCommand} onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.installCommand || '').catch(() => {})">
+              <button type="button" class="terminal-install__option" data-install-command={curlCommand} aria-label="Copy curl install command">
                 <span class="terminal-install__method">curl</span>
                 <code>{curlCommand}</code>
                 <span class="terminal-install__copy" data-install-label>Copy</span>

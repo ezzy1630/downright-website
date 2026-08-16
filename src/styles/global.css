@@ -769,11 +769,18 @@ ol {
 }
 
 .hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: max-content minmax(220px, 1fr);
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
   margin-top: 28px;
 }
+
+.hero__actions > .button,
+.hero__actions > .terminal-install { min-width: 0; }
+
+.hero__actions > .button { min-height: 48px; }
 
 .hero__micro {
   margin-top: 15px;
@@ -1555,7 +1562,8 @@ ol {
   .hero { padding-top: 100px; }
   .hero h1 { max-width: 12ch; font-size: clamp(42px, 12.5vw, 62px); }
   .hero__copy > p:not(.hero__micro) { font-size: 16px; }
-  .hero__actions .button { flex: 1 1 auto; }
+  .hero__actions { grid-template-columns: max-content minmax(190px, 1fr); }
+  .hero__actions > .button { min-height: 48px; }
   .document-window--hero { height: 600px; min-height: 0; }
   .document-window__bar { min-height: 46px; padding: 0 11px; }
   .document-window__controls { gap: 5px; }
@@ -1617,4 +1625,10 @@ ol {
   .theme-values > div { grid-template-columns: repeat(2, 1fr); }
   .changelog-group { grid-template-columns: 1fr; gap: 18px; padding-bottom: 54px; }
   .changelog-entry h2 { font-size: 30px; }
+}
+
+@media (max-width: 480px) {
+  .hero__actions { grid-template-columns: 1fr; }
+  .hero__actions > .button,
+  .hero__actions > .terminal-install { width: 100%; }
 }
