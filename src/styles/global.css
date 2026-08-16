@@ -1081,16 +1081,6 @@ ol {
 .annotation-list li { display: grid; grid-template-columns: 28px 1fr; gap: 8px; padding: 12px 0; border-top: 1px solid var(--rule); color: var(--text-secondary); font-size: 13px; }
 .annotation-list span { color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
 .render-stage__window { min-width: 0; }
-.native-capture { margin: 0; }
-.native-capture__frame { overflow: hidden; border: 1px solid var(--rule); background: var(--surface); }
-.native-capture__frame img { display: block; width: 100%; height: auto; }
-.native-capture figcaption { display: grid; gap: 3px; margin-top: 12px; color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; line-height: 1.4; }
-.native-capture figcaption strong { color: var(--text-secondary); font-weight: 500; }
-.native-evidence { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr); gap: 28px; align-items: start; margin-top: 44px; }
-.native-evidence .native-capture:nth-child(2) { margin-top: 58px; }
-.native-evidence--single { grid-template-columns: minmax(0, 760px); width: min(100%, 760px); margin-inline: auto; }
-.native-evidence--single .native-capture { width: 100%; }
-.native-evidence--reach { margin-top: 44px; }
 .render-document-viewport { height: min(720px, calc(100dvh - 112px)); overflow: hidden; border-radius: var(--radius-window); }
 .render-document-viewport .document-window { height: 100%; }
 .render-document-viewport .document-content { transform: translateY(calc(var(--document-progress, 0) * -820px)); transition: transform var(--motion-quick) linear; }
@@ -1410,8 +1400,6 @@ ol {
   .conflict-bar strong { width: 100%; margin-bottom: 3px; }
   .agent-timeline { grid-template-columns: auto 1fr auto; }
   .agent-timeline p { grid-column: 1 / -1; }
-  .native-evidence { grid-template-columns: 1fr; gap: 32px; }
-  .native-evidence .native-capture:nth-child(2) { max-width: 416px; margin-top: 0; }
   .close-section { min-height: 76svh; padding: 96px 16px 72px; }
   .site-footer__top,
   .site-footer__bottom { align-items: flex-start; flex-direction: column; }

@@ -6,9 +6,6 @@ const publicRoot = join(root, "public");
 const dataRoot = join(root, "src/data/app");
 const readJson = (name) => readFile(join(dataRoot, name), "utf8").then(JSON.parse);
 const plain = (value) => value.replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
-const nativeCaptureVersion = "1.0.13";
-const nativeCaptureCommit = "b178f7d";
-
 const [themes, benchmarks, facts, changelog] = await Promise.all(["themes.json", "benchmarks.json", "facts.json", "changelog.json"].map(readJson));
 
 const index = `# Downright
@@ -96,16 +93,11 @@ This is the current launch record for the approved site plan. The site does not 
 - Repository: ${facts.repository ?? "not configured"} is the source remote; public address confirmation remains open.
 - Brand: the current knot mark ships as the canonical mark; whether it evolves before launch remains open.
 
-## Native capture set
+## Native evidence
 
-The current native evidence stills are from the installed /Applications/Downright.app bundle on macOS 26 at version ${nativeCaptureVersion}, build 173, source commit ${nativeCaptureCommit}. The payload now follows the newer ${facts.version} source commit ${facts.sourceCommit.slice(0, 7)}. Its committed diff changes version, release, CLI, and project plumbing, not themes, motion, docs, or the rendered sample. A fresh capture refresh for that newer commit was attempted but the native window provider became unavailable; the stills remain explicitly versioned:
+This website intentionally publishes no screenshots. Its interactive demonstrations use live HTML, CSS, and generated document payload data. Native app verification remains a separate local release gate; the current payload follows the ${facts.version} source commit ${facts.sourceCommit.slice(0, 7)}.
 
-- render-warm-dark.jpg - the real app rendering sample.md in Warm Dark.
-- source-warm-dark.jpg - the same document in Source Focus.
-- tasks-warm-dark.jpg - the native Tasks inspector with the completed sample task.
-- command-palette-warm-dark.jpg - the native command palette with its searchable command list.
-
-The approved Quick Look before/after pair, Finder thumbnails folder, conflict and agent story, density rail rest/hover, structural zoom ×5, six theme frames, split view, terminal, and motion clips are still not present. They are not simulated as shipped evidence; the remaining demonstrations stay payload-driven HTML until their native sessions are cut.
+The approved Quick Look, Finder, conflict, density, structural zoom, theme, split view, terminal, and motion checks remain outside the website and are not represented as shipped evidence here.
 
 ## Payload provenance
 

@@ -15,6 +15,7 @@ import { livedown, decorateState } from "./livedown";
 import { recordParse } from "./stats";
 import { doc } from "../kernel/store";
 import { sound } from "../kernel/sound";
+import { renderSampleMarkdown } from "../data/site";
 
 export interface MountedWindow {
   view: EditorView;
@@ -85,6 +86,14 @@ export function mountEditor(
   options: { onParse?: (ms: number) => void } = {},
 ): MountedWindow {
   const meter = windowEl.querySelector<HTMLElement>("[data-honesty-meter]");
+  const readLayer = windowEl.querySelector<HTMLElement>("[data-document-read]");
+  const renderedDocument = readLayer?.querySelector<HTMLElement>("[data-static-document]");
+  const paintReadLayer = (text: string): void => {
+    if (!renderedDocument) return;
+    const scrollTop = readLayer?.scrollTop ?? 0;
+    renderedDocument.innerHTML = renderSampleMarkdown(text);
+    if (readLayer) readLayer.scrollTop = scrollTop;
+  };
   const report = (ms: number): void => {
     recordParse(ms);
     if (meter) meter.textContent = `parse ${Math.max(0.05, ms).toFixed(1)} ms`;
@@ -141,6 +150,10 @@ export function mountEditor(
 
   const unsubscribe = doc.subscribe((state) => {
     if (dirtyLabel) dirtyLabel.hidden = !state.dirty;
+    // An edited source must remain the same document when the visitor flips
+    // to Document or Split. During an agent stream the scene owns this layer
+    // so its word-level marks are not erased by the external-write update.
+    if (state.agent !== "streaming" && state.agent !== "conflict") paintReadLayer(state.text);
     if (state.text === view.state.doc.toString()) return;
     // External changes (agent resolution, dropped file, reset) land here.
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: state.text } });

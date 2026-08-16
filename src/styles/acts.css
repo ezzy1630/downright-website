@@ -619,9 +619,6 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   opacity: var(--enter, 1);
 }
 
-.sweep__capture a { color: var(--link); text-decoration: none; }
-.sweep__capture a:hover { text-decoration: underline; }
-
 /* The page's second and last handwritten aside. */
 .sweep__annotation {
   grid-row: 4;
@@ -1829,7 +1826,6 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act][data-active="true"
   .sweep__capture { grid-column: 1; }
   .sweep__annotation { justify-self: start; }
   .sweep__lede, .sweep__closing { font-size: 19px; margin-bottom: 14px; }
-  .sweep__capture a { display: inline-flex; align-items: center; min-height: 44px; }
   .sweep-block__raw { font-size: 11.5px; line-height: 1.6; }
   .sweep__surface { padding: 18px 16px 0; }
   .sweep-stage { height: 200svh; }

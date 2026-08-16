@@ -221,11 +221,17 @@ function initTapToType(): void {
     caption.textContent = "This window is real. Type in it.";
     caption.classList.add("is-settled");
   }
+  let loading = false;
+  const isMounted = (): boolean => body.querySelector<HTMLElement>("[data-document-editor]")?.dataset.editorMounted === "true";
   document.querySelector<HTMLButtonElement>("[data-film-type]")?.addEventListener("click", () => {
+    if (isMounted() || loading) return;
+    loading = true;
     void import("../editor/mount").then(({ mountEditor }) => {
-      if (body.dataset.editorMounted) return;
-      mountEditor(windowEl, body);
-      requestAnimationFrame(() => body.querySelector<HTMLElement>(".cm-content")?.focus());
+      if (isMounted()) return;
+      const mounted = mountEditor(windowEl, body);
+      requestAnimationFrame(() => mounted.view.focus());
+    }).finally(() => {
+      loading = false;
     });
   });
 }

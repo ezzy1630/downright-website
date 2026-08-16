@@ -40,7 +40,7 @@ export const copy = {
   gap: {
     eyebrow: "The difference",
     lede: "Press Space on a Markdown file today. This is what macOS shows you.",
-    capture: "Real capture · qlmanage on macOS 26 · nothing retouched. The lines above are the same bytes, live.",
+    capture: "The same bytes above are live DOM — no uploaded image, no detour.",
     closing: "Same file. Same bytes. Downright just renders them.",
     annotation: "same bytes ↑",
     beatTwoHeading: "There is more of it every day.",

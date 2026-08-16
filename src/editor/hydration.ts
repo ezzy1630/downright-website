@@ -24,11 +24,18 @@ export function hydrateOnIntent(windowEl: HTMLElement, onMount?: (mounted: Mount
       if (document.activeElement !== windowEl && !windowEl.contains(document.activeElement)) return;
       event.preventDefault();
     }
+    const pointer = event instanceof MouseEvent ? { x: event.clientX, y: event.clientY } : null;
     loading = true;
     cleanup();
     import("./mount").then(({ mountEditor }) => {
       const mounted = mountEditor(windowEl, body);
-      requestAnimationFrame(() => mounted.view.focus());
+      requestAnimationFrame(() => {
+        mounted.view.focus();
+        if (!pointer) return;
+        const position = mounted.view.posAtCoords(pointer);
+        if (position == null) return;
+        mounted.view.dispatch({ selection: { anchor: position }, scrollIntoView: true });
+      });
       onMount?.(mounted);
     });
   };

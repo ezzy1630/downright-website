@@ -3,7 +3,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import DensityRail from "../components/DensityRail.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import AppWindow from "../components/AppWindow.astro";
-import NativeCapture from "../components/NativeCapture.astro";
 import { benchmarks, copy, facts, themes } from "../data/site";
 
 const osVersion = "macOS 26";
@@ -18,7 +17,7 @@ const architectureClaims = [
   "Downright never changes a byte of your file",
 ];
 const annotations: [selector: string, label: string, detail: string][] = [
-  [".doc-math--block", "Math", "Real symbols, inline and block. No screenshots."],
+  [".doc-math--block", "Math", "Real symbols, typeset in the document."],
   [".mermaid-figure", "Diagrams", "Mermaid, drawn as part of the document."],
   [".doc-table", "Tables", "Pipe rows become a real table."],
   [".doc-callout", "Callouts", "GitHub alerts, drawn natively."],
@@ -98,7 +97,6 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
 
         <p class="sweep__capture">
           <span>{copy.gap.capture}</span>{" "}
-          <a href="/assets/native/quicklook-sample.webp" target="_blank" rel="noreferrer">See the capture ↗</a>
         </p>
         <p class="sweep__annotation" data-sweep-annotation aria-hidden="true">{copy.gap.annotation}</p>
       </div>
@@ -140,16 +138,6 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       <p class="agent-story act-reveal">
         Every change lands on a timeline, so you can compare any two versions later. Setup is three checkboxes and one default: <strong>nothing leaves your Mac</strong>.
       </p>
-      <div class="native-evidence native-evidence--single act-reveal" data-native-moment="agent-render">
-        <NativeCapture
-          src="/assets/native/render-warm-dark.jpg"
-          alt="Downright's warm-dark native document view rendering a Markdown file"
-          label="Real capture · macOS 26"
-          caption="Installed Downright · document view · captured before this payload refresh."
-          width={1020}
-          height={730}
-        />
-      </div>
     </section>
 
     {/* 8.6 — Speed: dark band №1 */}
@@ -229,16 +217,6 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       <div class="terminal-artifact act-reveal" data-terminal data-fingerprint="terminal">
         <div class="terminal-artifact__bar"><span>down — the document from the terminal</span><span>zsh</span></div>
         <pre data-terminal-body><code></code></pre>
-      </div>
-      <div class="native-evidence native-evidence--single native-evidence--reach act-reveal" data-native-moment="reach-source">
-        <NativeCapture
-          src="/assets/native/source-warm-dark.jpg"
-          alt="Downright's warm-dark native source view showing the same Markdown file"
-          label="Real capture · macOS 26"
-          caption="Installed Downright · source view · the same file, captured before this payload refresh."
-          width={1020}
-          height={730}
-        />
       </div>
     </section>
 

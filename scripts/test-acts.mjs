@@ -142,7 +142,7 @@ const keepMine = await cdp.evaluate(`(async () => {
   return JSON.stringify({
     hasMine: read.includes('MY OWN WORDS'),
     hasAgentNote: read.includes('Agents rewrite faster than anyone reads'),
-    hasAgentRewrite: read.includes('stays authoritative while the rendered surface'),
+    hasAgentRewrite: read.includes('rendered surface remains native'),
     barHidden: document.querySelector('[data-conflict-bar]').hidden,
   });
 })()`);
@@ -166,7 +166,7 @@ const takeTheirs = await cdp.evaluate(`(async () => {
   return JSON.stringify({
     hasMine: read.includes('MY OWN WORDS'),
     hasAgentNote: read.includes('Agents rewrite faster than anyone reads'),
-    hasAgentRewrite: read.includes('stays authoritative while the rendered surface'),
+    hasAgentRewrite: read.includes('rendered surface remains native'),
     barHidden: bar.hidden,
   });
 })()`);
