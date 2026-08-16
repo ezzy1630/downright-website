@@ -149,95 +149,210 @@ ol {
   align-items: center;
   justify-content: space-between;
   width: min(100% - 40px, var(--content-max));
-  height: 100%;
+  height: 56px;
   margin: 0 auto;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 2px;
   color: var(--heading);
   text-decoration: none;
 }
 
-.brand-mark {
-  display: inline-grid;
-  width: 24px;
-  height: 24px;
-  color: var(--heading);
+.brand-symbol {
+  position: relative;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  isolation: isolate;
 }
 
-.brand-mark__svg {
+.brand-symbol__glow,
+.brand-symbol__shadow {
+  position: absolute;
   display: block;
-  width: 100%;
-  height: 100%;
+  pointer-events: none;
+}
+
+.brand-symbol__glow {
+  z-index: -2;
+  inset: 1px;
+  border: 1px solid color-mix(in oklab, var(--accent) 14%, transparent);
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--accent) 7%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--surface) 34%, transparent),
+    0 5px 10px -8px color-mix(in oklab, var(--accent) 58%, transparent);
+  opacity: 0.64;
+  transform: translateY(1px);
+  transition: background-color var(--motion-selection) var(--ease-decelerate), border-color var(--motion-selection) var(--ease-decelerate), box-shadow var(--motion-selection) var(--ease-decelerate), opacity var(--motion-selection) var(--ease-decelerate);
+}
+
+.brand-symbol__shadow {
+  z-index: -1;
+  right: 7px;
+  bottom: 1px;
+  left: 7px;
+  height: 2px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--heading) 20%, transparent);
+  opacity: 0.14;
+  transform: translateY(1px) scaleX(0.72);
+  transition: opacity var(--motion-standard) var(--ease-decelerate), transform var(--motion-standard) var(--ease-snap);
+}
+
+.brand-mark {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
   overflow: visible;
-  transform-origin: center;
-  transition: transform var(--motion-hover) var(--ease-snap);
+  transform-origin: 48% 52%;
+  transition: transform var(--motion-selection) var(--ease-snap);
 }
 
-.brand-mark__bar {
+.brand-mark__spine,
+.brand-mark__bowl {
+  fill: currentColor;
   transform-box: fill-box;
   transform-origin: center;
-  transition: transform var(--motion-hover) var(--ease-snap);
+  transition: transform var(--motion-selection) var(--ease-snap);
 }
 
-.brand-mark__tile-glint {
-  transition: opacity var(--motion-hover) var(--ease-snap), transform var(--motion-hover) var(--ease-snap);
+.brand-mark__rule {
+  fill: currentColor;
+  opacity: 0.62;
   transform-box: fill-box;
   transform-origin: center;
+  transition: opacity var(--motion-selection) var(--ease-decelerate), transform var(--motion-selection) var(--ease-snap);
 }
 
-.brand:hover .brand-mark__svg,
-.brand:focus-visible .brand-mark__svg {
-  transform: translateY(-1px) rotate(-1deg) scale(1.025);
-}
-
-.brand:hover .brand-mark__bar--paper,
-.brand:focus-visible .brand-mark__bar--paper {
-  transform: translateY(-0.3px);
-}
-
-.brand:hover .brand-mark__bar--accent,
-.brand:focus-visible .brand-mark__bar--accent {
-  transform: translateY(-0.45px) translateX(0.45px) scaleX(1.04);
-}
-
-.brand:hover .brand-mark__tile-glint,
-.brand:focus-visible .brand-mark__tile-glint {
+.brand-mark__rule--accent {
+  fill: var(--accent);
   opacity: 1;
-  transform: translateX(0.35px);
 }
 
-.brand:active .brand-mark__svg {
-  transform: translateY(0) scale(0.97);
+.brand:hover .brand-mark,
+.brand:focus-visible .brand-mark {
+  transform: translateY(-1px);
+}
+
+.brand:hover .brand-symbol__glow,
+.brand:focus-visible .brand-symbol__glow {
+  border-color: color-mix(in oklab, var(--accent) 24%, transparent);
+  background: color-mix(in oklab, var(--accent) 11%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--surface) 42%, transparent),
+    0 6px 12px -8px color-mix(in oklab, var(--accent) 72%, transparent);
+  opacity: 1;
+}
+
+.brand:hover .brand-symbol__shadow,
+.brand:focus-visible .brand-symbol__shadow {
+  opacity: 0.22;
+  transform: translateY(2px) scaleX(0.9);
+}
+
+.brand:hover .brand-mark__bowl,
+.brand:focus-visible .brand-mark__bowl {
+  transform: translateX(1px);
+}
+
+.brand:hover .brand-mark__rule--accent,
+.brand:focus-visible .brand-mark__rule--accent {
+  transform: translateX(1px);
+}
+
+.brand:hover .brand-mark__rule--first,
+.brand:focus-visible .brand-mark__rule--first {
+  opacity: 0.76;
+  transform: translateX(1px);
+}
+
+.brand:hover .brand-mark__rule--last,
+.brand:focus-visible .brand-mark__rule--last {
+  opacity: 0.76;
+  transform: translateX(1px);
+}
+
+.brand:active .brand-mark {
+  transform: translateY(1px);
+  transition-duration: var(--motion-press-in);
+}
+
+.brand:active .brand-symbol__glow {
+  opacity: 0.46;
+  transition-duration: var(--motion-press-in);
+}
+
+.brand:active .brand-symbol__shadow {
+  opacity: 0.12;
+  transform: translateY(1px) scaleX(0.62);
+  transition-duration: var(--motion-press-in);
+}
+
+.brand:active .brand-mark__rule {
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brand-mark__svg,
-  .brand-mark__bar,
-  .brand-mark__tile-glint {
+  .brand-mark,
+  .brand-symbol__glow,
+  .brand-symbol__shadow,
+  .brand-wordmark__name,
+  .brand-mark__spine,
+  .brand-mark__bowl,
+  .brand-mark__rule {
     transition: none;
   }
 
-  .brand:hover .brand-mark__svg,
-  .brand:focus-visible .brand-mark__svg,
-  .brand:active .brand-mark__svg,
-  .brand:hover .brand-mark__bar,
-  .brand:focus-visible .brand-mark__bar,
-  .brand:hover .brand-mark__tile-glint,
-  .brand:focus-visible .brand-mark__tile-glint {
+  .brand:hover .brand-mark,
+  .brand:focus-visible .brand-mark,
+  .brand:active .brand-mark,
+  .brand:hover .brand-symbol__glow,
+  .brand:focus-visible .brand-symbol__glow,
+  .brand:active .brand-symbol__glow,
+  .brand:hover .brand-symbol__shadow,
+  .brand:focus-visible .brand-symbol__shadow,
+  .brand:active .brand-symbol__shadow,
+  .brand:hover .brand-mark__bowl,
+  .brand:focus-visible .brand-mark__bowl,
+  .brand:hover .brand-mark__rule,
+  .brand:focus-visible .brand-mark__rule {
     transform: none;
   }
 }
 
 .brand-wordmark {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 650;
-  letter-spacing: -0.02em;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.brand-wordmark__name {
+  display: block;
+  transform: translateY(0);
+  transition: color var(--motion-selection) var(--ease-decelerate), transform var(--motion-selection) var(--ease-snap);
+}
+
+.brand:hover .brand-wordmark__name,
+.brand:focus-visible .brand-wordmark__name {
+  color: color-mix(in oklab, var(--heading) 86%, var(--accent));
+}
+
+.brand:active .brand-wordmark__name {
+  transform: translateY(1px);
 }
 
 .site-nav,
@@ -1265,7 +1380,9 @@ ol {
   }
 }
 .site-footer__bottom div span { color: var(--text-secondary); font-family: var(--font-mono); font-size: 10px; }
-.brand--compact .brand-mark { width: 20px; height: 20px; }
+.brand--compact { gap: 6px; min-height: 32px; }
+.brand--compact .brand-symbol { width: 26px; height: 26px; }
+.brand--compact .brand-mark { width: 22px; height: 22px; }
 .brand--compact .brand-wordmark { font-size: 13px; }
 
 .release-status { position: fixed; z-index: 60; right: 22px; bottom: 22px; display: flex; align-items: center; gap: 22px; max-width: min(420px, calc(100% - 44px)); padding: 14px 16px; border: 1px solid var(--rule); border-radius: var(--radius-panel); background: color-mix(in oklab, var(--surface) 90%, transparent); backdrop-filter: blur(12px); opacity: 0; transform: translateY(8px); transition: opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-decelerate); }
@@ -1385,14 +1502,23 @@ ol {
 }
 
 @media (max-width: 900px) {
+  .site-header { height: 60px; }
   .site-nav,
   .site-header__actions { display: none; }
-  .site-header__inner { width: min(100% - 32px, var(--content-max)); }
-  /* Thumb targets: the wordmark link and the menu button both clear 44px. */
-  .brand { min-height: 44px; }
-  .menu-toggle { display: grid; gap: 4px; width: 44px; height: 44px; place-content: center; border: 1px solid var(--rule); border-radius: var(--radius-button); background: transparent; cursor: pointer; }
-  .menu-toggle span { display: block; width: 14px; height: 1px; background: var(--text-secondary); }
-  .mobile-menu { position: absolute; top: 56px; right: 16px; left: 16px; display: grid; gap: 3px; padding: 10px; border: 1px solid var(--rule); border-radius: var(--radius-panel); background: var(--surface); }
+  .site-header__inner { position: relative; justify-content: flex-start; width: min(100% - 32px, var(--content-max)); height: 60px; }
+  .brand:not(.brand--compact) { min-height: 44px; gap: 8px; }
+  .brand:not(.brand--compact) .brand-symbol { width: 32px; height: 32px; }
+  .brand:not(.brand--compact) .brand-mark { width: 32px; height: 32px; }
+  .brand:not(.brand--compact) .brand-wordmark { font-size: 17px; letter-spacing: -0.03em; }
+  .menu-toggle { position: absolute; right: 0; display: grid; gap: 4px; width: 44px; height: 44px; place-content: center; border: 1px solid var(--rule); border-radius: var(--radius-button); background: transparent; cursor: pointer; transition: background-color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), transform var(--motion-press-out) var(--ease-snap); }
+  .menu-toggle:hover,
+  .menu-toggle[aria-expanded="true"] { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, transparent); }
+  .menu-toggle:active { transform: scale(0.97); }
+  .menu-toggle span { display: block; width: 14px; height: 1px; background: var(--text-secondary); transform-origin: center; transition: background-color var(--motion-hover) var(--ease-decelerate), opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-snap); }
+  .menu-toggle[aria-expanded="true"] span:first-child { transform: translateY(2.5px) rotate(45deg); }
+  .menu-toggle[aria-expanded="true"] span:last-child { transform: translateY(-2.5px) rotate(-45deg); }
+  .mobile-menu { position: absolute; top: 60px; right: 16px; left: 16px; display: grid; gap: 3px; padding: 10px; border: 1px solid var(--rule); border-radius: var(--radius-panel); background: var(--surface); opacity: 0; pointer-events: none; transform: translateY(-6px) scale(0.985); transform-origin: top right; transition: opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-snap); }
+  .mobile-menu.is-open { opacity: 1; pointer-events: auto; transform: none; }
   .mobile-menu[hidden] { display: none; }
   .mobile-menu > a { padding: 11px; color: var(--text-secondary); text-decoration: none; transition: background-color var(--motion-hover) var(--ease-decelerate), color var(--motion-hover) var(--ease-decelerate), transform var(--motion-hover) var(--ease-snap); }
   .mobile-menu > a:hover,

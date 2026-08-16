@@ -13,7 +13,7 @@ const images = {
   changelog: ["Version truth,", "in public.", "A changelog generated from the app payload."],
   privacy: ["Local use", "is the default.", "No account. No cloud sync. No core-app telemetry."],
 };
-const canonicalMark = await readFile(join(root, "src/assets/brand/mark.svg"), "utf8");
+const canonicalMark = await readFile(join(root, "public/favicon.svg"), "utf8");
 const markContent = canonicalMark.replace(/^<svg\b[^>]*>/, "").replace(/<\/svg>\s*$/, "");
 const brandMark = `<g transform="translate(77 100) scale(1.1)">${markContent}</g>`;
 

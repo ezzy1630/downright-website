@@ -20,7 +20,15 @@ No. Quick Look is useful for a fast Finder preview. Downright is the deeper read
 
 ## Is there a Homebrew cask?
 
-No verified cask is claimed yet. The site will not present one as available until it exists and has been checked.
+Yes. Install the production app from the public tap:
+
+```bash
+brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright
+```
+
+It installs Downright into `/Applications` and keeps Sparkle updates. The
+tap-free `brew install --cask downright` form still depends on official
+Homebrew Cask review.
 
 ## Why might macOS warn about the app?
 

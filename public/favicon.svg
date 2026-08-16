@@ -1,4 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#f7f4ee"/>
-  <path d="M12.1 5.1 10.3 26.9M21.3 5.1l-1.8 21.8M6 12.2h21M5 19.8h21" stroke="#292522" stroke-width="2.6" stroke-linecap="round"/>
+  <title>Downright</title>
+  <style>
+    .mark,.rule{fill:#172b45}
+    @media (prefers-color-scheme:dark){.mark,.rule{fill:#f7f4ee}}
+  </style>
+  <rect class="mark" x="2" y="4" width="6" height="24" rx="3"/>
+  <path class="mark" d="M11 4h7c7 0 12 5.2 12 12s-5 12-12 12h-7v-5h7c4.2 0 7-3 7-7s-2.8-7-7-7h-7V4Z"/>
+  <rect class="rule" x="11" y="11" width="9" height="3" rx="1.5" opacity=".62"/>
+  <rect x="11" y="15" width="9" height="3" rx="1.5" fill="#307afe"/>
+  <rect class="rule" x="11" y="19" width="9" height="3" rx="1.5" opacity=".62"/>
 </svg>

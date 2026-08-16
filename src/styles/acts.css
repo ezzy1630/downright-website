@@ -366,10 +366,11 @@
 
 .brew-chip {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  max-width: 100%;
   min-height: 44px;
-  padding: 0 14px;
+  padding: 10px 14px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-button);
   background: transparent;
@@ -377,10 +378,14 @@
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  text-align: left;
   transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate);
 }
 
 .brew-chip:hover { color: var(--heading); border-color: var(--accent); }
+.brew-chip:active { translate: 0 1px; border-color: var(--accent); }
 .brew-chip span { color: var(--link); }
 
 /* ── Eyebrows ─────────────────────────────────────────────────────────

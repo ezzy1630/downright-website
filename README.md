@@ -68,8 +68,8 @@ The answer pages are /markdown-viewer-mac, /markdown-editor-mac-free,
 ## Known gaps
 
 The site intentionally publishes its remaining launch gaps at `/known-gaps` and
-`/known-gaps.md`: the domain is assumed but unconfirmed, no Homebrew cask is
-claimed, the public repo address and mark evolution remain open, and the native
+`/known-gaps.md`: the public tap is live while official Homebrew Cask review,
+the public repo address and mark evolution remain open, and the native
 Quick Look/Finder/conflict/agent capture sessions are not present in the current
 Verification inventory. Clean-machine release verification remains a separate
 gate. No product evidence is fabricated to cover those gaps.

@@ -1,11 +1,10 @@
 ---
 /**
- * The mark: the document itself. A `#` — Markdown's most iconic glyph —
- * drawn with the app's optical care: the horizontals carry the weight (they
- * are the text), the verticals lean a half-degree (the hand). Reads at 16px,
- * works single-color in currentColor, sits in the traffic-light row. The
- * knot is retired.
+ * Website lockup derived from the app icon's D and document rules. The app
+ * tile is deliberately omitted: at navigation size the identity needs one
+ * crisp silhouette, not a miniature rendering of the macOS icon.
  */
+
 interface Props {
   compact?: boolean;
   href?: string;
@@ -14,13 +13,18 @@ interface Props {
 const { compact = false, href = "/", withWordmark = true } = Astro.props;
 ---
 <a class:list={["brand", { "brand--compact": compact }]} href={href} aria-label="Downright home">
-  <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M8.5 3.7 7 20.3M17.2 3.7l-1.5 16.6M3.9 9.1h16.4M3.2 14.9h16.4"
-      stroke="currentColor"
-      stroke-width={compact ? 2.2 : 2.4}
-      stroke-linecap="round"
-    />
-  </svg>
-  {withWordmark && <span class="brand-wordmark">Downright</span>}
+  <span class="brand-symbol" aria-hidden="true">
+    <span class="brand-symbol__glow"></span>
+    <span class="brand-symbol__shadow"></span>
+    <svg class="brand-mark" viewBox="0 0 32 32" focusable="false">
+      <rect class="brand-mark__spine" x="2" y="4" width="6" height="24" rx="3" />
+      <path class="brand-mark__bowl" d="M11 4h7c7 0 12 5.2 12 12s-5 12-12 12h-7v-5h7c4.2 0 7-3 7-7s-2.8-7-7-7h-7V4Z" />
+      <g class="brand-mark__rules">
+        <rect class="brand-mark__rule brand-mark__rule--first" x="11" y="11" width="9" height="3" rx="1.5" />
+        <rect class="brand-mark__rule brand-mark__rule--accent" x="11" y="15" width="9" height="3" rx="1.5" />
+        <rect class="brand-mark__rule brand-mark__rule--last" x="11" y="19" width="9" height="3" rx="1.5" />
+      </g>
+    </svg>
+  </span>
+  {withWordmark && <span class="brand-wordmark"><span class="brand-wordmark__name">Downright</span></span>}
 </a>

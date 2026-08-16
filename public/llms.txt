@@ -39,4 +39,6 @@ Downright is a free, open-source, native Markdown editor and viewer for macOS. I
 - Download artifact: Downright.dmg
 - Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
 
-The site does not claim a Homebrew cask. Its verified production domain is https://downright.cc.
+Homebrew tap: https://github.com/ezzy1630/homebrew-downright
+Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright
+The tap-free cask command remains pending official Homebrew Cask review. Its verified production domain is https://downright.cc.

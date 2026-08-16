@@ -1,4 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <path d="M16 3.4c2.8 0 4.9 2.3 4.9 5.1v2.2l1.9-1.1c2.5-1.4 5.5-.5 6.8 1.8 1.4 2.4.6 5.4-1.8 6.8l-1.9 1.1 1.9 1.1c2.4 1.4 3.2 4.4 1.8 6.8-1.3 2.3-4.3 3.2-6.8 1.8l-1.9-1.1v2.2c0 2.8-2.1 5.1-4.9 5.1s-4.9-2.3-4.9-5.1v-2.2l-1.9 1.1c-2.5 1.4-5.5.5-6.8-1.8-1.4-2.4-.6-5.4 1.8-6.8l1.9-1.1-1.9-1.1C1.8 16.8 1 13.8 2.4 11.4c1.3-2.3 4.3-3.2 6.8-1.8l1.9 1.1V8.5c0-2.8 2.1-5.1 4.9-5.1Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"/>
-  <path d="M16 9.1v13.8M10 12.6l12 6.8M10 19.4l12-6.8" stroke="currentColor" stroke-linecap="round" stroke-width="1.55"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" class="brand-mark__svg" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="brand-mark-ink" x1="7" y1="5" x2="27" y2="27" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10233b"/>
+      <stop offset="0.58" stop-color="#1b304b"/>
+      <stop offset="1" stop-color="#304965"/>
+    </linearGradient>
+    <linearGradient id="brand-mark-page" x1="13" y1="9" x2="22" y2="23" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffdfa"/>
+      <stop offset="1" stop-color="#e8e1d9"/>
+    </linearGradient>
+    <linearGradient id="brand-mark-rule" x1="13" y1="11" x2="21" y2="19" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b6aea6"/>
+      <stop offset="1" stop-color="#7f7770"/>
+    </linearGradient>
+    <linearGradient id="brand-mark-blue" x1="13" y1="14" x2="21" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#79aaf4"/>
+      <stop offset="0.55" stop-color="#4a88e4"/>
+      <stop offset="1" stop-color="#2b64bd"/>
+    </linearGradient>
+    <filter id="brand-mark-shell-shadow" x="-24%" y="-28%" width="148%" height="170%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="0.42" stdDeviation="0.38" flood-color="#1b1712" flood-opacity="0.3"/>
+    </filter>
+    <filter id="brand-mark-page-shadow" x="-30%" y="-26%" width="160%" height="165%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="0.5" stdDeviation="0.34" flood-color="#4a4036" flood-opacity="0.28"/>
+    </filter>
+    <filter id="brand-mark-rule-shadow" x="-30%" y="-70%" width="160%" height="240%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="0.24" stdDeviation="0.2" flood-color="#312a24" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <path class="brand-mark__depth" d="M8 24V8h9.5c5.4 0 9.4 3.1 9.4 8s-4 8-9.4 8H8" fill="none" stroke="#71675c" stroke-width="4.18" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.28" transform="translate(0 0.42)"/>
+  <path class="brand-mark__edge" d="M8 24V8h9.5c5.4 0 9.4 3.1 9.4 8s-4 8-9.4 8H8" fill="none" stroke="#fffaf2" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.36" transform="translate(-0.14 -0.14)"/>
+  <path class="brand-mark__shell" d="M8 24V8h9.5c5.4 0 9.4 3.1 9.4 8s-4 8-9.4 8H8" fill="none" stroke="url(#brand-mark-ink)" stroke-width="4.08" stroke-linecap="round" stroke-linejoin="round" filter="url(#brand-mark-shell-shadow)"/>
+
+  <rect class="brand-mark__document" x="10.7" y="9.6" width="11.2" height="12.8" rx="1.7" fill="url(#brand-mark-page)" stroke="#c5bcb3" stroke-width="0.48" filter="url(#brand-mark-page-shadow)"/>
+  <path class="brand-mark__document-edge" d="M12.35 10.1h7.6" stroke="#fff" stroke-width="0.46" stroke-linecap="round" stroke-opacity="0.78"/>
+
+  <g class="brand-mark__rules">
+    <g class="brand-mark__rule brand-mark__rule--paper" filter="url(#brand-mark-rule-shadow)">
+      <rect x="12.3" y="11.55" width="8" height="1.22" rx="0.61" fill="url(#brand-mark-rule)"/>
+    </g>
+    <g class="brand-mark__rule brand-mark__rule--accent" filter="url(#brand-mark-rule-shadow)">
+      <rect x="12.3" y="14.7" width="8" height="1.22" rx="0.61" fill="url(#brand-mark-blue)"/>
+    </g>
+    <g class="brand-mark__rule brand-mark__rule--paper" filter="url(#brand-mark-rule-shadow)">
+      <rect x="12.3" y="17.85" width="8" height="1.22" rx="0.61" fill="url(#brand-mark-rule)"/>
+    </g>
+  </g>
 </svg>
