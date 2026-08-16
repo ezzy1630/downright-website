@@ -10,11 +10,13 @@
  * duplicates, ever.
  *
  * Flight rules:
- *  - First (before moving), Last (after re-parenting), Invert, Play — the
- *    classic FLIP, sprung on the app's own closed-form integrator.
- *  - The fly uses translate + scale only (compositor-friendly); the slot's
- *    overflow is lifted for the duration so the window is never clipped
- *    mid-flight, then restored.
+ *  - First (before moving), Last (after re-parenting), Invert, Play — sprung
+ *    on the app's own closed-form integrator, as a true rect morph: the
+ *    window translates AND genuinely resizes, so content keeps its
+ *    proportions the whole flight (a scale FLIP would stretch the text).
+ *  - Position springs lead with a whisper of overshoot; size springs trail
+ *    heavier; a ballistic arc lifts the flight off the straight line; the
+ *    shadow deepens for the trip (data-flying) and settles on landing.
  *  - Reduced motion = teleport. The window lands in its slot with no travel.
  *  - Only the hero slot is editable. Every other slot forces read mode.
  */
@@ -39,8 +41,13 @@ interface Slot {
 
 const CLAMP = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
 
-function springDuration(distance: number): number {
-  return CLAMP(0.0115 * Math.sqrt(distance), 0.18, 0.55);
+/**
+ * Flight timing. Distance-driven like a spring scroll, but floored higher:
+ * a window is heavy, and a 150ms hop reads as a snap-cut, not a travel. The
+ * ceiling stays short of half a second even for cross-page flights.
+ */
+function flightDuration(distance: number): number {
+  return CLAMP(0.0125 * Math.sqrt(distance), 0.26, 0.6);
 }
 
 export class WindowDirector {
@@ -48,7 +55,7 @@ export class WindowDirector {
   private readonly slots: Slot[];
   private current: SlotId | null = null;
   private flying = false;
-  private observer: IntersectionObserver | null = null;
+  private cancelFlight: (() => void) | null = null;
 
   constructor(windowEl: HTMLElement) {
     this.window = windowEl;
@@ -134,7 +141,13 @@ export class WindowDirector {
     const slot = this.slots.find((candidate) => candidate.id === this.current);
     const host = slot?.host();
     if (!host) return;
-    this.window.style.transform = "none";
+    this.cancelFlight?.();
+    this.cancelFlight = null;
+    this.flying = false;
+    delete this.window.dataset.flying;
+    this.window.style.translate = "";
+    this.window.style.width = "";
+    this.window.style.height = "";
     host.style.overflow = "";
   }
 
@@ -171,9 +184,10 @@ export class WindowDirector {
       this.setMode("edit");
     }
 
-    // First: capture the flight origin.
+    // First: capture the flight origin (includes any in-flight state, so a
+    // reverse claim mid-air simply bends the flight, never snaps).
     const before = this.window.getBoundingClientRect();
-    const wasVisible = before.bottom > 0 && before.top < window.innerHeight;
+    const wasVisible = before.bottom > -80 && before.top < window.innerHeight + 80;
 
     // Last: re-parent.
     const anchor = slot.before?.() ?? null;
@@ -181,46 +195,82 @@ export class WindowDirector {
     else host.append(this.window);
     this.window.dataset.slot = target;
 
-    // Invert + Play.
+    // Invert + Play — a true rect morph, not a scale FLIP. The window glides
+    // and genuinely resizes, exactly like a native window finding its new
+    // context: content keeps its proportions (no stretched text), the
+    // position springs lead with a whisper of overshoot, the size springs
+    // trail slightly heavier, and a ballistic arc lifts the flight off the
+    // straight line between slots. Perceptual, physical, never bouncy.
     const after = this.window.getBoundingClientRect();
     const dx = before.left - after.left;
     const dy = before.top - after.top;
-    const sx = after.width > 0 ? before.width / after.width : 1;
-    const sy = after.height > 0 ? before.height / after.height : 1;
+    const dw = before.width - after.width;
+    const dh = before.height - after.height;
+    const noDelta = Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(dw) < 1 && Math.abs(dh) < 1;
 
-    if (reducedMotion() || !wasVisible || (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(sx - 1) < 0.001 && Math.abs(sy - 1) < 0.001)) {
-      this.window.style.transform = "none";
+    if (reducedMotion() || !wasVisible || noDelta) {
+      this.window.style.translate = "";
+      this.window.style.width = "";
+      this.window.style.height = "";
       return;
     }
 
     // Lift the slot's clip so the window is never clipped mid-flight.
-    const clipped = host.closest<HTMLElement>(".render-document-viewport, .agent-stage__document");
+    const clipped = host.closest<HTMLElement>(".render-document-viewport, .agent-stage__document, .sweep");
     const previousOverflow = clipped?.style.overflow ?? "";
     if (clipped) clipped.style.overflow = "visible";
 
-    const distance = Math.max(Math.abs(dx), Math.abs(dy));
-    const duration = springDuration(distance);
-    const tx = new SpringScalar(dx, duration);
-    const ty = new SpringScalar(dy, duration);
-    const rx = new SpringScalar(sx, duration);
-    const ry = new SpringScalar(sy, duration);
-    tx.setTarget(0);
-    ty.setTarget(0);
-    rx.setTarget(1);
-    ry.setTarget(1);
-    this.flying = true;
-    this.window.style.transformOrigin = "top left";
+    const distance = Math.max(Math.abs(dx), Math.abs(dy), Math.abs(dw), Math.abs(dh) * 0.6);
+    const positionDuration = flightDuration(distance);
+    const sizeDuration = positionDuration * 1.16;
+    const arcPx = CLAMP(distance * 0.055, 6, 30);
 
-    ticker.add((dt) => {
-      const moving = tx.advance(dt) || ty.advance(dt) || rx.advance(dt) || ry.advance(dt);
-      this.window.style.transform = `translate(${tx.value.toFixed(2)}px, ${ty.value.toFixed(2)}px) scale(${rx.value.toFixed(4)}, ${ry.value.toFixed(4)})`;
-      if (!moving) {
-        this.window.style.transform = "none";
-        this.flying = false;
-        if (clipped) clipped.style.overflow = previousOverflow;
-      }
+    // Freeze the origin inline (position via translate, size via box), then
+    // spring everything to the slot's own geometry.
+    this.window.style.width = `${before.width.toFixed(2)}px`;
+    this.window.style.height = `${before.height.toFixed(2)}px`;
+    this.window.style.translate = `${dx.toFixed(2)}px ${dy.toFixed(2)}px`;
+
+    const px = new SpringScalar(dx, positionDuration, 0.16);
+    const py = new SpringScalar(dy, positionDuration, 0.16);
+    const w = new SpringScalar(before.width, sizeDuration, 0.08);
+    const h = new SpringScalar(before.height, sizeDuration, 0.08);
+    const arc = new SpringScalar(0, positionDuration * 0.92, 0);
+    px.setTarget(0);
+    py.setTarget(0);
+    w.setTarget(after.width);
+    h.setTarget(after.height);
+    arc.setTarget(1);
+
+    // A new claim replaces this flight wholesale (see moveTo entry), so the
+    // previous job must never keep writing geometry.
+    this.cancelFlight?.();
+    this.flying = true;
+    this.window.dataset.flying = "";
+
+    const settle = (): void => {
+      this.cancelFlight = null;
+      this.flying = false;
+      delete this.window.dataset.flying;
+      this.window.style.translate = "";
+      this.window.style.width = "";
+      this.window.style.height = "";
+      if (clipped) clipped.style.overflow = previousOverflow;
+    };
+
+    const cancel = ticker.add((dt) => {
+      const moving = px.advance(dt) || py.advance(dt) || w.advance(dt) || h.advance(dt) || arc.advance(dt);
+      const lift = Math.sin(CLAMP(arc.value, 0, 1) * Math.PI) * arcPx;
+      this.window.style.translate = `${px.value.toFixed(2)}px ${(py.value - lift).toFixed(2)}px`;
+      this.window.style.width = `${w.value.toFixed(2)}px`;
+      this.window.style.height = `${h.value.toFixed(2)}px`;
+      if (!moving) settle();
       return moving;
     });
+    this.cancelFlight = () => {
+      cancel();
+      settle();
+    };
   }
 
   setMode(mode: "read" | "edit"): void {
@@ -264,7 +314,8 @@ export class WindowDirector {
   }
 
   destroy(): void {
-    this.observer?.disconnect();
+    this.cancelFlight?.();
+    this.cancelFlight = null;
   }
 }
 

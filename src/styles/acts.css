@@ -90,7 +90,16 @@
   border-radius: var(--radius-window);
   background: var(--surface);
   box-shadow: var(--window-shadow);
-  transition: background-color var(--motion-deliberate) var(--ease-decelerate);
+  transition: background-color var(--motion-deliberate) var(--ease-decelerate),
+    box-shadow var(--motion-deliberate) var(--ease-decelerate);
+}
+
+/* Mid-flight the window is picked up: a deeper, softer shadow reads as
+   altitude while it morphs between slots, and settles again on landing. */
+.app-window[data-flying] .app-window__face {
+  box-shadow:
+    0 48px 96px -34px color-mix(in srgb, #1a1512 64%, transparent),
+    0 14px 36px -18px color-mix(in srgb, #1a1512 48%, transparent);
 }
 
 /* The window is one node; each act's slot sizes it. */
