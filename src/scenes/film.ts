@@ -267,6 +267,8 @@ function initSweepThumb(): void {
     blocks.push({ raw, rendered, at: 0.2 + (index / Math.max(1, source.length)) * 0.7 });
   });
   surface.append(fragment);
+  const windowEl = surface.closest<HTMLElement>("[data-sweep-window]");
+  if (windowEl) windowEl.dataset.chrome = "ql";
   const track = document.createElement("div");
   track.className = "film-scrub";
   track.innerHTML = `<div class="film-scrub__track" role="slider" tabindex="0" aria-label="Scrub the render" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="film-scrub__fill"></div><div class="film-scrub__thumb"></div></div><div class="film-scrub__label"><span>raw bytes</span><span>rendered</span></div>`;
@@ -275,10 +277,14 @@ function initSweepThumb(): void {
   const paint = (progress: number): void => {
     track.style.setProperty("--scrub", progress.toFixed(4));
     slider.setAttribute("aria-valuenow", String(Math.round(progress * 100)));
+    if (windowEl) windowEl.dataset.chrome = progress >= 0.86 ? "app" : "ql";
     for (const block of blocks) {
       const turn = Math.min(1, Math.max(0, (progress - block.at) / 0.08));
-      block.raw.style.opacity = String(1 - Math.min(1, turn * 2));
-      block.rendered.style.opacity = String(Math.max(0, (turn - 0.5) * 2));
+      const handedOff = turn >= 0.5;
+      block.raw.style.opacity = handedOff ? "0" : "1";
+      block.rendered.style.opacity = handedOff ? "1" : "0";
+      block.rendered.style.transform = `translateY(${handedOff ? "0" : "7"}px)`;
+      block.raw.style.transform = `translateY(${handedOff ? "-7" : "0"}px)`;
     }
     const total = surface.scrollHeight - surface.clientHeight;
     if (total > 0) surface.scrollTop = Math.min(1, Math.max(0, (progress - 0.18) / 0.82)) * total;

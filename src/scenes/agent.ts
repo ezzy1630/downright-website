@@ -21,9 +21,9 @@ const DWELL_MS = 1500;
 
 /** The rewrite the agent performs — phrasal edits on stable sample lines. */
 const REWRITES: { find: RegExp; replace: string }[] = [
-  { find: /This lower shelf gives the document map real structure without competing with the proof above\./, replace: "The document map draws from this same structure, so every altitude has a floor to stand on." },
-  { find: /prose \+ source \+ state \+ media/, replace: "prose, source, state, and media in one surface" },
-  { find: /stays the source of truth while the rendered surface stays native/, replace: "stays authoritative while the rendered surface stays native" },
+  { find: /The document map draws from this same structure, so every altitude has a floor to stand on\./, replace: "The document map follows the same block index, so every reading level keeps its anchor." },
+  { find: /Native: prose, source, state, and media in one surface\./, replace: "Native: prose, source, state, and media remain one review surface." },
+  { find: /The handoff stays source-first while the rendered surface stays native\./, replace: "The handoff stays source-first while the rendered surface remains native." },
 ];
 
 const ADDED_SECTION = "\n\n> [!NOTE]\n> Agents rewrite faster than anyone reads. Marks and review keep the file yours.\n";

@@ -144,6 +144,14 @@ const COLLECT = String.raw`(() => {
   };
 
   const textRects = [];
+  const blockIds = new WeakMap();
+  let nextBlockId = 0;
+  const blockOwner = (el) => {
+    const owner = el.closest('h1,h2,h3,h4,h5,h6,p,li,td,th,pre,figcaption');
+    if (!owner) return 0;
+    if (!blockIds.has(owner)) blockIds.set(owner, ++nextBlockId);
+    return blockIds.get(owner);
+  };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node;
   const CHROME_SEL = '[data-site-header], .site-footer, [data-density-rail], .toast-host, dialog, .drop-veil, [data-release-status], .command-palette, .shortcut-sheet, .review-panel, .quick-look';
@@ -169,7 +177,7 @@ const COLLECT = String.raw`(() => {
       textRects.push({
         act, x: +r.left.toFixed(1), y: +r.top.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1),
         op: +op.toFixed(2), cropped, cropOk: cropOk(el), t: t.trim().slice(0, 44),
-        bridge: !!el.closest('.app-window'),
+        bridge: !!el.closest('.app-window'), owner: blockOwner(el),
       });
     }
   }
@@ -378,6 +386,7 @@ async function sweepViewport(cdp, vp, shotDir) {
       outer: for (let i = 0; i < rects.length; i++) {
         for (let j = i + 1; j < rects.length; j++) {
           if (rects[i].t === rects[j].t) continue;
+          if (rects[i].owner && rects[i].owner === rects[j].owner) continue;
           const dx = Math.abs((rects[i].x + rects[i].w / 2) - (rects[j].x + rects[j].w / 2));
           const dy = Math.abs((rects[i].y + rects[i].h / 2) - (rects[j].y + rects[j].h / 2));
           if (dx < 16 && dy < 8) continue; // inline siblings, not collisions

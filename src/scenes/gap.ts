@@ -44,11 +44,6 @@ export function initGap(): void {
   initWall();
 }
 
-function smoothstep(value: number): number {
-  const t = Math.min(1, Math.max(0, value));
-  return t * t * (3 - 2 * t);
-}
-
 interface SweepBlock {
   raw: HTMLElement;
   rendered: HTMLElement;
@@ -143,14 +138,15 @@ function initSweep(): void {
 
     for (const block of blocks) {
       const turn = Math.min(1, Math.max(0, (progress - block.at) / BLOCK_RAMP));
-      // A hand-off, not a crossfade: the raw half is gone before the rendered
-      // half arrives, so the two never stack into an unreadable double image.
-      const out = smoothstep(turn / 0.5);
-      const inn = smoothstep((turn - 0.5) / 0.5);
-      block.raw.style.opacity = String(1 - out);
-      block.rendered.style.opacity = String(inn);
-      block.rendered.style.transform = `translateY(${((1 - inn) * 7).toFixed(2)}px)`;
-      block.raw.style.transform = `translateY(${(out * -7).toFixed(2)}px)`;
+      // A hard hand-off, not a crossfade: the raw half leaves at the midpoint
+      // and the rendered half arrives on the next frame. The line still
+      // travels continuously, but two readings can never stack into a double
+      // image when the scroll lands between animation frames.
+      const handedOff = turn >= 0.5;
+      block.raw.style.opacity = handedOff ? "0" : "1";
+      block.rendered.style.opacity = handedOff ? "1" : "0";
+      block.rendered.style.transform = `translateY(${handedOff ? "0" : "7"}px)`;
+      block.raw.style.transform = `translateY(${handedOff ? "-7" : "0"}px)`;
     }
 
     for (const note of notes) {
