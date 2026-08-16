@@ -23,13 +23,13 @@ const {
   imagePath = "/og/index.svg",
 } = Astro.props;
 const repository = facts.repository;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://downright.app").toString();
+const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://downright.cc").toString();
 const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
 ---
 
 <!--
   ┌─────────────────────────────────────────────────────────────────────┐
-  │  downright.app — the living document                               │
+  │  downright.cc — the living document                               │
   │                                                                     │
   │  One Markdown file runs this whole page. You can type in it,       │
   │ watch an agent rewrite it, win the conflict, spill a theme over     │
@@ -38,7 +38,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
   │  No frameworks. One spring kernel, the app's own constants.        │
   │  No analytics, no cookies, no server. The document is the site.    │
   │                                                                     │
-  │  This page is also Markdown:  curl downright.app/index.md          │
+  │  This page is also Markdown:  curl downright.cc/index.md          │
   └─────────────────────────────────────────────────────────────────────┘
 -->
 <!doctype html>
@@ -50,7 +50,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#171614" />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" type="text/markdown" href={new URL(markdownPath, Astro.site ?? "https://downright.app")} title="Markdown version" />
+    <link rel="alternate" type="text/markdown" href={new URL(markdownPath, Astro.site ?? "https://downright.cc")} title="Markdown version" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin media="(min-width: 900px)" />
     <meta property="og:type" content="website" />
@@ -58,13 +58,13 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={new URL(imagePath, Astro.site ?? "https://downright.app")} />
+    <meta property="og:image" content={new URL(imagePath, Astro.site ?? "https://downright.cc")} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(imagePath, Astro.site ?? "https://downright.app")} />
+    <meta name="twitter:image" content={new URL(imagePath, Astro.site ?? "https://downright.cc")} />
     <title>{title}</title>
     <script is:inline>
       // Warm Dark is the house ground: every first visit lands on #171614.
@@ -166,7 +166,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         No cookies, no analytics, no newsletter, no chat widget, no server — and it says so because for some of you that line is the pitch.
       </p>
       <div class="site-footer__bottom">
-        <p>This page is also Markdown. <code>curl downright.app/index.md | down</code></p>
+        <p>This page is also Markdown. <code>curl downright.cc/index.md | down</code></p>
         <div>
           <a href="/llms.txt">llms.txt</a>
           <a href="/humans.txt">humans.txt</a>

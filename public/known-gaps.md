@@ -4,7 +4,7 @@ This is the current launch record for the approved site plan. The site does not 
 
 ## Release inputs
 
-- Domain: https://downright.app is the current deployment assumption and still needs confirmation.
+- Domain: https://downright.cc is the intended public domain; Vercel and DNS confirmation remains pending.
 - Artifact: Downright.dmg is available at https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg.
 - Homebrew: no cask is claimed until one exists and is verified.
 - Repository: https://github.com/ezzy1630/Downright is the source remote; public address confirmation remains open.

@@ -2,7 +2,7 @@ import type { APIContext } from "astro";
 import { changelog } from "../data/site";
 
 export function GET({ site }: APIContext) {
-  const base = site?.toString().replace(/\/$/, "") ?? "https://downright.app";
+  const base = site?.toString().replace(/\/$/, "") ?? "https://downright.cc";
   const items = changelog.entries.slice(0, 20).map((entry) => `<item><title>${escapeXml(entry.summary)}</title><link>${base}/changelog</link><guid>${base}/changelog#${slug(entry.summary)}</guid><pubDate>${new Date(entry.date === "Unreleased" ? Date.now() : entry.date).toUTCString()}</pubDate><description>${escapeXml(`${entry.kind}: ${entry.summary}`)}</description></item>`).join("");
   return new Response(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Downright Changelog</title><link>${base}/changelog</link><description>Native Markdown app for macOS</description>${items}</channel></rss>`, { headers: { "Content-Type": "application/rss+xml; charset=utf-8" } });
 }

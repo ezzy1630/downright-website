@@ -15,7 +15,7 @@ const hasPublicArtifact = Boolean(facts.downloadUrl);
     <article class="legal-copy">
       <h2>Release inputs</h2>
       <ul>
-        <li><strong>Domain:</strong> <code>downright.app</code> is the current deployment assumption and still needs confirmation.</li>
+        <li><strong>Domain:</strong> <code>downright.cc</code> is the intended public domain; Vercel and DNS confirmation remains pending.</li>
         <li><strong>Artifact:</strong> <code>{facts.artifactName}</code> is available at {hasPublicArtifact ? <a href={facts.downloadUrl} target="_blank" rel="noreferrer">the public GitHub Release URL</a> : "no signed, notarized, stapled public URL is configured"}.</li>
         <li><strong>Homebrew:</strong> no cask is claimed until one exists and is verified.</li>
         <li><strong>Repository:</strong> <a href={facts.repository ?? "/"}>{facts.repository ?? "not configured"}</a> is the source remote; public address confirmation remains open.</li>

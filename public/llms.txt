@@ -6,15 +6,15 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 
 ## Routes
 
-- https://downright.app/ - product argument and interactive document demos
-- https://downright.app/themes - six source-derived themes
-- https://downright.app/changelog - generated native-app changelog
-- https://downright.app/privacy - privacy promises
-- https://downright.app/known-gaps - current release and evidence gaps
-- https://downright.app/index.md - Markdown version of the homepage
-- https://downright.app/themes.md - Markdown theme data
-- https://downright.app/changelog.md - Markdown changelog
-- https://downright.app/known-gaps.md - Markdown launch record
+- https://downright.cc/ - product argument and interactive document demos
+- https://downright.cc/themes - six source-derived themes
+- https://downright.cc/changelog - generated native-app changelog
+- https://downright.cc/privacy - privacy promises
+- https://downright.cc/known-gaps - current release and evidence gaps
+- https://downright.cc/index.md - Markdown version of the homepage
+- https://downright.cc/themes.md - Markdown theme data
+- https://downright.cc/changelog.md - Markdown changelog
+- https://downright.cc/known-gaps.md - Markdown launch record
 
 ## Source and evidence
 
@@ -34,4 +34,4 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 - Download artifact: Downright.dmg
 - Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
 
-The site does not claim a Homebrew cask or confirmed domain beyond the current https://downright.app deployment assumption.
+The site does not claim a Homebrew cask or confirmed domain beyond the current https://downright.cc deployment assumption.

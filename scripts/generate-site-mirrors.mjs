@@ -90,7 +90,7 @@ This is the current launch record for the approved site plan. The site does not 
 
 ## Release inputs
 
-- Domain: https://downright.app is the current deployment assumption and still needs confirmation.
+- Domain: https://downright.cc is the intended public domain; Vercel and DNS confirmation remains pending.
 - Artifact: ${facts.artifactName} is available at ${facts.downloadUrl || "no signed, notarized, stapled public URL is configured"}.
 - Homebrew: no cask is claimed until one exists and is verified.
 - Repository: ${facts.repository ?? "not configured"} is the source remote; public address confirmation remains open.
@@ -124,15 +124,15 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 
 ## Routes
 
-- https://downright.app/ - product argument and interactive document demos
-- https://downright.app/themes - six source-derived themes
-- https://downright.app/changelog - generated native-app changelog
-- https://downright.app/privacy - privacy promises
-- https://downright.app/known-gaps - current release and evidence gaps
-- https://downright.app/index.md - Markdown version of the homepage
-- https://downright.app/themes.md - Markdown theme data
-- https://downright.app/changelog.md - Markdown changelog
-- https://downright.app/known-gaps.md - Markdown launch record
+- https://downright.cc/ - product argument and interactive document demos
+- https://downright.cc/themes - six source-derived themes
+- https://downright.cc/changelog - generated native-app changelog
+- https://downright.cc/privacy - privacy promises
+- https://downright.cc/known-gaps - current release and evidence gaps
+- https://downright.cc/index.md - Markdown version of the homepage
+- https://downright.cc/themes.md - Markdown theme data
+- https://downright.cc/changelog.md - Markdown changelog
+- https://downright.cc/known-gaps.md - Markdown launch record
 
 ## Source and evidence
 
@@ -152,7 +152,7 @@ Downright is a local-first Markdown reader and editor. The native app renders Ma
 - Download artifact: ${facts.artifactName}
 - Download URL: ${facts.downloadUrl || "not configured until a signed and notarized artifact is verified"}
 
-The site does not claim a Homebrew cask or confirmed domain beyond the current https://downright.app deployment assumption.
+The site does not claim a Homebrew cask or confirmed domain beyond the current https://downright.cc deployment assumption.
 `;
 
 await mkdir(publicRoot, { recursive: true });
