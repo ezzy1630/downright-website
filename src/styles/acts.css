@@ -364,8 +364,15 @@
   stroke-width: 2;
 }
 
-.brew-chip {
-  display: inline-flex;
+.terminal-install {
+  position: relative;
+  z-index: 4;
+  flex: 1 1 260px;
+  min-width: min(100%, 260px);
+}
+
+.terminal-install__trigger {
+  display: flex;
   align-items: flex-start;
   gap: 8px;
   max-width: 100%;
@@ -381,12 +388,81 @@
   line-height: 1.45;
   overflow-wrap: anywhere;
   text-align: left;
+  cursor: pointer;
   transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate);
 }
 
-.brew-chip:hover { color: var(--heading); border-color: var(--accent); }
-.brew-chip:active { translate: 0 1px; border-color: var(--accent); }
-.brew-chip span { color: var(--link); }
+.terminal-install__trigger::-webkit-details-marker { display: none; }
+.terminal-install__trigger::after {
+  margin-left: auto;
+  color: var(--text-faint);
+  content: "+";
+  font-size: 15px;
+  line-height: 1.25;
+}
+.terminal-install[open] .terminal-install__trigger::after { content: "−"; }
+.terminal-install__trigger:hover { color: var(--heading); border-color: var(--accent); }
+.terminal-install__trigger:active { translate: 0 1px; border-color: var(--accent); }
+.terminal-install__trigger > span:first-child { color: var(--link); }
+
+.terminal-install__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  width: min(560px, calc(100vw - 32px));
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-button);
+  background: var(--surface);
+  box-shadow: var(--window-shadow);
+}
+
+.terminal-install__option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--rule);
+  border-radius: calc(var(--radius-button) - 2px);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), background var(--motion-hover) var(--ease-decelerate);
+}
+
+.terminal-install__option:hover,
+.terminal-install__option:focus-visible {
+  border-color: var(--accent);
+  background: var(--surface-raised);
+  color: var(--heading);
+}
+
+.terminal-install__method,
+.terminal-install__copy {
+  color: var(--link);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.terminal-install__option code {
+  min-width: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.terminal-install__option:hover code,
+.terminal-install__option:focus-visible code { color: var(--heading); }
 
 /* ── Eyebrows ─────────────────────────────────────────────────────────
    Muted mono, uppercase, wide. Never the accent — an accent eyebrow is on
@@ -1966,7 +2042,6 @@ html[data-film="true"] .hero__copy { width: 100%; }
 html[data-film="true"] .hero h1 { max-width: 12ch; font-size: clamp(38px, 10.6vw, 54px); }
 html[data-film="true"] .hero__copy > p:not(.hero__micro) { margin-top: 12px; font-size: 15px; }
 html[data-film="true"] .hero__actions { margin-top: 14px; }
-html[data-film="true"] .hero__actions .brew-chip { display: none; }
 html[data-film="true"] .hero__micro { margin-top: 9px; }
 html[data-film="true"] .hero__window { width: 100%; margin: 0; }
 html[data-film="true"] .hero__window .app-window { height: 38svh; min-height: 300px; }

@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import DensityRail from "../components/DensityRail.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import AppWindow from "../components/AppWindow.astro";
-import { benchmarks, copy, facts, themes } from "../data/site";
+import { benchmarks, brewCommand, copy, curlCommand, facts, npmCommand, themes } from "../data/site";
 
 const benchmarkNames = ["Parse 100 KB", "Source edit and paragraph map", "Text diff, external rewrite", "End-to-end semantic convergence", "Syntax highlight, 10 KB Swift"];
 const benchmarkRows = benchmarkNames
@@ -37,9 +37,29 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <p>{copy.hero.body}</p>
         <div class="hero__actions">
           <DownloadButton />
-          <button type="button" class="brew-chip" data-brew data-magnet aria-label="Copy Homebrew install command">
-            <span aria-hidden="true">$</span> brew tap ezzy1630/downright &amp;&amp; brew trust --cask ezzy1630/downright/downright &amp;&amp; brew install --cask downright
-          </button>
+          <details class="terminal-install">
+            <summary class="terminal-install__trigger" data-magnet>
+              <span aria-hidden="true">$</span>
+              <span>Install via Terminal</span>
+            </summary>
+            <div class="terminal-install__menu" role="group" aria-label="Terminal installation commands">
+              <button type="button" class="terminal-install__option" data-install-command={brewCommand} onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.installCommand || '').catch(() => {})">
+                <span class="terminal-install__method">Homebrew</span>
+                <code>{brewCommand}</code>
+                <span class="terminal-install__copy" data-install-label>Copy</span>
+              </button>
+              <button type="button" class="terminal-install__option" data-install-command={npmCommand} onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.installCommand || '').catch(() => {})">
+                <span class="terminal-install__method">npm</span>
+                <code>{npmCommand}</code>
+                <span class="terminal-install__copy" data-install-label>Copy</span>
+              </button>
+              <button type="button" class="terminal-install__option" data-install-command={curlCommand} onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.installCommand || '').catch(() => {})">
+                <span class="terminal-install__method">curl</span>
+                <code>{curlCommand}</code>
+                <span class="terminal-install__copy" data-install-label>Copy</span>
+              </button>
+            </div>
+          </details>
         </div>
         <p class="hero__micro">{copy.hero.micro}</p>
       </div>

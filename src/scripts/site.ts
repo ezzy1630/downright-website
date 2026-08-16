@@ -24,7 +24,6 @@ import { initFilm } from "../scenes/film";
 import { initTravel } from "../shell/travel";
 import { initReveal } from "../scenes/reveal";
 import { hydrateOnIntent } from "../editor/hydration";
-import { brewCommand } from "../data/site";
 
 sound.restore();
 
@@ -157,20 +156,6 @@ function setupChrome(): void {
 
   document.querySelector<HTMLButtonElement>("[data-palette-trigger]")?.addEventListener("click", () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
-  });
-
-  const brew = document.querySelector<HTMLButtonElement>("[data-brew]");
-  brew?.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(brewCommand);
-      const label = brew.textContent;
-      brew.textContent = "copied ✓";
-      window.setTimeout(() => {
-        brew.textContent = label;
-      }, 1400);
-    } catch {
-      /* clipboard blocked; the command is visible to copy by hand */
-    }
   });
 
   const soundToggle = document.querySelector<HTMLButtonElement>("[data-sound-toggle]");

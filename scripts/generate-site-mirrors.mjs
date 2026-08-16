@@ -90,6 +90,7 @@ This is the current launch record for the approved site plan. The site does not 
 
 - Domain: https://downright.cc is the verified production domain, connected to Vercel through Porkbun DNS.
 - Artifact: ${facts.artifactName} is available at ${facts.downloadUrl || "no signed, notarized, stapled public URL is configured"}.
+- One-line install: curl -fsSL https://downright.cc/install | bash, or npx --yes @ezzy/downright-installer; both use the same verified release path.
 - Homebrew: the public tap at https://github.com/ezzy1630/homebrew-downright installs the production DMG with brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright; tap-free official Homebrew Cask review remains separate.
 - Repository: ${facts.repository ?? "not configured"} is the source remote; public address confirmation remains open.
 - Brand: the app-derived vector mark is canonical; the tactile native raster remains product artwork.
@@ -127,6 +128,7 @@ ${entityDescription} It integrates with Finder, Quick Look, and the down command
 - https://downright.cc/downright-vs-typora - Downright and Typora
 - https://downright.cc/downright-vs-obsidian - Downright and Obsidian
 - https://downright.cc/faq - product FAQ
+- https://downright.cc/install - checksum- and signature-verifying macOS installer
 - https://downright.cc/index.md - Markdown version of the homepage
 - https://downright.cc/themes.md - Markdown theme data
 - https://downright.cc/changelog.md - Markdown changelog
@@ -149,6 +151,8 @@ ${entityDescription} It integrates with Finder, Quick Look, and the down command
 - Supported extensions: ${facts.supportedExtensions.map((extension) => `.${extension}`).join(" ")}
 - Download artifact: ${facts.artifactName}
 - Download URL: ${facts.downloadUrl || "not configured until a signed and notarized artifact is verified"}
+- Curl install: curl -fsSL https://downright.cc/install | bash
+- npm install: npx --yes @ezzy/downright-installer
 
 Homebrew tap: https://github.com/ezzy1630/homebrew-downright
 Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright

@@ -18,6 +18,23 @@ Yes, with ordinary Markdown files. Downright watches the file you have open, mar
 
 No. Quick Look is useful for a fast Finder preview. Downright is the deeper read, edit, and review surface for the same file.
 
+## Is there a one-line installer?
+
+Yes. On macOS, run:
+
+```bash
+curl -fsSL https://downright.cc/install | bash
+```
+
+If Node.js 18 or newer is already installed, run:
+
+```bash
+npx --yes @ezzy/downright-installer
+```
+
+Both paths install the signed release into `/Applications` and keep Sparkle
+updates enabled.
+
 ## Is there a Homebrew cask?
 
 Yes. Install the production app from the public tap:

@@ -17,6 +17,7 @@ const hasPublicArtifact = Boolean(facts.downloadUrl);
       <ul>
         <li><strong>Domain:</strong> <code>downright.cc</code> is the verified production domain, connected to Vercel through Porkbun DNS.</li>
         <li><strong>Artifact:</strong> <code>{facts.artifactName}</code> is available at {hasPublicArtifact ? <a href={facts.downloadUrl} target="_blank" rel="noreferrer">the public GitHub Release URL</a> : "no signed, notarized, stapled public URL is configured"}.</li>
+        <li><strong>One-line install:</strong> the hosted <code>curl</code> installer and npm launcher use the same checksum- and signature-verified release path.</li>
         <li><strong>Homebrew:</strong> the public <a href="https://github.com/ezzy1630/homebrew-downright" target="_blank" rel="noreferrer">tap</a> installs the production DMG; official Homebrew Cask review remains separate.</li>
         <li><strong>Repository:</strong> <a href={facts.repository ?? "/"}>{facts.repository ?? "not configured"}</a> is the source remote; public address confirmation remains open.</li>
         <li><strong>Brand:</strong> the app-derived vector mark is canonical; the tactile native raster remains product artwork.</li>
