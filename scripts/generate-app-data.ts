@@ -199,6 +199,10 @@ async function main() {
   const version = versionSource.match(/^MARKETING_VERSION=(.+)$/m)?.[1]?.trim() ?? "unknown";
   const repositoryRaw = command(["git", "config", "--get", "remote.origin.url"]);
   const repository = repositoryRaw.replace(/^git@github\.com:/, "https://github.com/").replace(/\.git$/, "") || null;
+// The signed, notarized DMG ships on the latest GitHub release; the download
+// button is wired hot to it (an env override can still pin a specific URL).
+const downloadUrl = process.env.PUBLIC_DOWNLOAD_URL?.trim()
+  || `https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg`;
   const sourceCommit = command(["git", "rev-parse", "HEAD"], "unknown");
   const dirty = Boolean(command(["git", "status", "--porcelain"]));
   const generatedAt = new Date().toISOString();
@@ -208,7 +212,7 @@ async function main() {
   await writeJson("changelog.json", { ...parseChangelog(changelog), sourceCommit, generatedAt });
   await writeJson("facts.json", {
     sourceCommit, generatedAt, sourceWorkingTreeDirty: dirty, version, minimumMacOS: "14.0", license: "MIT", artifactName: "Downright.dmg",
-    repository, supportedExtensions: parseExtensions(plist), downloadUrl: process.env.PUBLIC_DOWNLOAD_URL?.trim() ?? "",
+    repository, supportedExtensions: parseExtensions(plist), downloadUrl,
   });
   await writeJson("motion.json", motion);
   await writeFile(join(outputRoot, "sample.md"), sample);

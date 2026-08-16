@@ -98,7 +98,7 @@
 .window-slot { width: 100%; height: 100%; }
 .window-slot--render { height: 100%; }
 .window-slot--agent { height: 100%; }
-.window-slot--theme { height: 620px; }
+.window-slot--theme { height: 540px; }
 /* The fold crops the DOCUMENT, not the window. Masking the whole face also
    erased the status bar. Both panes run past the visible slice and fade over
    the last 96px, so the crop lands on a soft edge, not half a code line. */
@@ -396,6 +396,17 @@
   text-transform: uppercase;
 }
 
+/* ── The hard-cut entrance ─────────────────────────────────────────────
+   Act text stays below the readability floor until the previous act has
+   scrolled clear, then steps in over a short band. Driven by --act-reveal
+   (computed in src/scenes/reveal.ts); opacity + a small rise only. */
+[data-enhanced="true"] .act-reveal {
+  opacity: var(--act-reveal, 0);
+  translate: 0 calc((1 - var(--act-reveal, 0)) * 22px);
+}
+[data-enhanced="false"] .act-reveal,
+.no-js .act-reveal { opacity: 1; translate: none; }
+
 /* ── The gap: the sweep ───────────────────────────────────────────────
    A pinned stage where the raw bytes become the page under the reader's own
    scroll. Both halves of every block are in the DOM from first paint, stacked
@@ -420,9 +431,16 @@
   column-gap: clamp(24px, 3vw, 56px);
   align-content: center;
   padding: 24px 0 30px;
+  /* The whole sweep stays below the readability floor until the hero has
+     cleared and the stage actually engages; otherwise the pinned window and
+     the annotation rail peek into the hero's viewport from below. */
+  --enter: clamp(0, calc(var(--sweep-progress, 0) * 10), 1);
 }
 
-.sweep .eyebrow { grid-column: 1; }
+.sweep .eyebrow {
+  grid-column: 1;
+  opacity: clamp(0, calc(var(--sweep-progress, 0) * 12.5), 1);
+}
 
 /* The annotations name each capability as the sweep renders it. */
 .sweep .annotation-rail {
@@ -447,7 +465,14 @@
   line-height: 1.32;
 }
 
-.sweep__lede { opacity: clamp(0, calc((0.62 - var(--sweep-progress, 0)) * 5), 1); }
+/* The lede is a hard-cut entrance, not a crossfade: it stays below the
+   readability floor until the hero has fully cleared, then steps in over the
+   first 8% of the sweep. Out it goes as the closing line takes over. */
+.sweep__lede {
+  --lede-in: clamp(0, calc(var(--sweep-progress, 0) * 12.5), 1);
+  --lede-out: clamp(0, calc((0.62 - var(--sweep-progress, 0)) * 5), 1);
+  opacity: calc(var(--lede-in) * var(--lede-out));
+}
 .sweep__closing {
   color: var(--heading);
   opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.72) * 5), 1);
@@ -464,6 +489,7 @@
   border-radius: var(--radius-window);
   background: var(--surface);
   box-shadow: var(--window-shadow);
+  opacity: var(--enter, 1);
   transition: background-color var(--motion-deliberate) var(--ease-decelerate),
     border-color var(--motion-deliberate) var(--ease-decelerate);
 }
@@ -570,6 +596,7 @@
   font-family: var(--font-mono);
   font-size: 10.5px;
   line-height: 1.7;
+  opacity: var(--enter, 1);
 }
 
 .sweep__capture a { color: var(--link); text-decoration: none; }
@@ -592,7 +619,7 @@
 [data-sweep-static="true"] .sweep__annotation { opacity: 1; }
 [data-sweep-static="true"] .sweep__line { display: none; }
 
-.gap-wall { margin-top: 110px; border-top: 1px solid var(--rule); padding-top: 34px; }
+.gap-wall { margin-top: 64px; border-top: 1px solid var(--rule); padding-top: 28px; }
 .gap-wall__line {
   max-width: 30ch;
   margin-bottom: 40px;
@@ -605,7 +632,7 @@
 }
 
 .gap-wall__scroller {
-  height: 340px;
+  height: 240px;
   overflow: hidden;
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
@@ -638,7 +665,7 @@
   border-top: 1px solid var(--rule);
   color: var(--text-secondary);
   font-size: 12px;
-  opacity: 0.62;
+  opacity: calc(0.62 * var(--enter, 1));
   transform: translateX(-6px);
   transition: opacity var(--motion-deliberate) var(--ease-structural), transform var(--motion-deliberate) var(--ease-structural);
 }
@@ -647,7 +674,7 @@
 .annotation-rail li span { color: var(--text-secondary); font-size: 11px; }
 
 .annotation-rail li.is-bloomed, .annotation-rail li.is-static {
-  opacity: 1;
+  opacity: var(--enter, 1);
   transform: none;
   color: var(--text);
 }
@@ -688,7 +715,7 @@
 .agent-stage__document {
   position: relative;
   width: min(100%, 880px);
-  height: min(660px, 76vh);
+  height: min(580px, 66vh);
   margin-inline: auto;
   overflow: hidden;
   border-radius: var(--radius-window);
@@ -804,12 +831,8 @@
 .agent-contextual p { max-width: 40ch; color: var(--heading); font-family: var(--font-display); font-size: clamp(24px, 2.6vw, 38px); letter-spacing: -0.018em; line-height: 1.16; }
 .agent-contextual .button { margin-top: 24px; }
 
-.agent-story { margin-top: 60px; display: grid; gap: 18px; }
-.agent-story__timeline { display: grid; grid-template-columns: auto 1fr auto; gap: 15px; align-items: center; color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
-.agent-story__timeline i { position: relative; display: flex; justify-content: space-between; height: 1px; background: var(--rule); }
-.agent-story__timeline b { position: relative; z-index: 1; display: block; width: 5px; height: 5px; margin-top: -2px; border-radius: 50%; background: var(--accent); }
-.agent-story p { max-width: 62ch; color: var(--text-secondary); font-size: 14px; }
-.agent-story p strong { color: var(--heading); }
+.agent-story { margin-top: 22px; max-width: 62ch; color: var(--text-secondary); font-size: 14px; }
+.agent-story strong { color: var(--heading); }
 
 /* ── Dark bands: budgets + architecture keep their quieter ink ───────── */
 .dark-band {
@@ -820,7 +843,11 @@
 .dark-band .dark-band__inner {
   width: min(calc(100% - 96px), var(--content-max));
   margin: 0 auto;
-  padding: 144px 0;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 72px 0;
 }
 
 .dark-band .section-intro h2,
@@ -847,7 +874,7 @@
   min-width: 680px;
   border-collapse: collapse;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -859,7 +886,7 @@
 
 .benchmark-table th,
 .benchmark-table td {
-  padding: 13px 12px;
+  padding: 17px 14px;
   border-top: 1px solid var(--band-rule);
   text-align: left;
 }
@@ -893,16 +920,25 @@
 .architecture-layout {
   display: grid;
   grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
-  gap: clamp(40px, 10vw, 160px);
-  align-items: start;
+  gap: clamp(32px, 6vw, 80px);
+  align-items: center;
 }
 
-.architecture-quote p {
-  max-width: 10ch;
+.architecture-quote > p:first-child {
+  max-width: 12ch;
   font-family: var(--font-display);
-  font-size: clamp(42px, 5vw, 76px);
+  font-size: clamp(54px, 6vw, 96px);
   letter-spacing: -0.022em;
   line-height: 0.98;
+}
+
+.architecture-quote__body {
+  max-width: 36ch;
+  margin-top: 26px;
+  color: var(--band-text-secondary);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.55;
 }
 
 .architecture-quote a {
@@ -918,15 +954,15 @@
 }
 
 .architecture-list li {
-  padding: 16px 0;
+  padding: 20px 0;
   border-top: 1px solid var(--band-rule);
   font-family: var(--font-display);
-  font-size: clamp(20px, 2.2vw, 30px);
+  font-size: clamp(22px, 2.4vw, 34px);
   line-height: 1.16;
 }
 
 .reach-section {
-  padding-bottom: 116px;
+  padding: 80px 0 64px;
 }
 
 /* ── Speed: bars + session ────────────────────────────────────────────── */
@@ -964,7 +1000,7 @@
 .file-surface {
   position: relative;
   width: min(100%, 940px);
-  margin: 55px auto 0;
+  margin: 36px auto 0;
   overflow: hidden;
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
@@ -988,7 +1024,7 @@
 
 .file-surface__field {
   position: relative;
-  height: 320px;
+  height: 220px;
   overflow: hidden;
   background:
     linear-gradient(color-mix(in oklab, var(--rule) 30%, transparent) 0.5px, transparent 0.5px),
@@ -1045,7 +1081,7 @@
 
 .terminal-artifact {
   overflow: hidden;
-  margin-top: 20px;
+  margin-top: 16px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
   background: var(--code-bg);
@@ -1060,6 +1096,9 @@
 
 .terminal-artifact pre {
   overflow: auto;
+  /* Reserve the full four-command transcript up front so the type-in never
+     reflows the page (and, in the sweep, never shifts the acts below it). */
+  min-height: 232px;
   padding: 26px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
@@ -1261,6 +1300,25 @@
   justify-content: center;
   min-height: 100svh;
   padding: 76px 0 40px;
+}
+
+/* The desktop's marketing acts are not film beats. The film tells the story
+   in six beats — hero, gap, zoom, agent, spill, handoff — and hides the
+   desktop-only sections, so no speed/architecture/reach/themes text leaks
+   into the thumb-sized page (the "dual-DOM" the film is built to avoid). */
+[data-film="true"] .speed-section,
+[data-film="true"] .architecture-section,
+[data-film="true"] .reach-section,
+[data-film="true"] .themes-section {
+  display: none;
+}
+
+/* The gap-wall ("there is more of it every day") and the close-facts grid are
+   desktop furniture. On the film the gap is the thumb scrub and the close is
+   the handoff — these two would only crowd the beats below them. */
+[data-film="true"] .gap-wall,
+[data-film="true"] .close-facts {
+  display: none;
 }
 
 .film-beat__kicker {
@@ -1620,6 +1678,7 @@
   .sweep__capture { grid-column: 1; }
   .sweep__annotation { justify-self: start; }
   .sweep__lede, .sweep__closing { font-size: 19px; margin-bottom: 14px; }
+  .sweep__capture a { display: inline-flex; align-items: center; min-height: 44px; }
   .sweep-block__raw { font-size: 11.5px; line-height: 1.6; }
   .sweep__surface { padding: 18px 16px 0; }
   .sweep-stage { height: 200svh; }
@@ -1648,7 +1707,7 @@
      hint goes, and the mode control tightens rather than overflowing. */
   .app-window__hint { display: none; }
   .app-window__bar { gap: 8px; padding: 0 10px; }
-  .app-window__segmented button { min-width: 0; padding: 5px 9px; }
+  .app-window__segmented button { min-width: 44px; min-height: 44px; padding: 5px 9px; }
   .app-window__segmented button {
     font-size: 0;
     line-height: 1;

@@ -21,7 +21,11 @@ export function initDownloadFunnel(): void {
     button.addEventListener("click", () => {
       if (!facts.downloadUrl) {
         // The signed DMG gate: the ask is honest about not being live yet.
-        document.querySelector<HTMLElement>("[data-release-status]")?.classList.add("is-open");
+        const status = document.querySelector<HTMLElement>("[data-release-status]");
+        if (status) {
+          status.hidden = false;
+          status.classList.add("is-open");
+        }
         return;
       }
       const anchor = document.createElement("a");

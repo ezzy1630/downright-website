@@ -110,7 +110,10 @@ export class WindowDirector {
     let active: SlotId = "hero";
     for (const slot of this.slots) {
       const section = document.getElementById(slot.section);
-      if (!section) continue;
+      // A hidden section (display:none — the film hides the themes act) still
+      // reports offsetTop 0, which would falsely claim every scroll position
+      // and strand the window in an invisible slot.
+      if (!section || section.offsetParent === null) continue;
       if (section.offsetTop <= reference) active = slot.id;
       else break;
     }

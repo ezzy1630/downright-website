@@ -22,6 +22,7 @@ import { initSpeed } from "../scenes/speed";
 import { initDownloadFunnel } from "../shell/funnel";
 import { initFilm } from "../scenes/film";
 import { initTravel } from "../shell/travel";
+import { initReveal } from "../scenes/reveal";
 import { hydrateOnIntent } from "../editor/hydration";
 
 sound.restore();
@@ -49,6 +50,7 @@ initShare();
 initDownloadFunnel();
 magnetize();
 initTravel();
+initReveal();
 
 const rail: RailController | null = initRail();
 

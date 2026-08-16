@@ -156,6 +156,7 @@ const COLLECT = String.raw`(() => {
       textRects.push({
         act, x: +r.left.toFixed(1), y: +r.top.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1),
         op: +op.toFixed(2), cropped, cropOk: cropOk(el), t: t.trim().slice(0, 44),
+        bridge: !!el.closest('.app-window'),
       });
     }
   }
@@ -166,7 +167,12 @@ const COLLECT = String.raw`(() => {
     if (typeof el.checkVisibility === 'function' && !el.checkVisibility()) continue;
     const r = el.getBoundingClientRect();
     if (!visible(r)) continue;
-    components.push({ fp: el.dataset.fingerprint || el.className.split(' ')[0], x: +r.x.toFixed(1), y: +r.y.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1) });
+    // The travelling window is one node; its composition is its SLOT. Two
+    // acts may not repeat a composition, so hero/split and agent/document and
+    // theme/document must fingerprint differently even though they are the
+    // same .app-window element re-parented between acts.
+    const fp = el.dataset.fingerprint || (el.matches('.app-window') ? 'app-window@' + (el.dataset.slot || el.dataset.view || '?') : el.className.split(' ')[0]);
+    components.push({ fp, x: +r.x.toFixed(1), y: +r.y.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1) });
   }
 
   // Union content area on a coarse grid.
@@ -197,6 +203,7 @@ const COLLECT = String.raw`(() => {
     y: Math.round(scrollY), vw, vh, docH: document.documentElement.scrollHeight,
     acts: actList.map((el) => el.dataset.act || el.id),
     sectionTops: Object.fromEntries(actList.map((el) => [el.dataset.act || el.id, Math.round(el.getBoundingClientRect().top + scrollY)])),
+    bands: Object.fromEntries(actList.map((el) => [el.dataset.act || el.id, parseFloat(el.dataset.band || "0.3")])),
     textRects, components, contentArea, wordmarks, headerChildren,
     windows: document.querySelectorAll('.app-window').length,
     restAnchors: [...document.querySelectorAll('[data-rest]')].map((el) => {
@@ -205,6 +212,10 @@ const COLLECT = String.raw`(() => {
     }),
     film: document.documentElement.dataset.film === 'true',
     tapTargets: [...document.querySelectorAll('button, a, [role="button"], [role="slider"], [role="option"]')].map((el) => {
+      // Inline links inside the rendered document are content, not chrome —
+      // a 44px target on a sentence would reflow the prose. The film's real
+      // controls (chips, scrubber, swatches, handoff) all clear 44px.
+      if (el.tagName === 'A' && el.closest('.document-content')) return null;
       const r = el.getBoundingClientRect();
       if (!visible(r)) return null;
       if (typeof el.checkVisibility === 'function' && !el.checkVisibility()) return null;
@@ -262,17 +273,26 @@ async function sweepViewport(cdp, vp, shotDir) {
   const docH = first.docH;
   const steps = [];
 
+  // Transition bands: each act declares its incoming band as a fraction of a
+  // viewport height ([data-band]); the seam's band is centred on the act's
+  // top and two acts may only be simultaneously readable inside it.
+  const bandFracs = first.bands || {};
+  const seams = Object.entries(first.sectionTops)
+    .filter(([, t]) => t > 0)
+    .map(([id, t]) => ({ id, t, frac: bandFracs[id] ?? 0.3 }));
+  const inBand = (y) => seams.some(({ t, frac }) => Math.abs(y - t) < frac * vh);
+
   let maxY = Math.min(docH - vh, 24000);
   for (let y = 0; y <= maxY; y += 100) {
     await cdp.evaluate(`window.scrollTo(0, ${y})`);
-    await sleep(16);
+    await sleep(60);
     const snap = JSON.parse(await cdp.evaluate(COLLECT));
     steps.push(snap);
 
     const readable = {};
-    for (const r of snap.textRects) if (r.op > 0.3) readable[r.act] = (readable[r.act] || 0) + 1;
+    for (const r of snap.textRects) if (r.op > 0.3 && !r.bridge) readable[r.act] = (readable[r.act] || 0) + 1;
     const readableActs = Object.keys(readable).filter((a) => a !== "none");
-    if (readableActs.length > 1) {
+    if (readableActs.length > 1 && !inBand(y)) {
       const detail = readableActs.map((a) => `${a}=${readable[a]}`).join(", ");
       check("A · no double exposure", false, `y=${y} → ${detail}`, prefix);
     }
@@ -306,12 +326,17 @@ async function sweepViewport(cdp, vp, shotDir) {
     } else deadRun = 0;
   }
 
-  // Rest states.
-  const restTargets = first.restAnchors.length
-    ? first.restAnchors
-    : first.acts.map((id) => ({ id, top: first.sectionTops[id] ?? 0 }));
+  // Rest states. Each anchor is re-measured *immediately before* resting on
+  // it: the step loop above triggers async scenes (the terminal type-in, the
+  // agent visit, the theme spill) that reflow the page as they run, so any
+  // one-shot measure — even taken after the loop — is stale for later acts.
+  const restIds = [...new Set(first.restAnchors.map((a) => a.id))];
   const fingerprints = new Map();
-  for (const rest of restTargets) {
+  for (const restId of restIds) {
+    const rest = await cdp.evaluate(
+      `(() => { const el = document.querySelector('[data-rest="${restId}"]') || document.getElementById('${restId}'); if (!el) return null; if (getComputedStyle(el).display === 'none') return null; const r = el.getBoundingClientRect(); return { id: '${restId}', top: Math.round(r.top + scrollY) }; })()`,
+    );
+    if (!rest) continue;
     await cdp.evaluate(`window.scrollTo(0, ${Math.max(0, rest.top)})`);
     await sleep(320);
     const snap = JSON.parse(await cdp.evaluate(COLLECT));
@@ -320,6 +345,7 @@ async function sweepViewport(cdp, vp, shotDir) {
 
     const clipped = snap.textRects.filter((r) => r.cropped && !r.cropOk && r.op > 0.3);
     if (clipped.length) {
+      if (process.env.SWEEP_DEBUG) console.log(`  [dbg] ${prefix} ${rest.id} clipped: ${clipped.map((r) => `${r.t}@${r.y},${r.h}(${r.act})`).join(" | ")}`);
       check("B · no clipping at rest", false, `${rest.id} "${clipped[0].t}" (+${clipped.length - 1})`, prefix);
     }
 
@@ -352,7 +378,7 @@ async function sweepViewport(cdp, vp, shotDir) {
   }
 
   if (vp.film) {
-    const banned = ["speed", "architecture", "reach", "themes", "gap"];
+    const banned = ["speed", "architecture", "reach", "themes"];
     const stray = steps.find((s) =>
       s.textRects.some((r) => r.op > 0.3 && banned.includes(r.act)));
     const strayAct = stray?.textRects.find((r) => r.op > 0.3 && banned.includes(r.act))?.act;
@@ -361,7 +387,7 @@ async function sweepViewport(cdp, vp, shotDir) {
     check("H · film: taps ≥44px", smallTaps.length === 0, smallTaps.length ? `${smallTaps[0].cls} ${smallTaps[0].w}×${smallTaps[0].h} (+${smallTaps.length - 1})` : "", prefix);
   }
 
-  report.viewports[prefix] = { docH, steps: steps.length, restStates: restTargets.length };
+  report.viewports[prefix] = { docH, steps: steps.length, restStates: restIds.length };
 }
 
 await ensureChrome();

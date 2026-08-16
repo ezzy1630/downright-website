@@ -979,7 +979,11 @@ ol {
 }
 
 .page-section {
-  padding: 144px 0;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 96px 0;
 }
 
 .section-intro {
@@ -1088,8 +1092,8 @@ ol {
 .render-document-viewport .document-window { height: 100%; }
 .render-document-viewport .document-content { transform: translateY(calc(var(--document-progress, 0) * -820px)); transition: transform var(--motion-quick) linear; }
 
-.themes-section { min-height: 200svh; }
-.theme-showroom { position: sticky; top: 72px; display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; margin-top: 55px; }
+.themes-section { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; }
+.theme-showroom { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; margin-top: 55px; }
 .theme-showroom__list { align-content: start; }
 .theme-showroom__list button { min-height: 52px; padding: 7px 10px; }
 .theme-showroom__list button strong { font-size: 13px; font-weight: 600; }
@@ -1129,12 +1133,52 @@ ol {
 .agent-timeline b { position: relative; z-index: 1; display: block; width: 5px; height: 5px; margin-top: -2px; border-radius: 50%; background: var(--accent); }
 .agent-timeline p { grid-column: 2; margin-top: 7px; color: var(--text-secondary); font-family: var(--font-body); font-size: 12px; }
 
-.close-section { min-height: 88svh; padding: 144px 48px 100px; border-top: 1px solid var(--rule); }
-.close-section__inner { width: min(100%, 850px); margin: 0 auto; text-align: center; }
-.close-section h2 { font-size: clamp(48px, 7vw, 100px); }
-.close-section p { margin: 22px auto 0; color: var(--text-secondary); font-size: 18px; }
+.close-section { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: 96px 48px; border-top: 1px solid var(--rule); }
+.close-section__inner { width: min(100%, 1080px); margin: 0 auto; text-align: center; }
+.close-section h2 { font-size: clamp(60px, 8.5vw, 122px); }
+.close-section p { margin: 22px auto 0; color: var(--text-secondary); font-size: 19px; }
 .close-section .button { margin-top: 30px; }
 .close-section small { display: block; margin-top: 15px; color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
+
+/* The close is a statement, not a whisper: four facts in a single row so the
+   act still reads as a composed frame instead of a centred caption. */
+.close-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 52px 0 0;
+  list-style: none;
+  text-align: left;
+}
+
+.close-facts li {
+  padding: 28px 26px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.close-facts strong {
+  display: block;
+  color: var(--heading);
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.close-facts span {
+  display: block;
+  margin-top: 8px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 680px) {
+  .close-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 .site-footer { width: min(100% - 96px, var(--content-max)); margin: 0 auto; padding: 28px 0 34px; border-top: 1px solid var(--rule); color: var(--text-secondary); font-size: 12px; }
 .site-footer__top,
@@ -1143,16 +1187,32 @@ ol {
 .site-footer__bottom div { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
 .site-footer__bottom { margin-top: 28px; color: var(--text-secondary); }
 .site-footer__bottom code { color: var(--text-secondary); font-family: var(--font-mono); font-size: 10px; }
+
+/* Thumb targets: the footer's links and toggles clear 44px on a phone. */
+@media (max-width: 900px) {
+  .site-footer a,
+  .site-footer button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 10px;
+  }
+}
 .site-footer__bottom div span { color: var(--text-secondary); font-family: var(--font-mono); font-size: 10px; }
 .brand--compact .brand-mark { width: 20px; height: 20px; }
 .brand--compact .brand-wordmark { font-size: 13px; }
 
 .release-status { position: fixed; z-index: 60; right: 22px; bottom: 22px; display: flex; align-items: center; gap: 22px; max-width: min(420px, calc(100% - 44px)); padding: 14px 16px; border: 1px solid var(--rule); border-radius: var(--radius-panel); background: color-mix(in oklab, var(--surface) 90%, transparent); backdrop-filter: blur(12px); opacity: 0; transform: translateY(8px); transition: opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-decelerate); }
+/* display:flex above would override the UA's [hidden]{display:none}, leaving a
+   transparent banner in the layout at all times; make `hidden` authoritative. */
+.release-status[hidden] { display: none; }
 .release-status.is-open { opacity: 1; transform: none; }
 .release-status div { display: grid; gap: 3px; }
 .release-status strong { color: var(--heading); font-size: 12px; }
 .release-status span { color: var(--text-secondary); font-size: 11px; }
-.release-status button { border: 0; background: transparent; color: var(--text-faint); cursor: pointer; font-size: 11px; }
+.release-status button { min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--text-faint); cursor: pointer; font-size: 11px; }
 
 .subpage { padding: 126px 0 144px; }
 .subpage-hero { width: min(100%, 720px); }
@@ -1241,7 +1301,9 @@ ol {
   .site-nav,
   .site-header__actions { display: none; }
   .site-header__inner { width: min(100% - 32px, var(--content-max)); }
-  .menu-toggle { display: grid; gap: 4px; width: 34px; height: 34px; place-content: center; border: 1px solid var(--rule); border-radius: var(--radius-button); background: transparent; cursor: pointer; }
+  /* Thumb targets: the wordmark link and the menu button both clear 44px. */
+  .brand { min-height: 44px; }
+  .menu-toggle { display: grid; gap: 4px; width: 44px; height: 44px; place-content: center; border: 1px solid var(--rule); border-radius: var(--radius-button); background: transparent; cursor: pointer; }
   .menu-toggle span { display: block; width: 14px; height: 1px; background: var(--text-secondary); }
   .mobile-menu { position: absolute; top: 56px; right: 16px; left: 16px; display: grid; gap: 3px; padding: 10px; border: 1px solid var(--rule); border-radius: var(--radius-panel); background: var(--surface); }
   .mobile-menu[hidden] { display: none; }

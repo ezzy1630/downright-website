@@ -33,7 +33,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
     <DensityRail />
 
     {/* 8.1 — Hero: it's real, type in it */}
-    <section class="hero section-anchor" id="hero" data-rail-section data-section-label="Start" data-section-detail="The native Markdown app" data-theme-zone>
+    <section class="hero section-anchor" id="hero" data-act="hero" data-rest="hero" data-rail-section data-section-label="Start" data-section-detail="The native Markdown app" data-theme-zone>
       <div class="hero__copy">
         <h1>{copy.hero.heading}</h1>
         <p>{copy.hero.body}</p>
@@ -45,7 +45,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         </div>
         <p class="hero__micro">{copy.hero.micro}</p>
       </div>
-      <div class="hero__window">
+      <div class="hero__window" data-crop-ok>
         <AppWindow editable view="split" />
         <p class="hero__annotation">
           <svg class="hero__annotation-arrow" viewBox="0 0 60 40" aria-hidden="true" focusable="false">
@@ -63,7 +63,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
     </section>
 
     {/* 8.2 — The gap, doubled */}
-    <section class="gap-section section-anchor" id="gap" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
+    <section class="gap-section section-anchor" id="gap" data-act="gap" data-band="0.5" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
       {/* The sweep: one pinned stage where the raw bytes become the page.
           Both halves of every block are live DOM from the same store. The
           stage owns its own scroll length so beat two never overlaps it. */}
@@ -83,7 +83,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           ))}
         </ul>
 
-        <div class="sweep__window" data-sweep-window>
+        <div class="sweep__window" data-sweep-window data-fingerprint="sweep" data-crop-ok>
           <div class="sweep__bar">
             <span class="traffic-lights traffic-lights--ql" aria-hidden="true"><i></i></span>
             <span class="traffic-lights traffic-lights--app" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -104,7 +104,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       </div>
       </div>
 
-      <div class="gap-wall" aria-label="An agent's Markdown output">
+      <div class="gap-wall" data-rest="gap" data-fingerprint="agent-wall" aria-label="An agent's Markdown output">
         <h3 class="gap-wall__heading">{copy.gap.beatTwoHeading}</h3>
         <p class="gap-wall__line">{copy.gap.beatTwoLine}</p>
         <div class="gap-wall__scroller" data-agent-wall data-agent-wall-scroll tabindex="0" aria-label="Real agent-generated Markdown from a refactoring session"></div>
@@ -112,12 +112,12 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
     </section>
 
     {/* 8.5 — The agent visit: the climax */}
-    <section class="page-section agent-section section-anchor" id="agent" data-rail-section data-section-label="The agent visit" data-section-detail="Review the write" data-theme-zone>
-      <div class="section-intro">
+    <section class="page-section agent-section section-anchor" id="agent" data-act="agent" data-band="0.4" data-rail-section data-section-label="The agent visit" data-section-detail="Review the write" data-theme-zone>
+      <div class="section-intro act-reveal">
         <h2>{copy.agent.heading}</h2>
         <p>{copy.agent.body}</p>
       </div>
-      <div class="agent-stage" data-agent-stage>
+      <div class="agent-stage" data-agent-stage data-rest="agent">
         <div class="agent-stage__document" data-agent-document>
           <div class="window-slot window-slot--agent" data-window-slot="agent"></div>
         </div>
@@ -137,25 +137,20 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <p>{copy.agent.contextual}</p>
         <DownloadButton />
       </div>
-      <div class="agent-story">
-        <div class="agent-story__timeline" aria-label="Version timeline">
-          <span>May</span>
-          <i><b></b><b></b><b></b><b></b><b></b></i>
-          <span>August</span>
-        </div>
-        <p>Every change lands on a timeline, so you can compare any two versions later. Setup is three checkboxes and one default: <strong>nothing leaves your Mac</strong>.</p>
-      </div>
+      <p class="agent-story act-reveal">
+        Every change lands on a timeline, so you can compare any two versions later. Setup is three checkboxes and one default: <strong>nothing leaves your Mac</strong>.
+      </p>
     </section>
 
     {/* 8.6 — Speed: dark band №1 */}
-    <section class="dark-band speed-section section-anchor" id="speed" data-rail-section data-section-label="Speed" data-section-detail="Budgets beside numbers" data-speed-section data-theme-zone>
+    <section class="dark-band speed-section section-anchor" id="speed" data-act="speed" data-rest="speed" data-band="0.3" data-rail-section data-section-label="Speed" data-section-detail="Budgets beside numbers" data-speed-section data-theme-zone>
       <div class="dark-band__inner">
-        <div class="section-intro">
+        <div class="section-intro act-reveal">
           <h2>{copy.speed.heading}</h2>
           <p>{copy.speed.body}</p>
         </div>
-        <div class="benchmark-table-wrap">
-          <table class="benchmark-table">
+        <div class="benchmark-table-wrap act-reveal">
+          <table class="benchmark-table" data-fingerprint="benchmark">
             <caption>Current local benchmark · every row has its limit beside it</caption>
             <thead><tr><th scope="col">Measurement</th><th scope="col">p50</th><th scope="col">p95</th><th scope="col">Budget</th><th scope="col" aria-hidden="true"></th></tr></thead>
             <tbody>
@@ -171,8 +166,8 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
             </tbody>
           </table>
         </div>
-        <p class="benchmark-session" data-session-row>Type in the window above and your own parse time joins this table.</p>
-        <div class="benchmark-notes">
+        <p class="benchmark-session act-reveal" data-session-row>Type in the window above and your own parse time joins this table.</p>
+        <div class="benchmark-notes act-reveal">
           <p><strong>Corpus</strong> {benchmarks.corpus}. <strong>Date</strong> {benchmarks.date}. <strong>Machine</strong> {benchmarks.machine}.</p>
           <p>{benchmarks.qualification} Missing: {benchmarks.limitations.join(", ")}.</p>
         </div>
@@ -180,24 +175,25 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
     </section>
 
     {/* 8.7 — Architecture: dark band №2 */}
-    <section class="dark-band architecture-section section-anchor" id="architecture" data-rail-section data-section-label="Architecture" data-section-detail="Raw text stays in charge" data-theme-zone>
-      <div class="dark-band__inner architecture-layout">
-        <div class="architecture-quote">
+    <section class="dark-band architecture-section section-anchor" id="architecture" data-act="architecture" data-rest="architecture" data-band="0.3" data-rail-section data-section-label="Architecture" data-section-detail="Raw text stays in charge" data-theme-zone>
+      <div class="dark-band__inner architecture-layout" data-fingerprint="architecture">
+        <div class="architecture-quote act-reveal">
           <p>{copy.architecture.heading}</p>
+          <p class="architecture-quote__body">{copy.architecture.body}</p>
           <a href={facts.repository} target="_blank" rel="noreferrer">Read the repository <span aria-hidden="true">↗</span></a>
         </div>
-        <ul class="architecture-list">{architectureClaims.map((claim) => <li>{claim}</li>)}</ul>
-        <p class="architecture-punctuation">{copy.architecture.punctuation}</p>
+        <ul class="architecture-list act-reveal">{architectureClaims.map((claim) => <li>{claim}</li>)}</ul>
+        <p class="architecture-punctuation act-reveal">{copy.architecture.punctuation}</p>
       </div>
     </section>
 
     {/* 8.8 — System reach: verlet cards, Quick Look, terminal */}
-    <section class="page-section reach-section section-anchor" id="reach" data-rail-section data-section-label="System reach" data-section-detail="Finder, Quick Look, terminal" data-theme-zone>
-      <div class="section-intro">
+    <section class="page-section reach-section section-anchor" id="reach" data-act="reach" data-rest="reach" data-band="0.3" data-rail-section data-section-label="System reach" data-section-detail="Finder, Quick Look, terminal" data-theme-zone>
+      <div class="section-intro act-reveal">
         <h2>{copy.reach.heading}</h2>
         <p>{copy.reach.body}</p>
       </div>
-      <div class="file-surface" data-file-surface aria-label="Markdown files — flick them, press Space to Quick Look, drag one onto the document">
+      <div class="file-surface act-reveal" data-file-surface data-fingerprint="finder" aria-label="Markdown files — flick them, press Space to Quick Look, drag one onto the document">
         <div class="file-surface__bar">
           <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
           <strong>Markdown</strong>
@@ -215,21 +211,20 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <div class="quick-look__body document-content" data-quick-look-body></div>
         </div>
       </div>
-      <div class="terminal-artifact" data-terminal>
+      <div class="terminal-artifact act-reveal" data-terminal data-fingerprint="terminal">
         <div class="terminal-artifact__bar"><span>down — the document from the terminal</span><span>zsh</span></div>
         <pre data-terminal-body><code></code></pre>
       </div>
-      <p class="reach-note">Spotlight indexes files you have opened. Downright never scans your disk in the background.</p>
     </section>
 
     {/* 8.9 — Themes: the spill */}
-    <section class="page-section themes-section section-anchor" id="themes" data-rail-section data-section-label="Themes" data-section-detail="Six palettes, one document" data-theme-zone>
-      <div class="section-intro">
+    <section class="page-section themes-section section-anchor" id="themes" data-act="themes" data-rest="themes" data-band="0.3" data-rail-section data-section-label="Themes" data-section-detail="Six palettes, one document" data-theme-zone>
+      <div class="section-intro act-reveal">
         <h2>{copy.themes.heading}</h2>
         <p>{copy.themes.body}</p>
       </div>
-      <div class="theme-showroom">
-        <div class="theme-showroom__list" role="listbox" aria-label="Theme showroom">
+      <div class="theme-showroom act-reveal">
+        <div class="theme-showroom__list" data-fingerprint="themes" role="listbox" aria-label="Theme showroom">
           {themes.map((theme) => (
             <button type="button" role="option" aria-selected={theme.id === "warm-dark" ? "true" : "false"} data-theme-option={theme.id} data-magnet>
               <span class="theme-option__dot" style={`--dot: ${theme.palette.background}; --dot-ink: ${theme.palette.accent}`} aria-hidden="true"></span>
@@ -242,24 +237,22 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <div class="window-slot window-slot--theme" data-window-slot="theme"></div>
         </div>
       </div>
-      <div class="theme-token-table">
-        <p>The same values, straight from the app's theme files.</p>
-        <div class="theme-token-table__rows">
-          {themes.slice(0, 6).map((theme) => (
-            <div><strong>{theme.name}</strong><code>{theme.palette.background}</code><code>{theme.palette.text}</code><code>{theme.palette.accent}</code></div>
-          ))}
-        </div>
-      </div>
     </section>
 
     {/* 8.10 — The close */}
-    <section class="close-section section-anchor" id="close" data-rail-section data-section-label="Free and open" data-section-detail="MIT, no account" data-theme-zone>
-      <div class="close-section__inner">
+    <section class="close-section section-anchor" id="close" data-act="close" data-rest="close" data-band="0.3" data-rail-section data-section-label="Free and open" data-section-detail="MIT, no account" data-theme-zone>
+      <div class="close-section__inner act-reveal">
         <h2>{copy.close.heading}</h2>
         <p>{copy.close.body}</p>
         <DownloadButton />
         <small>macOS {facts.minimumMacOS}+ · direct download · {facts.artifactName} when verified · or <code>brew install --cask downright</code></small>
-        <div class="film-handoff" aria-label="Send this page to your Mac">
+        <ul class="close-facts" data-fingerprint="close-facts">
+          <li><strong>MIT</strong><span>open-source license</span></li>
+          <li><strong>0</strong><span>telemetry · cookies · servers</span></li>
+          <li><strong>{facts.minimumMacOS}+</strong><span>native, no WebView</span></li>
+          <li><strong>⌘⇧E</strong><span>this page keeps its source too</span></li>
+        </ul>
+        <div class="film-handoff" data-fingerprint="handoff" aria-label="Send this page to your Mac">
           <p class="film-handoff__line">Downright lives on your Mac. Send it there.</p>
           <button type="button" class="film-handoff__primary" data-share="share">AirDrop this page to your Mac</button>
           <div class="film-handoff__row">
