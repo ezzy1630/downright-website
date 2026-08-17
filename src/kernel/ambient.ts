@@ -10,7 +10,7 @@ const COLUMN_WIDTH = 84;
 const PARALLAX_FACTOR = 0.42;
 const PARALLAX_PERIOD = ROW_HEIGHT * 4;
 const PARALLAX_INSET = 320;
-const SPOTLIGHT_RADIUS = 260;
+const SPOTLIGHT_RADIUS = 320;
 const SNIPPET_LIT_RADIUS = 172;
 const CONTENT_FADE_DISTANCE = 150;
 
@@ -225,8 +225,8 @@ export function initAmbientBackdrop(): void {
           ? Math.pow(1 - spotlightDistance / SPOTLIGHT_RADIUS, 2)
           : 0;
         const contentFade = rectFade(x, y, fades);
-        const baseAlpha = 0.078 + (seed % 5) * 0.009;
-        const alpha = baseAlpha * Math.max(0.04, 1 - contentFade * 0.96) * (1 + spotlightStrength * 2.25);
+        const baseAlpha = 0.064 + (seed % 5) * 0.007;
+        const alpha = baseAlpha * Math.max(0.04, 1 - contentFade * 0.96) * (1 + spotlightStrength * 1.55);
         if (alpha < 0.004) continue;
 
         context.globalAlpha = alpha;

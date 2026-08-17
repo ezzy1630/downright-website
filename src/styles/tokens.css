@@ -89,7 +89,7 @@
   --depth-shadow-strong: rgb(61 45 33 / 0.28);
   --depth-highlight: rgb(255 255 255 / 0.80);
   --depth-inset: rgb(50 36 26 / 0.10);
-  --depth-rim: color-mix(in oklab, var(--heading) 12%, var(--rule));
+  --depth-rim: color-mix(in oklab, var(--heading) 8%, var(--rule));
   --surface-inset: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
   --panel-shadow: var(--surface-inset), 0 0 0 0.5px var(--depth-rim), 0 9px 18px -12px var(--depth-shadow), 0 24px 52px -24px var(--depth-shadow-strong);
   --panel-shadow-hover: var(--surface-inset), 0 0 0 0.5px var(--depth-rim), 0 12px 24px -12px var(--depth-shadow), 0 34px 68px -26px var(--depth-shadow-strong);
@@ -163,7 +163,7 @@
   --marker: #bdb2a6;
   --accent: #6ea8ff;
   --link: #8ab8ff;
-  --rule: #3d3832;
+  --rule: #37332e;
   --selection: #253a56;
   --code-bg: #231f1a;
   --inline-code-bg: #2d2822;

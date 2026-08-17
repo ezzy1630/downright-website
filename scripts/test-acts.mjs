@@ -220,10 +220,20 @@ const lightBand = await cdp.evaluate(`(async () => {
   await new Promise((resolve) => setTimeout(resolve, 650));
   const band = document.querySelector('.dark-band');
   const style = getComputedStyle(band);
-  return JSON.stringify({ theme: document.documentElement.dataset.theme, band: style.backgroundColor, token: style.getPropertyValue('--band-bg').trim() });
+  const body = getComputedStyle(document.body);
+  return JSON.stringify({
+    theme: document.documentElement.dataset.theme,
+    band: style.backgroundColor,
+    token: style.getPropertyValue('--band-bg').trim(),
+    body: body.backgroundColor,
+  });
 })()`);
 const lb = JSON.parse(lightBand);
-check("light themes keep bands on the page ground", lb.theme === "paper-light" && lb.token === "#f7f4ee" && lb.band === "rgb(247, 244, 238)", JSON.stringify(lb));
+check(
+  "light themes keep bands transparent over the ambient page field",
+  lb.theme === "paper-light" && lb.band === "rgba(0, 0, 0, 0)" && lb.body !== "rgba(0, 0, 0, 0)",
+  JSON.stringify(lb),
+);
 
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} passed`);

@@ -66,17 +66,17 @@
   z-index: 4;
   border-radius: inherit;
   pointer-events: none;
-  background: radial-gradient(240px circle at var(--px) var(--py), color-mix(in oklab, var(--accent) 6%, transparent), transparent 68%);
+  background: radial-gradient(320px circle at var(--px) var(--py), color-mix(in oklab, var(--accent) 4.2%, transparent), color-mix(in oklab, var(--accent) 1.2%, transparent) 38%, transparent 74%);
   opacity: 0;
-  transition: opacity var(--motion-hover) var(--ease-decelerate);
+  transition: opacity var(--motion-pointer) var(--ease-decelerate);
 }
 @media (hover: hover) {
-  [data-glow]:hover::after { opacity: 1; }
+  [data-glow]:hover::after { opacity: 0.82; }
 }
 
 [data-tilt] {
   rotate: var(--tilt-x, 0deg) var(--tilt-y, 0deg) 0deg;
-  transition: rotate var(--motion-standard) var(--ease-snap);
+  transition: rotate var(--motion-edge) var(--ease-snap);
 }
 .annotation-rail, .file-surface__field { perspective: 720px; }
 
@@ -282,7 +282,7 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--depth-rim);
+  border: 1px solid color-mix(in oklab, var(--depth-rim) 82%, transparent);
   border-radius: var(--radius-window);
   background:
     linear-gradient(180deg,
@@ -329,7 +329,7 @@
   .hero__window:hover .app-window__face {
     box-shadow:
       var(--window-shadow-hover),
-      0 12px 34px -18px color-mix(in oklab, var(--accent) 22%, transparent);
+      0 12px 34px -18px color-mix(in oklab, var(--accent) 14%, transparent);
   }
 }
 
@@ -594,7 +594,7 @@ html[data-hero-window-flying="true"] .hero__window {
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  border-right: 1px solid var(--rule);
+  border-right: 0.5px solid color-mix(in oklab, var(--rule) 58%, transparent);
   background:
     linear-gradient(180deg, color-mix(in oklab, var(--code-bg) 82%, var(--bg) 18%), var(--code-bg)),
     var(--code-bg);
@@ -674,7 +674,7 @@ html[data-hero-window-flying="true"] .hero__window {
   gap: 14px;
   min-height: 42px;
   padding: 0 14px;
-  border-bottom: 1px solid color-mix(in oklab, var(--rule) 82%, var(--depth-inset));
+  border-bottom: 0.5px solid color-mix(in oklab, var(--rule) 58%, var(--depth-inset));
   background:
     linear-gradient(180deg,
       color-mix(in oklab, var(--surface) 88%, var(--depth-highlight) 12%),
@@ -691,8 +691,8 @@ html[data-hero-window-flying="true"] .hero__window {
   white-space: nowrap;
   /* The filename leans toward the cursor (kernel/glow.ts writes --cursor-nx
      on the face); optically centred, but alive under the pointer. */
-  translate: calc(var(--cursor-nx, 0) * 3px) 0;
-  transition: translate var(--motion-standard) var(--ease-decelerate);
+  translate: calc(var(--cursor-nx, 0) * 1.5px) 0;
+  transition: translate var(--motion-pointer) var(--ease-decelerate);
 }
 
 .app-window__file b { color: var(--heading); font-size: 12px; font-weight: 600; letter-spacing: -0.005em; }
@@ -706,7 +706,7 @@ html[data-hero-window-flying="true"] .hero__window {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 0.5px solid var(--rule);
+  border: 0.5px solid color-mix(in oklab, var(--rule) 62%, transparent);
   border-radius: var(--radius-chip);
   background: color-mix(in oklab, var(--surface) 72%, var(--bg) 28%);
   box-shadow: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
@@ -736,7 +736,7 @@ html[data-hero-window-flying="true"] .hero__window {
   translate: calc(var(--segment-index, 0) * 100%) 0;
   border-radius: var(--radius-chip);
   background: var(--bg);
-  box-shadow: var(--surface-inset), 0 0 0 0.5px var(--depth-rim);
+  box-shadow: var(--surface-inset), 0 0 0 0.5px color-mix(in oklab, var(--depth-rim) 72%, transparent);
   transition: translate var(--motion-selection) var(--ease-snap);
 }
 
@@ -765,7 +765,7 @@ html[data-hero-window-flying="true"] .hero__window {
   gap: 18px;
   min-height: 30px;
   padding: 0 17px;
-  border-top: 1px solid var(--rule);
+  border-top: 0.5px solid color-mix(in oklab, var(--rule) 58%, transparent);
   background: color-mix(in oklab, var(--surface) 90%, var(--bg) 10%);
   box-shadow: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
   color: var(--text-faint);
@@ -939,6 +939,16 @@ html[data-film="true"] .app-window__ql-action { min-height: 44px; padding: 0 14p
   min-height: 23.125px;
   padding: 0;
   color: var(--syntax-variable);
+}
+.app-window[data-editor-surface="source"] .cm-cursor,
+.app-window[data-editor-surface="source"] .cm-dropCursor {
+  border-left: 1px solid color-mix(in oklab, var(--accent) 68%, var(--heading));
+}
+.app-window[data-editor-surface="source"] .cm-selectionBackground {
+  background: color-mix(in oklab, var(--accent) 15%, transparent) !important;
+}
+.app-window[data-editor-surface="source"] .cm-focused .cm-activeLine {
+  background: color-mix(in oklab, var(--accent) 3.5%, transparent);
 }
 .app-window[data-editor-surface="source"] .cm-source-hash,
 .app-window[data-editor-surface="source"] .cm-source-marker,
@@ -1558,7 +1568,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 [data-sweep-static="true"] .sweep__annotation { opacity: 1; }
 [data-sweep-static="true"] .sweep__line { display: none; }
 
-.gap-wall { margin-top: 128px; border-top: 1px solid var(--rule); padding-top: 44px; }
+.gap-wall { margin-top: 128px; border-top: 0; padding-top: 44px; }
 .gap-wall__line {
   max-width: 22ch;
   margin-bottom: 40px;
@@ -1844,7 +1854,10 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   box-shadow: var(--btn-bevel-top), 0 4px 12px -1px rgba(0, 0, 0, 0.28);
 }
 
-.agent-contextual { margin-top: 72px; padding-top: 34px; border-top: 1px solid var(--rule); }
+.agent-contextual {
+  margin-top: 72px;
+  padding-top: 34px;
+}
 .agent-contextual[hidden] { display: none; }
 .agent-contextual p { max-width: 40ch; color: var(--heading); font-family: var(--font-display); font-size: clamp(24px, 2.6vw, 38px); letter-spacing: -0.018em; line-height: 1.16; }
 .agent-contextual .button { margin-top: 24px; }
@@ -1852,9 +1865,9 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 .agent-story { margin-top: 22px; max-width: 62ch; color: var(--text-secondary); font-size: 14px; }
 .agent-story strong { color: var(--heading); }
 
-/* ── Dark bands: budgets + architecture keep their quieter ink ───────── */
+/* ── Shared surface: budgets + architecture stay on the ambient page field ─ */
 .dark-band {
-  background: var(--band-bg);
+  background: transparent;
   color: var(--band-text);
 }
 
@@ -3748,8 +3761,8 @@ html[data-film="true"] .gap-wall,
     min-height: 60svh;
     margin: 0 -48px;
     padding: 10svh max(48px, calc((100vw - var(--page-max)) / 2)) 8svh;
-    border-top: 1px solid var(--band-rule);
-    background: var(--band-bg);
+    border-top: 0;
+    background: transparent;
   }
   .gap-wall__heading,
   .gap-wall__line { position: relative; z-index: 1; color: var(--band-heading); }
@@ -3858,7 +3871,7 @@ html[data-film="true"] .gap-wall,
 
 @media (max-width: 900px) {
   .gap-stage { grid-template-columns: 1fr; }
-  .gap-pane--app { position: relative; inset: auto; border-left: 0; border-top: 1px solid var(--rule); }
+  .gap-pane--app { position: relative; inset: auto; border-left: 0; border-top: 0.5px solid color-mix(in oklab, var(--rule) 58%, transparent); }
   .gap-divider { display: none; }
   .app-window--hero { height: 620px; }
   .agent-stage__document { height: 640px; }

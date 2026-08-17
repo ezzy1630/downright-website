@@ -54,8 +54,8 @@ export function initPointerPresence(): void {
         const rect = tilt.getBoundingClientRect();
         const nx = rect.width > 0 ? ((lastX - rect.left) / rect.width - 0.5) * 2 : 0;
         const ny = rect.height > 0 ? ((lastY - rect.top) / rect.height - 0.5) * 2 : 0;
-        (tilt as HTMLElement).style.setProperty("--tilt-x", `${(ny * -2.4).toFixed(2)}deg`);
-        (tilt as HTMLElement).style.setProperty("--tilt-y", `${(nx * 3).toFixed(2)}deg`);
+        (tilt as HTMLElement).style.setProperty("--tilt-x", `${(ny * -1.6).toFixed(2)}deg`);
+        (tilt as HTMLElement).style.setProperty("--tilt-y", `${(nx * 2).toFixed(2)}deg`);
       }
     }
   };
