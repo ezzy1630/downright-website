@@ -447,7 +447,6 @@ async function sweepViewport(cdp, vp, shotDir) {
    noise). The real DMG click is stubbed so the sweep never navigates away or
    hits GitHub; the anchor's href + download attribute are asserted instead. */
 const EXPECTED_DMG = "https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg";
-const EXPECTED_REPO = "https://github.com/ezzy1630/Downright";
 const EXPECTED_SPONSORS = "https://github.com/sponsors/ezzy1630";
 
 async function goto(cdp, url) {
@@ -462,7 +461,7 @@ async function sponsorCensus(cdp) {
   return await cdp.evaluate(`(() => {
     const vis = (a) => (typeof a.checkVisibility === 'function' ? a.checkVisibility() : true);
     const links = [...document.querySelectorAll('a[href*="github.com/sponsors"]')].filter(vis);
-    const host = (a) => a.closest('[data-site-header]') ? 'header' : a.closest('.site-footer') ? 'footer' : a.closest('.close-sponsor') ? 'close' : a.closest('.glass-toast--download') ? 'panel' : a.closest('.film-handoff') ? 'film' : 'other';
+    const host = (a) => a.closest('[data-site-header]') ? 'header' : a.closest('.site-footer') ? 'footer' : a.closest('.close-sponsor') ? 'close' : a.closest('.download-complete') ? 'panel' : a.closest('.film-handoff') ? 'film' : 'other';
     return { total: links.length, places: links.map(host), hrefs: links.map((a) => a.getAttribute('href')) };
   })()`);
 }
@@ -485,7 +484,8 @@ async function sweepFunnel(cdp) {
   check("G · sponsor URL correct", before.hrefs.every((h) => h === EXPECTED_SPONSORS), before.hrefs.join(","), prefix);
 
   // Click the download with the anchor stubbed: assert DMG href + download
-  // semantics, the panel appears exactly once, and it carries star + fund.
+  // semantics, the completion state appears exactly once, and it carries the
+  // help, support, and direct-download fallback actions.
   const fired = await cdp.evaluate(`(async () => {
     const clicked = [];
     const orig = HTMLAnchorElement.prototype.click;
@@ -494,18 +494,18 @@ async function sweepFunnel(cdp) {
       const button = document.querySelector('[data-download]');
       button?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       await new Promise((r) => setTimeout(r, 180));
-      const panel = document.querySelector('.glass-toast--download');
+      const panel = document.querySelector('.download-complete');
       const panelLinks = panel ? [...panel.querySelectorAll('a')].map((a) => a.getAttribute('href')) : [];
       const first = { clicked: [...clicked], panel: !!panel, panelLinks };
       button?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       await new Promise((r) => setTimeout(r, 80));
-      first.panelCount = document.querySelectorAll('.glass-toast--download').length;
+      first.panelCount = document.querySelectorAll('.download-complete').length;
       return first;
     } finally { HTMLAnchorElement.prototype.click = orig; }
   })()`);
   check("G · click → DMG href + download attr", !!fired && fired.clicked.length === 1 && fired.clicked[0].href === EXPECTED_DMG && fired.clicked[0].download === "Downright.dmg", fired ? JSON.stringify(fired.clicked) : "", prefix);
   check("G · panel appears once/download", !!fired && fired.panel === true && fired.panelCount === 1, fired ? `panel=${fired.panel} count=${fired.panelCount}` : "", prefix);
-  check("G · panel carries star + fund", !!fired && fired.panelLinks.length === 2 && fired.panelLinks.includes(EXPECTED_REPO) && fired.panelLinks.includes(EXPECTED_SPONSORS), fired ? JSON.stringify(fired.panelLinks) : "", prefix);
+  check("G · completion carries help + support + fallback", !!fired && fired.panelLinks.length === 3 && fired.panelLinks.includes("/download/#install") && fired.panelLinks.includes(EXPECTED_SPONSORS) && fired.panelLinks.includes(EXPECTED_DMG), fired ? JSON.stringify(fired.panelLinks) : "", prefix);
 
   const after = await sponsorCensus(cdp);
   check("G · sponsor placements (panel open)", after.total === 3 && after.places.includes("panel") && after.places.includes("footer") && after.places.includes("close") && !after.places.includes("header"), JSON.stringify(after), prefix);

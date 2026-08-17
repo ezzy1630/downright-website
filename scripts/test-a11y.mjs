@@ -176,7 +176,7 @@ const check = (name, ok, detail = "") => {
   check("keyboard · theme panel opens", themeChanged.panelOpen === true, JSON.stringify(themeChanged));
   check("keyboard · theme control re-inks", themeChanged.theme === "nord", JSON.stringify(themeChanged));
 
-  // Download: focus + Enter fires the support panel (DMG stubbed).
+  // Download: focus + Enter fires the completion state (DMG stubbed).
   const download = await cdp.evaluate(`(async () => {
     const orig = HTMLAnchorElement.prototype.click;
     HTMLAnchorElement.prototype.click = function () {};
@@ -188,7 +188,7 @@ const check = (name, ok, detail = "") => {
       // stubbed below; calling btn.click() would stub the control under test.
       btn.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
       await new Promise((r) => setTimeout(r, 160));
-      return { panel: !!document.querySelector('.glass-toast--download') };
+      return { panel: !!document.querySelector('.download-complete') };
     } finally { HTMLAnchorElement.prototype.click = orig; }
   })()`);
   check("keyboard · download fires panel", download.panel === true, JSON.stringify(download));
