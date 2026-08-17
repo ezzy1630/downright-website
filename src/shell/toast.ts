@@ -1,13 +1,4 @@
-/**
- * Toasts & Onboarding Companion. Two kinds, both glass, both quiet:
- * the post-download companion sheet carries the 3-step visual DMG flow,
- * terminal one-click copy, and star/sponsor actions.
- * The companion stays open until the reader dismisses it; never modal, never
- * blocking.
- */
-
-import { brewCommand } from "../data/site";
-import { sound } from "../kernel/sound";
+/** Small transient messages plus the post-download handoff state. */
 
 export function toast(html: string, options: { duration?: number } = {}): void {
   const host = document.querySelector<HTMLElement>("[data-toast-host]") ?? createHost();
@@ -33,147 +24,58 @@ function createHost(): HTMLElement {
   return host;
 }
 
-/** The post-download companion card.
- *  It confirms the browser handoff first, then keeps the Finder install path
- *  close at hand without blocking the page. It is dismissible via the close
- *  button or Escape and stays until the reader explicitly dismisses it. */
-export function downloadPanel(artifactName: string, repository: string, sponsorsUrl: string): void {
+/** The quiet completion state shown after the browser accepts the DMG. */
+export function downloadPanel(artifactName: string, downloadUrl: string, sponsorsUrl: string): void {
   const host = document.querySelector<HTMLElement>("[data-toast-host]") ?? createHost();
-
-  // If a companion card already exists in the host, remove it cleanly first
-  const existing = host.querySelector(".glass-toast--download");
+  const existing = host.querySelector(".download-complete");
   if (existing) existing.remove();
 
   const element = document.createElement("div");
-  element.className = "glass-toast glass-toast--download glass-toast--companion glass";
-  const titleId = `download-helper-title-${Date.now()}`;
-  element.setAttribute("role", "region");
+  element.className = "download-complete";
+  const titleId = `download-complete-title-${Date.now()}`;
+  element.setAttribute("role", "dialog");
+  element.setAttribute("aria-modal", "true");
   element.setAttribute("aria-live", "polite");
   element.setAttribute("aria-labelledby", titleId);
 
   element.innerHTML = `
-    <div class="glass-toast__head">
-      <div class="glass-toast__title-group">
-        <img class="glass-toast__icon" src="/assets/downright-app-icon.png" width="36" height="36" alt="Downright icon" />
-        <div>
-          <strong id="${titleId}">Download started</strong>
-          <span class="glass-toast__sub"><code>${artifactName}</code> is landing in Downloads</span>
-        </div>
-      </div>
-      <button type="button" class="glass-toast__dismiss" data-toast-dismiss aria-label="Close download guidance" title="Close download guidance">
+    <div class="download-complete__surface glass">
+      <button type="button" class="download-complete__dismiss" data-download-dismiss aria-label="Close download confirmation" title="Close download confirmation">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
-    </div>
-
-    <div class="glass-toast__install-card">
-      <div class="glass-toast__install-copy">
-        <span class="glass-toast__eyebrow">Next in Finder</span>
-        <b>Open the DMG, then drag Downright to Applications.</b>
-        <span>Keep this guide open while it downloads.</span>
+      <img class="download-complete__icon" src="/assets/downright-app-icon.png" width="56" height="56" alt="Downright icon" />
+      <span class="download-complete__eyebrow">Download started</span>
+      <h1 id="${titleId}">Thank you for downloading Downright</h1>
+      <p class="download-complete__summary"><code>${artifactName}</code> is downloading to your Downloads folder.</p>
+      <p class="download-complete__next">When it finishes, open the DMG and move Downright to Applications.</p>
+      <div class="download-complete__actions">
+        <a class="button button--primary download-complete__help" href="/download/#install">Installation help</a>
+        ${sponsorsUrl ? `<a class="download-complete__support" href="${sponsorsUrl}" target="_blank" rel="noreferrer">Support Downright ↗</a>` : ""}
       </div>
-      <div class="glass-toast__route" aria-hidden="true">
-        <span class="glass-toast__route-node"><b>DMG</b><small>Downloads</small></span>
-        <span class="glass-toast__route-arrow">→</span>
-        <span class="glass-toast__route-node glass-toast__route-node--target"><b>↳</b><small>Applications</small></span>
-      </div>
+      <p class="download-complete__fallback">If the download does not start, <a href="${downloadUrl}" target="_blank" rel="noreferrer">download it directly from GitHub ↗</a>.</p>
     </div>
-
-    <ol class="glass-toast__steps" aria-label="Installation steps">
-      <li class="glass-toast__step">
-        <div class="glass-toast__step-badge">1</div>
-        <div class="glass-toast__step-info">
-          <b>Open the DMG</b>
-          <span>Click <code>${artifactName}</code> in Downloads</span>
-        </div>
-      </li>
-
-      <li class="glass-toast__step glass-toast__step--drag">
-        <div class="glass-toast__step-badge">2</div>
-        <div class="glass-toast__step-info">
-          <b>Drop Downright in Applications</b>
-          <span>Drag the app out of the mounted disk before launching it</span>
-        </div>
-      </li>
-
-      <li class="glass-toast__step">
-        <div class="glass-toast__step-badge">3</div>
-        <div class="glass-toast__step-info">
-          <b>Eject the DMG; open it from Applications</b>
-          <span>If macOS asks whether to open a download, choose Open. If it still blocks, Control-click Downright in Applications and choose Open.</span>
-        </div>
-      </li>
-    </ol>
-
-    <div class="glass-toast__terminal">
-      <span class="glass-toast__terminal-lead">Prefer Terminal? Copy the Homebrew command.</span>
-      <button type="button" class="glass-toast__copy-btn" data-companion-copy="${brewCommand}" aria-label="Copy Homebrew command">
-        <code>${brewCommand}</code>
-        <span class="glass-toast__copy-label" data-copy-status>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          <span>Copy</span>
-        </span>
-      </button>
-    </div>
-
-    <div class="glass-toast__footer">
-      <div class="glass-toast__links">
-        ${repository ? `<a href="${repository}" target="_blank" rel="noreferrer" class="toast-action-link">Star on GitHub ↗</a>` : ""}
-        ${sponsorsUrl ? `<a href="${sponsorsUrl}" target="_blank" rel="noreferrer" class="toast-action-link">Sponsor ↗</a>` : ""}
-      </div>
-    </div>
-
   `;
 
   host.append(element);
-  document.documentElement.dataset.downloadCompanion = "open";
+  document.documentElement.dataset.downloadComplete = "open";
   requestAnimationFrame(() => element.classList.add("is-open"));
 
-  // Copy button interaction
-  const copyBtn = element.querySelector<HTMLButtonElement>("[data-companion-copy]");
-  copyBtn?.addEventListener("click", async () => {
-    const cmd = copyBtn.dataset.companionCopy;
-    if (!cmd) return;
-    try {
-      await navigator.clipboard.writeText(cmd);
-      sound.tick();
-      const status = copyBtn.querySelector("[data-copy-status]");
-      if (status) {
-        status.innerHTML = `
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <span>Copied!</span>
-        `;
-        copyBtn.classList.add("is-copied");
-        setTimeout(() => {
-          if (copyBtn.contains(status)) {
-            status.innerHTML = `
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              <span>Copy</span>
-            `;
-            copyBtn.classList.remove("is-copied");
-          }
-        }, 2200);
-      }
-    } catch {
-      const status = copyBtn.querySelector("[data-copy-status]");
-      if (status) status.textContent = "Copy unavailable";
-      copyBtn.dataset.copyState = "unavailable";
-    }
-  });
-
+  let dismissed = false;
+  const onKey = (event: KeyboardEvent): void => {
+    if (event.key === "Escape") dismiss();
+  };
   const dismiss = (): void => {
+    if (dismissed) return;
+    dismissed = true;
     window.removeEventListener("keydown", onKey);
     element.classList.remove("is-open");
     window.setTimeout(() => {
       element.remove();
-      if (!host.querySelector(".glass-toast--download")) delete document.documentElement.dataset.downloadCompanion;
-    }, 400);
+      if (!host.querySelector(".download-complete")) delete document.documentElement.dataset.downloadComplete;
+    }, 260);
   };
 
-  element.querySelector("[data-toast-dismiss]")?.addEventListener("click", dismiss);
-
-  const onKey = (event: KeyboardEvent): void => {
-    if (event.key !== "Escape") return;
-    dismiss();
-  };
+  element.querySelector("[data-download-dismiss]")?.addEventListener("click", dismiss);
   window.addEventListener("keydown", onKey);
+  element.querySelector<HTMLButtonElement>("[data-download-dismiss]")?.focus();
 }

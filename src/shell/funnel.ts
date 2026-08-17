@@ -2,7 +2,7 @@
  * The funnel, exactly four asks: header (quiet, persistent) · hero · the one
  * contextual CTA earned after the agent conflict resolves · the close. The
  * press is the moment. The download button uses a restrained press, short
- * progress state, and a companion DMG helper.
+ * progress state, and a quiet completion handoff.
  */
 
 import { facts } from "../data/site";
@@ -54,14 +54,14 @@ export function initDownloadFunnel(): void {
       anchor.click();
       anchor.remove();
 
-      downloadPanel(facts.artifactName, facts.repository, facts.sponsorsUrl);
+      downloadPanel(facts.artifactName, downloadUrl, facts.sponsorsUrl);
     });
   }
 }
 
 /** Keep the page's feedback in step with the browser's download handoff:
  *  1. Starting, with a short progress sweep and spinner.
- *  2. Started, with a checkmark while the companion guidance stays open.
+ *  2. Started, with a checkmark while the completion state stays open.
  *  3. Ready again, so a retry is always available without a reload. */
 function animateDownloadButton(button: HTMLElement): void {
   const labelEl = button.querySelector<HTMLElement>("[data-download-label]");
