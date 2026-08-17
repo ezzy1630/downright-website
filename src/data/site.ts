@@ -77,7 +77,7 @@ export const copy = {
   },
   close: {
     heading: "Free. Open source. MIT. No account.",
-    body: "No telemetry, no cookies, no server. This page has none of them. Your Markdown stays on your Mac.",
+    body: "No app telemetry, no cookies, no account. The app stays local; this site uses anonymous, cookie-free analytics so we can see which pages help.",
   },
 } as const;
 

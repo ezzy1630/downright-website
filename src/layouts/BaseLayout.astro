@@ -2,6 +2,7 @@
 import tokensCss from "../styles/tokens.css?raw";
 import globalCss from "../styles/global.css?raw";
 import actsCss from "../styles/acts.css?raw";
+import Analytics from "@vercel/analytics/astro";
 import BrandMark from "../components/BrandMark.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import ThemeControl from "../components/ThemeControl.astro";
@@ -125,7 +126,8 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
   │ it, flip it to this source, or drop your own .md on it.            │
   │                                                                     │
   │  No frameworks. One spring kernel, the app's own constants.        │
-  │  No analytics, no cookies, no server. The document is the site.    │
+  │  Anonymous analytics, no cookies, no account. The document is the │
+  │  site.                                                            │
   │                                                                     │
   │  This page is also Markdown:  curl downright.cc/index.md          │
   └─────────────────────────────────────────────────────────────────────┘
@@ -192,6 +194,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         window.addEventListener("load", () => window.setTimeout(activateFallbackFonts, 2500), { once: true });
       })();
     </script>
+    <Analytics />
     <style is:inline set:html={inlineStyles}></style>
   </head>
   <body class={pageClass} data-theme-zone>
@@ -297,7 +300,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         </nav>
       </div>
       <p class="site-footer__absence">
-        No cookies, no analytics, no newsletter, no chat widget, no server — and it says so because for some of you that line is the pitch.
+        No cookies, no account, no newsletter, no chat widget. The app has no telemetry; this site uses anonymous, cookie-free analytics so we can see which pages help.
       </p>
       <div class="site-footer__bottom">
         <p>This page is also Markdown. <code>curl downright.cc/index.md | down</code></p>

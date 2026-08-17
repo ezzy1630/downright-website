@@ -26,6 +26,7 @@
     "@codemirror/language": "^6.12.4",
     "@codemirror/state": "^6.7.1",
     "@codemirror/view": "^6.43.8",
+    "@vercel/analytics": "^2.0.1",
     "astro": "latest"
   },
   "devDependencies": {
