@@ -140,9 +140,9 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         </div>
         <div class="conflict-bar" data-conflict-bar role="region" aria-label="External write needs review" hidden>
           <strong>An agent changed this file while you had it open.</strong>
-          <button type="button" data-conflict-action="review" data-conflict-focus>Review</button>
-          <button type="button" data-conflict-action="mine">Keep Mine</button>
-          <button type="button" data-conflict-action="theirs">Take Theirs</button>
+          <button type="button" data-conflict-action="review" data-conflict-focus data-pop>Review</button>
+          <button type="button" data-conflict-action="mine" data-pop>Keep Mine</button>
+          <button type="button" data-conflict-action="theirs" data-pop>Take Theirs</button>
         </div>
         <div class="change-toast glass" data-change-toast role="status" aria-live="polite">
           <strong>External write</strong>
@@ -217,7 +217,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       </div>
       <div class="file-surface act-reveal" data-file-surface data-fingerprint="finder" aria-label="Markdown files — flick them, press Space to Quick Look, drag one onto the document">
         <div class="file-surface__bar">
-          <span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="traffic-lights" title="Close · Minimise · Zoom" aria-hidden="true"><i></i><i></i><i></i></span>
           <strong>Markdown</strong>
           <span>4 files · flick one, press Space to Quick Look</span>
         </div>
@@ -260,6 +260,12 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         </div>
       </div>
     </section>
+
+    {/* The window's dock: between owned acts (the wall beat, the bands) the
+        traveling window parks here as a compact live document instead of
+        vanishing — the journey never leaves the visitor. Fades out over the
+        footer at the end of the story. */}
+    <div class="window-dock" data-window-dock aria-hidden="true"></div>
 
     {/* 8.10 — The close */}
     <section class="close-section section-anchor" id="close" data-act="close" data-rest="close" data-fingerprint="close" data-band="0.3" data-rail-section data-section-label="Free and open" data-section-detail="MIT, no account" data-theme-zone>

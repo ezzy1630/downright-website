@@ -34,6 +34,8 @@ import { pageMeta, reviewedOn } from "../data/seo";
             aria-selected={theme.id === "warm-dark" ? "true" : "false"}
             data-theme-option={theme.id}
             data-magnet
+            data-pop
+            data-glow
           >
             <span
               class="theme-option__dot"
@@ -49,7 +51,7 @@ import { pageMeta, reviewedOn } from "../data/seo";
         </p>
       </div>
 
-      <div class="themes-page__window">
+      <div class="themes-page__window" data-glow>
         <AppWindow editable view="split" label="sample.md" />
       </div>
     </section>

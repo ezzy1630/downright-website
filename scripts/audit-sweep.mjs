@@ -364,6 +364,16 @@ async function sweepViewport(cdp, vp, shotDir) {
     if (!rest) continue;
     await cdp.evaluate(`window.scrollTo(0, ${Math.max(0, rest.top)})`);
     await sleep(320);
+    // Rest means landed: the journey docks and flies between rest frames,
+    // so wait for the window's flight (and any dock hand-off) to settle
+    // before measuring — a mid-flight frame is not a rest frame.
+    for (let settle = 0; settle < 24; settle++) {
+      const flying = await cdp.evaluate(
+        "(() => { const w = document.querySelector('.app-window'); return w ? (w.dataset.flying !== undefined || w.style.translate !== '' || w.style.width !== '') : false; })()",
+      );
+      if (!flying) break;
+      await sleep(125);
+    }
     const snap = JSON.parse(await cdp.evaluate(COLLECT));
     const area = (snap.contentArea / (snap.vw * snap.vh)) * 100;
     if (process.env.SWEEP_DEBUG) console.log(`  [dbg] ${prefix} ${rest.id} top=${rest.top} scrollY=${snap.y} textRects=${snap.textRects.length} components=${snap.components.length} area=${area.toFixed(0)}%`);

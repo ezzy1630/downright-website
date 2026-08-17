@@ -10,7 +10,7 @@ import { dirname, join } from "node:path";
 import { EditorState } from "@codemirror/state";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const { decorateState } = await import("../src/editor/livedown.ts");
+const { decorateState, decorateSourceState } = await import("../src/editor/livedown.ts");
 const { Decoration } = await import("@codemirror/view");
 
 const sample = readFileSync(join(here, "../src/data/app/sample.md"), "utf8");
@@ -78,6 +78,24 @@ try {
   setOk = false;
 }
 check("decoration set valid for the full sample", setOk);
+
+// 6. Hydrating the hero's source pane keeps source presentation stable. The
+// editor may own the caret, but it must not switch to live-mode typography or
+// hide the Markdown markers on the first click.
+const sourcePass = decorateSourceState(EditorState.create({ doc, selection: { anchor: doc.length } }));
+const sourceClasses = sourcePass.ranges
+  .map((range) => range.value.spec.class)
+  .filter(Boolean);
+check("source mode keeps heading markers visible", sourceClasses.includes("cm-source-hash"));
+check("source mode keeps heading syntax coloured", sourceClasses.includes("cm-source-heading"));
+check("source mode never elides raw Markdown", !sourceClasses.includes("live-elided"));
+let sourceSetOk = true;
+try {
+  Decoration.set(sourcePass.ranges, true);
+} catch {
+  sourceSetOk = false;
+}
+check("source decoration set valid for the full sample", sourceSetOk);
 
 if (failures.length) {
   console.error(`\n${failures.length} failure(s)`);

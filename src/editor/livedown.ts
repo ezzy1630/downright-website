@@ -142,6 +142,116 @@ export function decorateState(state: EditorState): { ranges: Range<Decoration>[]
   return { ranges, ms: performance.now() - start };
 }
 
+type SourceToken = { from: number; to: number; className: string };
+
+const sourceInlinePatterns: ReadonlyArray<readonly [RegExp, string]> = [
+  [/`[^`\n]+`/g, "cm-source-code"],
+  [/\$[^$\n]+\$/g, "cm-source-math"],
+  [/\*\*[^*\n]+\*\*/g, "cm-source-strong"],
+  [/\[\[[^\]\n]+\]\]/g, "cm-source-link"],
+  [/\[[^\]\n]+\]\([^)]+\)/g, "cm-source-link"],
+];
+
+function sourceMark(className: string): Decoration {
+  return Decoration.mark({ class: className });
+}
+
+function overlaps(left: SourceToken, right: SourceToken): boolean {
+  return left.from < right.to && right.from < left.to;
+}
+
+function addSourceInlineTokens(
+  ranges: Range<Decoration>[],
+  text: string,
+  offset: number,
+): void {
+  const tokens: SourceToken[] = [];
+  for (const [pattern, className] of sourceInlinePatterns) {
+    const matcher = new RegExp(pattern.source, pattern.flags);
+    for (const match of text.matchAll(matcher)) {
+      const value = match[0];
+      const localOffset = match.index ?? 0;
+      tokens.push({
+        from: offset + localOffset,
+        to: offset + localOffset + value.length,
+        className,
+      });
+    }
+  }
+
+  tokens.sort((left, right) => left.from - right.from || right.to - left.to);
+  const accepted: SourceToken[] = [];
+  for (const token of tokens) {
+    if (token.from === token.to || accepted.some((existing) => overlaps(existing, token))) continue;
+    accepted.push(token);
+    ranges.push(sourceMark(token.className).range(token.from, token.to));
+  }
+}
+
+/**
+ * Source mode keeps the bytes and their visual grammar visible while the
+ * editor hydrates.  The prerendered source pane already establishes this
+ * contract; using the live-document decorations here would hide markers and
+ * restyle headings on the first click before the visitor has typed anything.
+ */
+export function decorateSourceState(state: EditorState): { ranges: Range<Decoration>[]; ms: number } {
+  const start = performance.now();
+  const ranges: Range<Decoration>[] = [];
+  let fenced = false;
+
+  for (let number = 1; number <= state.doc.lines; number += 1) {
+    const line = state.doc.line(number);
+    const text = line.text;
+
+    if (/^```/.test(text)) {
+      ranges.push(sourceMark("cm-source-fence").range(line.from, line.to));
+      fenced = !fenced;
+      continue;
+    }
+    if (fenced) {
+      ranges.push(sourceMark("cm-source-fenced").range(line.from, line.to));
+      continue;
+    }
+
+    const heading = /^(#{1,6})(\s+)(.*)$/.exec(text);
+    if (heading) {
+      ranges.push(sourceMark("cm-source-hash").range(line.from, line.from + heading[1].length));
+      const titleFrom = line.from + heading[1].length + heading[2].length;
+      ranges.push(sourceMark("cm-source-heading").range(titleFrom, line.to));
+      continue;
+    }
+
+    if (text.startsWith("|")) {
+      ranges.push(sourceMark("cm-source-table").range(line.from, line.to));
+      continue;
+    }
+    if (text.startsWith("> ")) {
+      ranges.push(sourceMark("cm-source-quote").range(line.from, line.to));
+      continue;
+    }
+    if (text.startsWith("- ")) {
+      ranges.push(sourceMark("cm-source-marker").range(line.from, line.from + 1));
+      const task = /^- \[([ xX])\]( ?)(.*)$/.exec(text);
+      if (task) {
+        const taskFrom = line.from + 2;
+        ranges.push(sourceMark("cm-source-task").range(taskFrom, taskFrom + 3));
+        addSourceInlineTokens(ranges, task[3], line.from + task[0].length - task[3].length);
+      } else {
+        addSourceInlineTokens(ranges, text.slice(2), line.from + 2);
+      }
+      continue;
+    }
+    if (text.startsWith("[^")) {
+      ranges.push(sourceMark("cm-source-link").range(line.from, line.to));
+      continue;
+    }
+
+    addSourceInlineTokens(ranges, text, line.from);
+  }
+
+  return { ranges, ms: performance.now() - start };
+}
+
 const liveDecorations = ViewPlugin.fromClass(
   class {
     decorations: DecorationSet;
@@ -153,6 +263,23 @@ const liveDecorations = ViewPlugin.fromClass(
     update(update: ViewUpdate): void {
       if (update.docChanged || update.selectionSet || update.viewportChanged) {
         this.decorations = Decoration.set(decorateState(update.view.state).ranges, true);
+      }
+    }
+  },
+  { decorations: (plugin) => plugin.decorations },
+);
+
+const sourceDecorations = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+
+    constructor(view: EditorView) {
+      this.decorations = Decoration.set(decorateSourceState(view.state).ranges, true);
+    }
+
+    update(update: ViewUpdate): void {
+      if (update.docChanged || update.selectionSet || update.viewportChanged) {
+        this.decorations = Decoration.set(decorateSourceState(update.view.state).ranges, true);
       }
     }
   },
@@ -183,4 +310,8 @@ const boldKeymap = keymap.of([
 
 export function livedown(): Extension[] {
   return [liveDecorations, boldKeymap];
+}
+
+export function sourceEditor(): Extension[] {
+  return [sourceDecorations, boldKeymap];
 }

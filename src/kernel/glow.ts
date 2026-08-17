@@ -33,6 +33,9 @@ export function initPointerPresence(): void {
       const rect = glow.getBoundingClientRect();
       (glow as HTMLElement).style.setProperty("--px", `${(lastX - rect.left).toFixed(1)}px`);
       (glow as HTMLElement).style.setProperty("--py", `${(lastY - rect.top).toFixed(1)}px`);
+      // Normalized cursor position (-1..1) — the titlebar's filename leans a
+      // few pixels toward the pointer off this; the wash above uses the px.
+      (glow as HTMLElement).style.setProperty("--cursor-nx", (rect.width > 0 ? ((lastX - rect.left) / rect.width) * 2 - 1 : 0).toFixed(3));
     }
 
     if (!reduced()) {

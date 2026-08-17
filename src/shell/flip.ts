@@ -27,10 +27,18 @@ export function setWindowView(windowEl: HTMLElement, view: WindowView): void {
   windowEl.dataset.view = view;
   const index = ORDER.indexOf(view);
   windowEl.style.setProperty("--segment-index", String(index));
-  for (const button of windowEl.querySelectorAll<HTMLButtonElement>("[data-view-button]")) {
-    button.setAttribute("aria-selected", String(button.dataset.viewButton === view));
-  }
+  paintTabs(windowEl, view);
   sound.whoosh();
+}
+
+/** The full tabs pattern: selected segment is the tab stop, its siblings are
+ *  reachable by arrow keys (selection follows focus, automatic activation). */
+function paintTabs(windowEl: HTMLElement, view: WindowView): void {
+  for (const button of windowEl.querySelectorAll<HTMLButtonElement>("[data-view-button]")) {
+    const selected = button.dataset.viewButton === view;
+    button.setAttribute("aria-selected", String(selected));
+    button.tabIndex = selected ? 0 : -1;
+  }
 }
 
 /** ⌘⇧E toggles Source against whatever mode the window was showing. */
@@ -58,11 +66,28 @@ export function initFlip(): void {
 export function initWindowControls(): void {
   for (const windowEl of document.querySelectorAll<HTMLElement>("[data-window]")) {
     windowEl.style.setProperty("--segment-index", String(ORDER.indexOf(windowView(windowEl))));
+    paintTabs(windowEl, windowView(windowEl));
     for (const button of windowEl.querySelectorAll<HTMLButtonElement>("[data-view-button]")) {
       button.addEventListener("click", () => {
         const view = button.dataset.viewButton as WindowView;
         if (ORDER.includes(view)) setWindowView(windowEl, view);
       });
     }
+    // Arrow keys walk the tablist; selection follows focus and activates.
+    const segmented = windowEl.querySelector<HTMLElement>(".app-window__segmented");
+    segmented?.addEventListener("keydown", (event) => {
+      const tabs = [...segmented.querySelectorAll<HTMLButtonElement>("[data-view-button]")];
+      const current = tabs.findIndex((tab) => tab.dataset.viewButton === windowView(windowEl));
+      let next = -1;
+      if (event.key === "ArrowRight") next = (current + 1) % tabs.length;
+      else if (event.key === "ArrowLeft") next = (current - 1 + tabs.length) % tabs.length;
+      else if (event.key === "Home") next = 0;
+      else if (event.key === "End") next = tabs.length - 1;
+      if (next < 0 || !tabs[next]) return;
+      event.preventDefault();
+      tabs[next].focus();
+      const view = tabs[next].dataset.viewButton as WindowView;
+      if (ORDER.includes(view)) setWindowView(windowEl, view);
+    });
   }
 }

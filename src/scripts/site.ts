@@ -13,6 +13,7 @@ import { initShare } from "../shell/share";
 import { initGlass } from "../kernel/glass";
 import { magnetize } from "../kernel/magnet";
 import { initPointerPresence } from "../kernel/glow";
+import { initLean } from "../kernel/lean";
 import { sound } from "../kernel/sound";
 import { setInPageReduce } from "../kernel/switchboard";
 import { initRail, type RailController } from "../scenes/rail";
@@ -25,6 +26,7 @@ import { initFilm } from "../scenes/film";
 import { initTravel } from "../shell/travel";
 import { initReveal } from "../scenes/reveal";
 import { hydrateOnIntent } from "../editor/hydration";
+import { springScrollTo } from "../motion/scroll";
 
 sound.restore();
 
@@ -53,6 +55,7 @@ initPop();
 // Film detection precedes lazy scene mounting: gap and travel otherwise build
 // desktop choreography into the seven-beat mobile composition.
 initTravel();
+initLean();
 initReveal();
 
 const rail: RailController | null = initRail();
@@ -109,10 +112,17 @@ for (const control of document.querySelectorAll<HTMLButtonElement>("[data-archit
     const view = control.dataset.architectureView;
     if (!windowEl || (view !== "document" && view !== "source")) return;
     windowEl.dataset.view = view;
+    windowEl.dataset.viewLock = view;
     windowEl.style.setProperty("--segment-index", view === "source" ? "2" : "0");
     for (const sibling of document.querySelectorAll<HTMLButtonElement>("[data-architecture-view]")) {
       sibling.setAttribute("aria-selected", String(sibling === control));
     }
+    // The window lives acts below (hero · gap · agent · themes), parked in
+    // the themes slot while this band is on screen — a bare view flip here
+    // was invisible. The click now hands off: the page springs to where the
+    // window is, arriving already flipped to the requested face.
+    const themes = document.getElementById("themes");
+    if (themes) springScrollTo(themes.offsetTop - 72, 480);
   });
 }
 

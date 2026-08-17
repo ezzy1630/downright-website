@@ -9,9 +9,9 @@
 
 import { EditorState } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
-import { EditorView, keymap } from "@codemirror/view";
+import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { history, historyKeymap } from "@codemirror/commands";
-import { livedown, decorateState } from "./livedown";
+import { sourceEditor, decorateSourceState } from "./livedown";
 import { recordParse } from "./stats";
 import { doc } from "../kernel/store";
 import { sound } from "../kernel/sound";
@@ -29,6 +29,7 @@ function editorExtensions(
 ): Extension[] {
   return [
     history(),
+    lineNumbers(),
     // Native contenteditable carries caret motion and select-all; the keymap
     // adds undo plus the Cmd-arrow jumps, which must not fall through to
     // native page scrolling while the editor has focus.
@@ -51,7 +52,7 @@ function editorExtensions(
         },
       },
     ]),
-    livedown(),
+    sourceEditor(),
     // Keep the source surface inside the travelling window at phone widths.
     // CodeMirror's wrapping extension updates line measurements and caret
     // mapping together; CSS-only wrapping leaves long markdown lines clipped
@@ -61,16 +62,22 @@ function editorExtensions(
       if (update.selectionSet || update.docChanged) onSelection(update.view);
       if (!update.docChanged) return;
       // The honest measure: one full decoration pass on the resulting doc.
-      onParse(decorateState(update.view.state).ms);
+      onParse(decorateSourceState(update.view.state).ms);
       onStroke();
       doc.edit(update.state.doc.toString());
       sound.thock();
     }),
     EditorView.theme({
-      "&": { height: "100%", fontSize: "16px" },
-      ".cm-scroller": { fontFamily: "var(--font-document)", lineHeight: "26px", overflow: "auto" },
-      ".cm-content": { paddingBottom: "35vh", caretColor: "var(--accent)" },
-      ".cm-line": { padding: "0 10px 0 22px" },
+      "&": { height: "100%", fontSize: "12.5px" },
+      ".cm-scroller": {
+        fontFamily: "var(--font-mono)",
+        lineHeight: "1.85",
+        overflow: "auto",
+      },
+      ".cm-gutters": { minWidth: "42px" },
+      ".cm-gutterElement": { padding: "0 12px 0 0" },
+      ".cm-content": { padding: "18px 0 35vh", caretColor: "var(--accent)" },
+      ".cm-line": { padding: "0" },
     }),
   ];
 }
@@ -138,6 +145,7 @@ export function mountEditor(
     (bodyEl.querySelector<HTMLElement>("[data-document-source]") ?? bodyEl).append(editorLayer);
   }
   editorLayer.hidden = false;
+  windowEl.dataset.editorSurface = "source";
 
   const view = new EditorView({
     state: EditorState.create({ doc: doc.current.text, extensions: editorExtensions(report, reportCaret, reportRate) }),
@@ -167,6 +175,7 @@ export function mountEditor(
       editorLayer.replaceChildren();
       editorLayer.hidden = true;
       delete editorLayer.dataset.editorMounted;
+      delete windowEl.dataset.editorSurface;
       windowEl.dataset.mode = "read";
     },
   };

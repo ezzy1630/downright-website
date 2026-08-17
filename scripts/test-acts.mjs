@@ -71,6 +71,9 @@ async function freshLoad() {
   // product behaving correctly — §8.5.)
   await cdp.send("Page.navigate", { url: "http://localhost:4321/" });
   await sleep(900);
+  // Page.navigate can preserve the previous test's scroll restoration point;
+  // return to the hero before the agent observer gets a chance to arm.
+  await cdp.evaluate(`window.scrollTo(0, 0); true`);
   await cdp.evaluate(`(() => { try { sessionStorage.clear(); localStorage.clear(); } catch {} return true; })()`);
   await cdp.send("Page.reload", { ignoreCache: true });
   await sleep(2400);
@@ -111,7 +114,7 @@ const mounted = await cdp.evaluate(`!!document.querySelector('.cm-editor')`);
 check("editor mounts on pointerdown in the source pane", mounted === true);
 const dirty = await cdp.evaluate(`document.querySelector('[data-dirty-label]')?.hidden === false`);
 check("titlebar shows — Edited once the buffer is dirty", dirty === true);
-const mineText = await cdp.evaluate(`document.querySelector('.cm-content').textContent.slice(0, 40)`);
+const mineText = await cdp.evaluate(`document.querySelector('.cm-content').textContent`);
 check("typed text landed in the source pane", String(mineText).includes("MY OWN WORDS"), String(mineText));
 
 await scrollToAgent();

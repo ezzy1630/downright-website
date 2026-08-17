@@ -9,11 +9,11 @@
 import { ticker } from "../kernel/ticker";
 import { PointerTracker } from "../kernel/pointer";
 import { reducedMotion } from "../kernel/switchboard";
-import { MOTION, SpringRect } from "../kernel/springs";
 import { renderSampleMarkdown } from "../data/site";
 import agentDumpSource from "../data/agent-dump.md?raw";
 import { doc } from "../kernel/store";
 import { repaintDocumentSurfaces } from "../shell/drop";
+import { flyPinnedRect, pinRect } from "../kernel/fly";
 import { sound } from "../kernel/sound";
 
 interface FileCard {
@@ -242,8 +242,8 @@ function initVerlet(): void {
   let quickLookOrigin: HTMLElement | null = null;
 
   /* The overlay is born from the card that opened it and returns there on
-     close — the panel springs its true rect (center + size), so the content
-     keeps its proportions while the sheet grows out of the file, exactly the
+     close — the shared pinned-rect flight (kernel/fly.ts) springs the
+     panel's true geometry, so the sheet grows out of the file exactly the
      way the system preview feels when it opens from an icon. */
   let cancelPanelFlight: (() => void) | null = null;
 
@@ -255,54 +255,12 @@ function initVerlet(): void {
     const target = panel();
     if (!target) { onDone(); return; }
     cancelPanelFlight?.();
-    const flight = new SpringRect(
-      from.left + from.width / 2,
-      from.top + from.height / 2,
-      from.width,
-      from.height,
-      MOTION.durations.deliberate,
-      0.14,
-    );
-    flight.setTarget(to.left + to.width / 2, to.top + to.height / 2, to.width, to.height);
-    const cancel = ticker.add((dt) => {
-      const moving = flight.advance(dt);
-      target.style.left = `${(flight.x.value - flight.width.value / 2).toFixed(2)}px`;
-      target.style.top = `${(flight.y.value - flight.height.value / 2).toFixed(2)}px`;
-      target.style.width = `${flight.width.value.toFixed(2)}px`;
-      target.style.height = `${flight.height.value.toFixed(2)}px`;
-      if (!moving) {
-        target.style.left = "";
-        target.style.top = "";
-        target.style.width = "";
-        target.style.height = "";
-        target.style.position = "";
-        target.style.margin = "";
+    cancelPanelFlight = flyPinnedRect(target, from, to, {
+      onSettle: () => {
         cancelPanelFlight = null;
         onDone();
-      }
-      return moving;
+      },
     });
-    cancelPanelFlight = () => {
-      cancel();
-      target.style.left = "";
-      target.style.top = "";
-      target.style.width = "";
-      target.style.height = "";
-      target.style.position = "";
-      target.style.margin = "";
-      cancelPanelFlight = null;
-    };
-  }
-
-  function pinPanelTo(rect: DOMRect): void {
-    const target = panel();
-    if (!target) return;
-    target.style.position = "fixed";
-    target.style.margin = "0";
-    target.style.left = `${rect.left}px`;
-    target.style.top = `${rect.top}px`;
-    target.style.width = `${rect.width}px`;
-    target.style.height = `${rect.height}px`;
   }
 
   function hideQuickLook(): void {
@@ -322,7 +280,7 @@ function initVerlet(): void {
       const target = panel();
       if (target) {
         const from = target.getBoundingClientRect();
-        pinPanelTo(from);
+        pinRect(target, from);
         flyPanel(from, card.element.getBoundingClientRect(), hideQuickLook);
         return;
       }
@@ -353,7 +311,7 @@ function initVerlet(): void {
         // sheet grow out of the file — all in one frame, before any paint.
         const to = target.getBoundingClientRect();
         const from = card.element.getBoundingClientRect();
-        pinPanelTo(from);
+        pinRect(target, from);
         flyPanel(from, to, () => {});
       }
     }
@@ -366,6 +324,22 @@ function initVerlet(): void {
   });
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && quickLook?.classList.contains("is-open")) closeQuickLook();
+    // The overlay is non-modal by design (aria-modal="false"), but while it
+    // holds the sheet open, Tab should not wander behind the scrim.
+    if (event.key === "Tab" && quickLook?.classList.contains("is-open")) {
+      const focusables = [...quickLook.querySelectorAll<HTMLElement>('button, [href], [tabindex]:not([tabindex="-1"])')].filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
+      if (focusables.length < 2) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (event.shiftKey && (active === first || !quickLook.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !quickLook.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
   });
 }
 

@@ -1,6 +1,7 @@
 /**
- * The agent visit — the mid-page climax. Arms on entry and fires exactly
- * once per session, ever: the living document receives an external write,
+ * The agent visit — the mid-page climax. Performs on EVERY entry (the first
+ * visit full-length, replays on a quicker cadence): the living document
+ * receives an external write,
  * words rewrite in place with word-level marks streaming in, the reading
  * position holds, a glass change toast lands, and marks dim after 1.5s of
  * dwell — exactly like the app. If the visitor typed in the hero, the buffer
@@ -10,11 +11,14 @@
  */
 
 import { doc } from "../kernel/store";
+import { flyPinnedRect, pinRect } from "../kernel/fly";
 import { reducedMotion } from "../kernel/switchboard";
 import { diffWords, summarizeDiff, type DiffToken } from "../kernel/worddiff";
 import { renderSampleMarkdown } from "../data/site";
 import type { RailController } from "./rail";
 import { toast } from "../shell/toast";
+import { MOTION, SpringScalar } from "../kernel/springs";
+import { ticker } from "../kernel/ticker";
 
 const SESSION_KEY = "downright-agent-visited";
 const DWELL_MS = 1500;
@@ -55,13 +59,9 @@ export function initAgent(rail: RailController | null): void {
   const readLayer = (): HTMLElement | null => document.querySelector<HTMLElement>("[data-document-read]");
   const surface = (): HTMLElement | null => document.querySelector<HTMLElement>("[data-document-read] [data-static-document]");
 
-  let fired = false;
   let triggered = false;
-  try {
-    fired = sessionStorage.getItem(SESSION_KEY) === "1";
-  } catch {
-    fired = false; // storage blocked; the moment still fires this visit
-  }
+  let performing = false;
+  let visit = 0;
 
   const revealContextual = (): void => {
     // The page's one contextual ask, earned only after the moment completes.
@@ -74,11 +74,31 @@ export function initAgent(rail: RailController | null): void {
     window.setTimeout(revealContextual, 600);
   };
 
+  /** The window wears the external write: accent state, pulsing bar dot,
+   *  a status line that says what is happening. Worn from the first mark
+   *  until the decision (or the dwell) settles it. */
+  const wearWriteState = (on: boolean): void => {
+    const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
+    if (!windowEl) return;
+    if (on) windowEl.dataset.chrome = "agent";
+    else if (windowEl.dataset.chrome === "agent") delete windowEl.dataset.chrome;
+    windowEl.querySelector(".app-window__write-dot")?.toggleAttribute("hidden", !on);
+    windowEl.querySelector("[data-write-state]")?.toggleAttribute("hidden", !on);
+  };
+
   const fire = (): void => {
-    const mine = doc.current.text;
+    performing = true;
+    visit += 1;
+    // Replays compose on the current text with any previous visit's note
+    // stripped, so the added block never accumulates across performances.
+    const mine = doc.current.text.split(ADDED_SECTION).join("");
     const theirs = composeTheirs(mine);
     const tokens = diffWords(mine, theirs);
     const summary = summarizeDiff(tokens);
+    // First visit full-length; replays run a quicker cadence.
+    const pace = visit > 1 ? 0.55 : 1;
+    const dwell = visit > 1 ? 800 : DWELL_MS;
+    wearWriteState(true);
 
     if (reducedMotion()) {
       doc.stageExternalWrite(theirs);
@@ -89,8 +109,11 @@ export function initAgent(rail: RailController | null): void {
       if (doc.current.dirty) {
         conflictBar.removeAttribute("hidden");
         conflictBar.classList.add("is-open");
+      } else {
+        wearWriteState(false);
       }
       finish();
+      performing = false;
       return;
     }
 
@@ -104,11 +127,12 @@ export function initAgent(rail: RailController | null): void {
     scroller?.scrollTo(0, scrollAnchor);
 
     const marks = [...(surface()?.querySelectorAll<HTMLElement>("mark[data-change-kind]") ?? [])];
-    const perWord = Math.max(12, 2200 / Math.max(1, marks.length));
+    const perWord = Math.max(12, (2200 * pace) / Math.max(1, marks.length));
+    const lead = 300 * pace;
     marks.forEach((changeMark, index) => {
-      window.setTimeout(() => changeMark.classList.add("is-live"), 300 + index * perWord);
+      window.setTimeout(() => changeMark.classList.add("is-live"), lead + index * perWord);
     });
-    const streamEnd = 300 + marks.length * perWord + 200;
+    const streamEnd = lead + marks.length * perWord + 200;
 
     window.setTimeout(() => {
       toastEl.querySelector("[data-change-summary]")!.textContent = `${summary.rewritten} rewritten · ${summary.added} added`;
@@ -116,7 +140,7 @@ export function initAgent(rail: RailController | null): void {
       // The rewrite lands in the store; the read layer holds the marks until
       // the conflict resolves or the dwell elapses, exactly like the app.
       doc.stageExternalWrite(theirs);
-      window.setTimeout(() => documentHost.classList.add("marks-dimmed"), DWELL_MS);
+      window.setTimeout(() => documentHost.classList.add("marks-dimmed"), dwell);
       if (doc.current.dirty) {
         // The unforgettable branch: they typed, the buffer is dirty.
         conflictBar.removeAttribute("hidden");
@@ -125,8 +149,10 @@ export function initAgent(rail: RailController | null): void {
       } else {
         window.setTimeout(() => {
           doc.markStreamed();
+          wearWriteState(false);
           finish();
-        }, DWELL_MS + 400);
+          performing = false;
+        }, dwell + 400);
       }
     }, streamEnd);
   };
@@ -140,9 +166,15 @@ export function initAgent(rail: RailController | null): void {
    */
   const observer = new IntersectionObserver(
     (entries) => {
-      if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.5)) trigger();
+      for (const entry of entries) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) trigger();
+        // The act left: re-arm. Every entry performs — the window never
+        // sits plain. (A performance already in flight finishes untouched;
+        // the next entry after it fires fresh.)
+        else if (!entry.isIntersecting && entry.intersectionRatio === 0) triggered = false;
+      }
     },
-    { threshold: [0.5] },
+    { threshold: [0, 0.5] },
   );
   observer.observe(documentHost);
 
@@ -156,24 +188,16 @@ export function initAgent(rail: RailController | null): void {
   };
 
   function trigger(): void {
-    if (triggered) return;
+    if (triggered || performing) return;
     triggered = true;
-    observer.disconnect();
-    window.removeEventListener("scroll", onScroll);
-    window.removeEventListener("resize", onScroll);
-    window.removeEventListener("load", onScroll);
+    // Kept for the harness's session marker; the visit itself no longer
+    // gates on it — every entry performs.
     try {
-      sessionStorage.setItem(SESSION_KEY, "1"); // once per session, ever
+      sessionStorage.setItem(SESSION_KEY, "1");
     } catch {
       /* this visit only */
     }
-    if (fired) {
-      // Already seen this session: hold the final state, no replay.
-      stage!.dataset.agentReplay = "held";
-      revealContextual();
-      return;
-    }
-    fired = true;
+    stage!.dataset.agentReplay = String(visit + 1);
     fire();
   }
   const onScroll = (): void => {
@@ -203,6 +227,23 @@ export function initAgent(rail: RailController | null): void {
     conflictBar.setAttribute("hidden", "");
     reviewPanel?.classList.remove("is-open");
     documentHost.classList.add("marks-dimmed");
+    wearWriteState(false);
+    performing = false;
+    // The decision lands as a stamp: the window takes it with one
+    // squash-settle, so the climax ends on a beat instead of a whisper.
+    if (!reducedMotion()) {
+      const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
+      if (windowEl) {
+        const stamp = new SpringScalar(0.985, MOTION.durations.deliberate, 0.5);
+        stamp.setTarget(1);
+        ticker.add((dt) => {
+          const moving = stamp.advance(dt);
+          windowEl.style.setProperty("--stamp-scale", stamp.value.toFixed(4));
+          if (!moving) windowEl.style.removeProperty("--stamp-scale");
+          return moving;
+        });
+      }
+    }
     finish();
   };
 
@@ -282,6 +323,17 @@ function openReview(panel: HTMLElement | null, resolve: (action: "mine" | "their
       </footer>
     </div>`;
   panel.classList.add("is-open");
+  // The review is born from its Review button — the same pinned-rect flight
+  // the Quick Look sheet gets, so every summons on this page grows from the
+  // control that made it.
+  const dialog = panel.querySelector<HTMLElement>(".review-diff");
+  const trigger = document.querySelector<HTMLElement>("[data-conflict-focus]");
+  if (dialog && trigger && document.documentElement.dataset.reducedMotion !== "true") {
+    const to = dialog.getBoundingClientRect();
+    const from = trigger.getBoundingClientRect();
+    pinRect(dialog, from);
+    flyPinnedRect(dialog, from, to);
+  }
   panel.querySelector<HTMLButtonElement>("[data-review-close]")?.addEventListener("click", () => panel.classList.remove("is-open"));
   panel.querySelector<HTMLButtonElement>("[data-review-keep]")?.addEventListener("click", () => resolve("mine"));
   panel.querySelector<HTMLButtonElement>("[data-review-take]")?.addEventListener("click", () => resolve("theirs"));

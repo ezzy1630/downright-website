@@ -73,6 +73,11 @@ function initSweep(): void {
   const line = document.createElement("i");
   line.className = "sweep__line";
   line.setAttribute("aria-hidden", "true");
+  // Paint state, hoisted: build() resets `last` so the first paint after a
+  // take-over runs even when progress itself has not moved — without this,
+  // the pane scroll and block opacities freeze at whatever the previous
+  // owner's last paint left behind.
+  let last = -1;
 
   const readPane = (): HTMLElement | null =>
     appWindow.querySelector<HTMLElement>("[data-document-read]");
@@ -120,6 +125,7 @@ function initSweep(): void {
     pane.replaceChildren(fragment);
     readPane()?.append(line);
     bindAnnotations();
+    last = -1;
     window.dispatchEvent(new Event("scroll"));
   };
 
@@ -134,6 +140,8 @@ function initSweep(): void {
       block.rendered.style.opacity = done ? "1" : "0";
     });
     stage.style.setProperty("--sweep-progress", "1");
+    const pane = readPane();
+    if (pane) pane.scrollTop = (pane.scrollHeight - pane.clientHeight) * 0.5;
     appWindow.dataset.chrome = "app";
     for (const note of notes) note.note.classList.add("is-bloomed", "is-static");
   };
@@ -168,7 +176,6 @@ function initSweep(): void {
   }
 
   let running = false;
-  let last = -1;
 
   const paint = (progress: number): void => {
     if (Math.abs(progress - last) < 0.0008) return;
@@ -176,6 +183,20 @@ function initSweep(): void {
     stage.style.setProperty("--sweep-progress", progress.toFixed(4));
     if (appWindow.dataset.slot === "gap") {
       appWindow.dataset.chrome = progress >= CHROME_AT ? "app" : "ql";
+    }
+
+    // The pane follows the line. The document runs ~3x the visible sheet, so
+    // without this the later turns happen below the fold, out of sight, and
+    // the line drifts away from the very block it is turning. Same mapping
+    // the film's thumb scrub uses; a pure function of progress, so scrubbing
+    // backwards retraces it exactly.
+    const pane = readPane();
+    if (pane) {
+      const total = pane.scrollHeight - pane.clientHeight;
+      if (total > 0) {
+        pane.scrollTop = Math.min(1, Math.max(0, (progress - 0.32) / 0.6)) * total;
+      }
+      line.style.translate = `0 ${(Math.min(1, Math.max(0, (progress - 0.35) / 0.58)) * pane.clientHeight).toFixed(1)}px`;
     }
 
     for (const block of blocks) {

@@ -15,10 +15,13 @@ import { join } from "node:path";
 const root = new URL("../dist", import.meta.url).pathname;
 const ENTRY_BUDGET = 32768;
 // Raised 102400 → 105000 by the spectacle pass (true-rect window flights,
-// Quick Look birth morph, pointer presence, count-up): +1.4KB gz of
-// first-party spring code, 60fps verified at 1440×900. The gate's law is
-// unchanged — zero animation frameworks, editor still intent-only.
-const SESSION_BUDGET = 105000;
+// Quick Look birth morph, pointer presence, count-up), then 105000 → 110000
+// by the journey pass (the docking mini-window with working lights and
+// minimap, flight afterimages, scroll-velocity lean, the shared pinned-rect
+// flight kernel, always-performing agent state): first-party spring code
+// only, 60fps verified at 1440×900, zero animation frameworks, editor still
+// intent-only.
+const SESSION_BUDGET = 110000;
 const FILM_BUDGET = 61440;
 const FONT_BUDGET = 92160;
 

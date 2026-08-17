@@ -109,6 +109,11 @@
 /* ── The app window: two faces, one document ──────────────────────────── */
 
 .app-window { position: relative; view-transition-name: app-window; }
+/* Scroll-velocity lean (kernel/lean.ts): the window tips against fast flicks
+   and settles flat; perspective on the slots makes the tilt read as depth.
+   The stamp (agent scene) squashes the same property on resolution. */
+.app-window { rotate: var(--lean, 0deg) 0deg 0deg; scale: var(--stamp-scale, 1); }
+.hero__window, .sweep__slot, .window-slot { perspective: 1200px; }
 .app-window__inner { position: relative; height: 100%; }
 
 .app-window__face {
@@ -138,6 +143,182 @@
     0 48px 96px -34px color-mix(in srgb, #1a1512 64%, transparent),
     0 14px 36px -18px color-mix(in srgb, #1a1512 48%, transparent);
 }
+
+/* The flight's afterimage: two accent outlines chasing the window on slower
+   springs. Fixed to the viewport (the window flies in document space), pure
+   decoration, gone the moment they catch up. */
+.window-ghost {
+  position: fixed;
+  z-index: 39;
+  pointer-events: none;
+  border: 1px solid color-mix(in oklab, var(--accent) 55%, transparent);
+  border-radius: var(--radius-window);
+  opacity: var(--ghost-opacity, 0.2);
+  transition: opacity var(--motion-quick) var(--ease-decelerate);
+  will-change: top, left, width, height;
+}
+
+/* ── The dock: the window between acts ───────────────────────────────────
+   When no act's stage holds the window, it parks here as a compact live
+   document instead of vanishing — the journey never leaves the visitor. It
+   retires over the close act's footer: the story, and the trip, are done. */
+.window-dock {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 38;
+  width: min(320px, calc(100vw - 48px));
+  height: min(216px, 36vh);
+  cursor: pointer;
+  transition: opacity var(--motion-deliberate) var(--ease-decelerate),
+    translate var(--motion-deliberate) var(--ease-decelerate),
+    scale var(--motion-deliberate) var(--ease-decelerate);
+}
+.window-dock:empty { display: none; }
+.window-dock.is-retired {
+  opacity: 0;
+  translate: 0 16px;
+  scale: 0.96;
+  pointer-events: none;
+}
+.window-dock .app-window { height: 100%; }
+
+/* The docked chrome: a real mini window. The lights work (close dismisses
+   until the next act, minimise collapses to the bar, zoom opens a readable
+   document pane); the face shows the document's skeleton as a minimap and
+   a journey caption instead of unreadable micro-prose. */
+.app-window[data-chrome="dock"] .app-window__segmented,
+.app-window[data-chrome="dock"] .app-window__hint,
+.app-window[data-chrome="dock"] .app-window__status,
+.app-window[data-chrome="dock"] .app-window__ql-action,
+.app-window[data-chrome="dock"] .app-window__file small { display: none; }
+.app-window[data-chrome="dock"] { user-select: none; }
+.app-window[data-chrome="dock"] .app-window__read { display: none; }
+.app-window__minimap,
+.app-window__dock-caption { display: none; }
+.app-window[data-chrome="dock"] .app-window__minimap,
+.app-window[data-chrome="dock"] .app-window__dock-caption { display: flex; }
+/* Zoomed, the dock is a real reader: the actual document pane, scrollable. */
+.app-window[data-chrome="dock"][data-dock-zoom="true"] .app-window__minimap,
+.app-window[data-chrome="dock"][data-dock-zoom="true"] .app-window__dock-caption { display: none; }
+.app-window[data-chrome="dock"][data-dock-zoom="true"] .app-window__read {
+  display: block;
+  overflow-y: auto;
+  padding: 18px 20px;
+}
+.app-window[data-chrome="dock"][data-dock-zoom="true"] .app-window__read .document-content {
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* The minimap: the document's block skeleton. Headings lead in the heading
+   ink and run long; fences take the code tint; everything else is quiet. */
+.app-window__minimap {
+  position: absolute;
+  inset: 46px 14px 34px;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.app-window__minimap i {
+  display: block;
+  width: var(--w, 60%);
+  height: 3px;
+  flex: none;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--text-secondary) 34%, transparent);
+}
+.app-window__minimap i[data-kind="h"] {
+  width: calc(var(--w, 60%) * 0.92 + 8%);
+  background: color-mix(in oklab, var(--heading) 62%, transparent);
+}
+.app-window__minimap i[data-kind="c"] { background: color-mix(in oklab, var(--accent) 45%, transparent); }
+.app-window__minimap i[data-kind="q"] { background: color-mix(in oklab, var(--text-faint) 42%, transparent); }
+
+/* The journey caption: what the dock is doing and where it goes next. */
+.app-window__dock-caption {
+  position: absolute;
+  right: 14px;
+  bottom: 8px;
+  left: 14px;
+  align-items: baseline;
+  gap: 8px;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.app-window__dock-caption strong {
+  flex: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.app-window__dock-caption span { overflow: hidden; text-overflow: ellipsis; }
+.app-window__dock-caption.is-alert {
+  color: color-mix(in oklab, var(--accent) 80%, var(--text));
+}
+
+/* The dock host's own states. Height and width transition so minimise and
+   zoom feel like the window genuinely folding and unfolding. */
+.window-dock {
+  width: min(340px, calc(100vw - 48px));
+  height: min(232px, 34vh);
+  opacity: 0.94;
+  transition: opacity var(--motion-deliberate) var(--ease-decelerate),
+    translate var(--motion-deliberate) var(--ease-decelerate),
+    scale var(--motion-deliberate) var(--ease-decelerate),
+    width var(--motion-deliberate) var(--ease-snap),
+    height var(--motion-deliberate) var(--ease-snap);
+}
+@media (hover: hover) {
+  .window-dock:hover { opacity: 1; }
+  .window-dock:hover .app-window__face {
+    box-shadow: 0 26px 56px -26px color-mix(in srgb, #1a1512 60%, transparent);
+  }
+}
+.window-dock.is-collapsed { height: 44px; }
+.window-dock.is-zoomed {
+  width: min(580px, calc(100vw - 48px));
+  height: min(440px, 62vh);
+}
+.window-dock.is-dismissed {
+  opacity: 0;
+  translate: 0 12px;
+  scale: 0.96;
+  pointer-events: none;
+}
+.window-dock.is-retired .app-window__dock-caption span::after { content: " · end of the story"; }
+
+/* In the dock the lights are live controls: hover them like the app's. */
+.app-window[data-chrome="dock"] .traffic-lights { cursor: pointer; }
+.app-window[data-chrome="dock"] .traffic-lights:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* ── The agent write: the window wears the external write ──────────────── */
+.app-window[data-chrome="agent"] .app-window__face {
+  border-color: color-mix(in oklab, var(--accent) 32%, var(--rule));
+}
+.app-window__write-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: write-pulse 1.2s var(--ease-decelerate) infinite;
+}
+@keyframes write-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.app-window__status-write { color: var(--accent); }
 
 /* The window is one node; each act's slot sizes it. */
 .app-window { width: 100%; height: 100%; }
@@ -263,6 +444,10 @@
   align-items: baseline;
   justify-content: center;
   white-space: nowrap;
+  /* The filename leans toward the cursor (kernel/glow.ts writes --cursor-nx
+     on the face); optically centred, but alive under the pointer. */
+  translate: calc(var(--cursor-nx, 0) * 3px) 0;
+  transition: translate var(--motion-standard) var(--ease-decelerate);
 }
 
 .app-window__file b { color: var(--heading); font-size: 12px; font-weight: 600; letter-spacing: -0.005em; }
@@ -336,6 +521,18 @@
 }
 
 .app-window__status-item { display: inline-flex; gap: 6px; align-items: baseline; }
+
+/* Idle guidance lives in the status bar only where there is room; the film's
+   narrow windows must never overflow their 30px bar. */
+.app-window__status-hint { color: var(--text-faint); }
+[data-film="true"] .app-window__status-hint,
+[data-film="true"] .app-window__write-dot,
+[data-film="true"] .app-window__status-write { display: none; }
+@media (max-width: 900px) {
+  .app-window__status-hint,
+  .app-window__write-dot,
+  .app-window__status-write { display: none; }
+}
 .app-window__status-syntax { color: var(--text-secondary); }
 .app-window__status-rate { align-items: center; margin-left: auto; }
 .app-window__status-rate i { color: var(--change-added); font-style: normal; font-size: 7px; }
@@ -396,11 +593,53 @@
 .source-row__number { padding-right: 12px; color: var(--text-faint); font-family: var(--font-mono); font-size: 11px; text-align: right; user-select: none; }
 .source-row__text { color: var(--syntax-variable); font-family: var(--font-mono); font-size: 11px; white-space: pre-wrap; }
 
-/* ── The living editor (CM6 Live mode) ────────────────────────────────── */
+/* ── The living source editor (CM6) ───────────────────────────────────── */
 
 .cm-editor { height: 100%; background: var(--bg); }
 .cm-editor.cm-focused { outline: none; }
-.cm-scroller { font-family: var(--font-display) !important; }
+.cm-scroller { font-family: var(--font-mono) !important; }
+
+/* Hydrating the source pane must not turn a click into a document-mode
+   redesign. CodeMirror owns the caret and editing, while this surface keeps
+   the same source grammar as the prerendered line-numbered view. */
+.app-window[data-editor-surface="source"] .cm-editor { background: var(--bg); }
+.app-window[data-editor-surface="source"] .cm-scroller {
+  font-family: var(--font-mono) !important;
+  font-size: 12.5px;
+  font-variant-ligatures: none;
+  line-height: 1.85;
+}
+.app-window[data-editor-surface="source"] .cm-gutters {
+  min-width: 42px;
+  border: 0;
+  background: transparent;
+  color: color-mix(in oklab, var(--text-faint) 62%, transparent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.app-window[data-editor-surface="source"] .cm-lineNumbers .cm-gutterElement {
+  min-width: 30px;
+  padding: 0 12px 0 0;
+  text-align: right;
+}
+.app-window[data-editor-surface="source"] .cm-content { padding: 18px 0 35vh; }
+.app-window[data-editor-surface="source"] .cm-line {
+  min-height: 23.125px;
+  padding: 0;
+  color: var(--syntax-variable);
+}
+.app-window[data-editor-surface="source"] .cm-source-hash,
+.app-window[data-editor-surface="source"] .cm-source-marker,
+.app-window[data-editor-surface="source"] .cm-source-fence { color: var(--marker); }
+.app-window[data-editor-surface="source"] .cm-source-heading { color: var(--link); font-weight: 600; }
+.app-window[data-editor-surface="source"] .cm-source-code,
+.app-window[data-editor-surface="source"] .cm-source-fenced { color: var(--syntax-string); }
+.app-window[data-editor-surface="source"] .cm-source-strong { color: var(--heading); font-weight: 600; }
+.app-window[data-editor-surface="source"] .cm-source-math { color: var(--syntax-number); }
+.app-window[data-editor-surface="source"] .cm-source-link { color: var(--link); }
+.app-window[data-editor-surface="source"] .cm-source-task { color: var(--accent); }
+.app-window[data-editor-surface="source"] .cm-source-table { color: var(--syntax-operator); }
+.app-window[data-editor-surface="source"] .cm-source-quote { color: var(--text-secondary); }
 
 .live-elided { display: none; }
 
@@ -849,8 +1088,9 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 72px), transparent 100%);
 }
 
-/* The render line: one hairline travelling the surface, accent-tinted, no
-   glow. Position is a transform, so it never costs a layout. */
+/* The render line: one hairline travelling the visible sheet, accent-tinted,
+   no glow. The desktop sweep positions it from JS (it rides the pane while
+   the content scrolls beneath); position is a transform, never a layout. */
 .sweep__line {
   position: absolute;
   z-index: 2;
@@ -860,7 +1100,6 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
   opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.3) * 12), 0.75);
-  translate: 0 calc(var(--sweep-progress, 0) * 100cqh);
   container-type: size;
 }
 
@@ -1460,7 +1699,8 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 
 /* The app's map is a small centred stack, not a second scrollbar. Keep the
    lane wide enough for a calm hit target while drawing only the short marks. */
-.density-rail { position: fixed; z-index: 30; top: 50%; right: auto; left: 12px; width: 72px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
+.density-rail {
+  view-transition-name: density-rail; position: fixed; z-index: 30; top: 50%; right: auto; left: 12px; width: 72px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
 .density-rail canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
 .density-rail__nav { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
@@ -1468,7 +1708,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 .density-rail__hud {
   position: absolute;
   left: 68px;
-  top: var(--hud-y, 50%);
+  top: 50%;
   display: grid;
   gap: 4px;
   width: min(300px, calc(100vw - 100px));
@@ -1479,8 +1719,11 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   box-shadow: var(--window-shadow);
   pointer-events: none;
   opacity: 0;
-  translate: -6px -50%;
-  transition: opacity var(--motion-hover) var(--ease-decelerate), translate var(--motion-hover) var(--ease-decelerate);
+  translate: -6px calc(-50% + var(--hud-offset, 0px));
+  scale: .985;
+  transform-origin: left center;
+  will-change: translate, scale, opacity;
+  transition: opacity var(--motion-hover) var(--ease-decelerate), translate var(--motion-standard) var(--ease-snap), scale var(--motion-standard) var(--ease-snap);
 }
 
 .density-rail__hud::before {
@@ -1493,12 +1736,21 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   background: var(--rule);
 }
 
-.density-rail__hud.is-open { opacity: 1; translate: 0 -50%; }
+.density-rail__hud.is-open { opacity: 1; translate: 0 calc(-50% + var(--hud-offset, 0px)); scale: 1; }
 .density-rail__hud strong { color: var(--heading); font-size: 12px; font-weight: 600; }
+.density-rail__hud > * { transition: opacity var(--motion-preview-crossfade) var(--ease-decelerate); }
 .density-rail__hud span { color: var(--text-secondary); font-family: var(--font-display); font-size: 13px; line-height: 1.35; opacity: 0; transition: opacity var(--motion-stagger) var(--ease-decelerate); }
 .density-rail__hud small { color: var(--text-faint); font-family: var(--font-mono); font-size: 9px; opacity: 0; transition: opacity var(--motion-stagger) var(--ease-decelerate); }
 .density-rail__hud.is-detail span,
 .density-rail__hud.is-detail small { opacity: 1; }
+.density-rail__hud.is-swapping > * { opacity: 0 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .density-rail__hud,
+  .density-rail__hud > *,
+  .density-rail__hud span,
+  .density-rail__hud small { transition: none; }
+}
 
 /* ── ⌘K palette + shortcut sheet ──────────────────────────────────────── */
 
@@ -1551,6 +1803,53 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 .palette-row.is-cursor { background: color-mix(in oklab, var(--accent) 12%, transparent); color: var(--heading); }
 
 .shortcut-sheet { width: min(420px, calc(100vw - 40px)); padding: 22px 26px; border-radius: var(--radius-window); color: var(--text); }
+
+/* ── Dialog entrances ────────────────────────────────────────────────────
+   The palette and shortcut sheet are dialogs; with @starting-style +
+   allow-discrete (Chromium) they rise in on the site's own curve and settle
+   back down on close, instead of snapping. Other engines keep the native
+   instant dialog — still correct, just quieter. */
+.command-palette,
+.shortcut-sheet {
+  opacity: 0;
+  translate: 0 8px;
+  scale: 0.985;
+  transition:
+    opacity var(--motion-deliberate) var(--ease-decelerate),
+    translate var(--motion-deliberate) var(--ease-decelerate),
+    scale var(--motion-deliberate) var(--ease-decelerate),
+    display var(--motion-deliberate) allow-discrete,
+    overlay var(--motion-deliberate) allow-discrete;
+}
+.command-palette[open],
+.shortcut-sheet[open] {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+@starting-style {
+  .command-palette[open],
+  .shortcut-sheet[open] {
+    opacity: 0;
+    translate: 0 12px;
+    scale: 0.98;
+  }
+}
+.command-palette::backdrop,
+.shortcut-sheet::backdrop {
+  opacity: 0;
+  transition: opacity var(--motion-deliberate) var(--ease-decelerate), display var(--motion-deliberate) allow-discrete;
+}
+.command-palette[open]::backdrop,
+.shortcut-sheet[open]::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  .command-palette[open]::backdrop,
+  .shortcut-sheet[open]::backdrop {
+    opacity: 0;
+  }
+}
 .shortcut-sheet table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .shortcut-sheet td { padding: 9px 0; border-bottom: 1px solid var(--rule); color: var(--text-secondary); }
 .shortcut-sheet kbd { color: var(--heading); font-family: var(--font-mono); font-size: 12px; }
@@ -1699,6 +1998,29 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
    keeping the wall out of the film leaves the authored beats readable. */
 [data-film="true"] .gap-wall {
   display: none;
+}
+
+/* The film has no density rail; a two-pixel accent hairline under the header
+   gives the thumb-scroller a sense of place. Scroll-driven, zero JS. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-film="true"] .site-header::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: -1px;
+      left: 0;
+      height: 2px;
+      background: var(--accent);
+      transform-origin: 0 50%;
+      animation: film-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+@keyframes film-progress {
+  from { scale: 0 1; }
+  to { scale: 1 1; }
 }
 
 .film-beat__kicker {

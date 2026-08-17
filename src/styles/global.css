@@ -131,6 +131,8 @@ ol {
 .site-header {
   position: fixed;
   view-transition-name: site-header;
+  /* Chrome named for the cross-page morphs; the footer joins it so the
+     page's frame persists across navigations (see acts.css for the rail). */
   z-index: 40;
   inset: 0 0 auto;
   height: 56px;
@@ -1387,7 +1389,8 @@ ol {
 }
 .close-sponsor a { color: var(--link); }
 
-.site-footer { width: min(100% - 96px, var(--content-max)); margin: 0 auto; padding: 28px 0 34px; border-top: 1px solid var(--rule); color: var(--text-secondary); font-size: 12px; }
+.site-footer {
+  view-transition-name: site-footer; width: min(100% - 96px, var(--content-max)); margin: 0 auto; padding: 28px 0 34px; border-top: 1px solid var(--rule); color: var(--text-secondary); font-size: 12px; }
 .site-footer__top,
 .site-footer__bottom { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .site-footer__top nav { display: grid; gap: 12px; align-items: start; }
@@ -1515,7 +1518,9 @@ ol {
     animation-duration: var(--motion-deliberate);
   }
   ::view-transition-group(app-window),
-  ::view-transition-group(site-header) {
+  ::view-transition-group(site-header),
+  ::view-transition-group(site-footer),
+  ::view-transition-group(density-rail) {
     animation-duration: var(--motion-liquid-settle);
     animation-timing-function: var(--ease-snap);
   }
@@ -1677,4 +1682,11 @@ ol {
   .hero__actions { grid-template-columns: 1fr; }
   .hero__actions > .button,
   .hero__actions > .terminal-install { width: 100%; }
+}
+
+/* Funnel pages: the answer tables answer the pointer like the film's
+   benchmark rows do — one vocabulary across the site. */
+.answer-table tbody tr { transition: background-color var(--motion-hover) var(--ease-decelerate); }
+@media (hover: hover) {
+  .answer-table tbody tr:hover { background: color-mix(in oklab, var(--accent) 4%, transparent); }
 }
