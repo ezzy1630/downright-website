@@ -5,6 +5,8 @@
  * URL shortener, no social pixel, no network request at all.
  */
 
+import { toast } from "./toast";
+
 export interface ShareTargets {
   title: string;
   text: string;
@@ -28,8 +30,18 @@ export function initShare(): void {
         }
       }
       if (kind === "copy" || (kind === "share" && typeof navigator.share !== "function")) {
-        await navigator.clipboard.writeText(url);
-        note(button, "Link copied");
+        if (!navigator.clipboard) {
+          note(button, "Copy unavailable");
+          toast("<strong>Copy link unavailable.</strong><span>Use your browser's address bar instead.</span>");
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(url);
+          note(button, "Link copied");
+        } catch {
+          note(button, "Copy failed");
+          toast("<strong>Copy link failed.</strong><span>Use your browser's address bar instead.</span>");
+        }
         return;
       }
       if (kind === "mail") {

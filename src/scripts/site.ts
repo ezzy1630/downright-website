@@ -17,16 +17,14 @@ import { initLean } from "../kernel/lean";
 import { sound } from "../kernel/sound";
 import { setInPageReduce } from "../kernel/switchboard";
 import { initRail, type RailController } from "../scenes/rail";
-import { initGap } from "../scenes/gap";
-import { initAgent } from "../scenes/agent";
-import { initReach } from "../scenes/reach";
-import { initSpeed } from "../scenes/speed";
 import { initDownloadFunnel, initPop } from "../shell/funnel";
 import { initFilm } from "../scenes/film";
 import { initTravel } from "../shell/travel";
 import { initReveal } from "../scenes/reveal";
 import { hydrateOnIntent } from "../editor/hydration";
 import { springScrollTo } from "../motion/scroll";
+import { initAmbientBackdrop } from "../kernel/ambient";
+import { initBrandTile } from "../shell/brandTile";
 
 sound.restore();
 
@@ -50,23 +48,24 @@ initPalette();
 initShare();
 initDownloadFunnel();
 magnetize();
-initPointerPresence();
 initPop();
+initBrandTile();
+initPointerPresence();
+initAmbientBackdrop();
 // Film detection precedes lazy scene mounting: gap and travel otherwise build
 // desktop choreography into the seven-beat mobile composition.
 initTravel();
-initLean();
 initReveal();
+initLean();
 
 const rail: RailController | null = initRail();
 
 /**
- * Mount a scene when its section approaches. Direct geometry on scroll and
- * hashchange, plus one rAF loop while sections are still pending — covers
- * deep-link hash jumps and scroll restoration, which can both land before
- * any listener attaches. The loop self-terminates when nothing is pending.
+ * Mount a scene when its section approaches. The direct geometry check stays
+ * on scroll, hashchange, and load; there is no idle polling loop. Scroll
+ * restoration and deep-link jumps still reach the same check without forcing
+ * the page to read four distant section rects on every frame.
  */
-const pendingSections = new Set<() => void>();
 
 function whenNear(sectionId: string, mount: () => void): void {
   const section = document.getElementById(sectionId);
@@ -84,27 +83,32 @@ function whenNear(sectionId: string, mount: () => void): void {
     mounted = true;
     window.removeEventListener("scroll", run);
     window.removeEventListener("hashchange", run);
-    pendingSections.delete(run);
+    window.removeEventListener("load", run);
     mount();
   };
 
-  pendingSections.add(run);
   window.addEventListener("scroll", run, { passive: true });
   window.addEventListener("hashchange", run);
+  window.addEventListener("load", run, { once: true });
   run();
 }
 
-function drivePendingSections(): void {
-  if (!pendingSections.size) return;
-  for (const run of [...pendingSections]) run();
-  if (pendingSections.size) requestAnimationFrame(drivePendingSections);
-}
-requestAnimationFrame(drivePendingSections);
+const reportSceneLoad = (error: unknown): void => {
+  markError(error instanceof Error ? error.message : String(error));
+};
 
-whenNear("gap", initGap);
-whenNear("agent", () => initAgent(rail));
-whenNear("reach", initReach);
-whenNear("speed", initSpeed);
+whenNear("gap", () => {
+  void import("../scenes/gap").then(({ initGap }) => initGap()).catch(reportSceneLoad);
+});
+whenNear("agent", () => {
+  void import("../scenes/agent").then(({ initAgent }) => initAgent(rail)).catch(reportSceneLoad);
+});
+whenNear("reach", () => {
+  void import("../scenes/reach").then(({ initReach }) => initReach()).catch(reportSceneLoad);
+});
+whenNear("speed", () => {
+  void import("../scenes/speed").then(({ initSpeed }) => initSpeed()).catch(reportSceneLoad);
+});
 
 for (const control of document.querySelectorAll<HTMLButtonElement>("[data-architecture-view]")) {
   control.addEventListener("click", () => {

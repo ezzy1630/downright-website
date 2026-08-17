@@ -195,11 +195,10 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
     <style is:inline set:html={inlineStyles}></style>
   </head>
   <body class={pageClass} data-theme-zone>
-    <header class="site-header glass" data-site-header data-theme-zone>
+    <header class="site-header" data-site-header data-theme-zone>
       <div class="site-header__inner">
-        <BrandMark />
+        <BrandMark withDescriptor />
         <nav class="site-nav" aria-label="Primary navigation">
-          <a href="/download/">Download</a>
           <a href="/themes/">Themes</a>
           <a href="/guides/quick-look-markdown/">Guides</a>
           <a href="/changelog/">Changelog</a>
@@ -217,7 +216,6 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         </button>
       </div>
       <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" hidden data-mobile-menu>
-        <a href="/download/">Download</a>
         <a href="/themes/">Themes</a>
         <a href="/guides/quick-look-markdown/">Guides</a>
         <a href="/changelog/">Changelog</a>
@@ -229,14 +227,36 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
     <slot />
 
     <dialog class="command-palette glass" data-command-palette aria-label="Command palette">
-      <input type="search" data-palette-input placeholder="Type a command or a place…" aria-label="Search commands" autocomplete="off" />
+      <div class="command-palette__header">
+        <svg class="command-palette__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="search" data-palette-input placeholder="Search commands or jump to a section…" aria-label="Search commands" autocomplete="off" spellcheck="false" />
+        <kbd class="command-palette__esc-badge" data-palette-close aria-hidden="true" title="Press Escape to close">esc</kbd>
+      </div>
       <div class="command-palette__list" data-palette-list role="listbox"></div>
+      <div class="command-palette__footer" aria-hidden="true">
+        <div class="command-palette__hints">
+          <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+          <span><kbd>↵</kbd> select</span>
+          <span><kbd>esc</kbd> close</span>
+        </div>
+        <span class="command-palette__status" data-palette-status>Downright ⌘K</span>
+      </div>
     </dialog>
 
     <dialog class="shortcut-sheet glass" data-shortcut-sheet aria-label="Keyboard shortcuts">
+      <div class="shortcut-sheet__header">
+        <div class="shortcut-sheet__title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
+          <strong>Keyboard shortcuts</strong>
+        </div>
+        <kbd class="shortcut-sheet__close-badge" data-shortcut-close aria-hidden="true" title="Press Escape to close">esc</kbd>
+      </div>
       <table>
         <tbody>
-          <tr><td><kbd>⌘K</kbd></td><td>This palette</td></tr>
+          <tr><td><kbd>⌘K</kbd></td><td>Command palette</td></tr>
           <tr><td><kbd>⌘⇧E</kbd></td><td>Flip the window to its source</td></tr>
           <tr><td><kbd>Space</kbd></td><td>Quick Look the focused file card</td></tr>
           <tr><td><kbd>1–5</kbd></td><td>Structural zoom level</td></tr>
@@ -244,7 +264,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
           <tr><td><kbd>Esc</kbd></td><td>Close whatever opened</td></tr>
         </tbody>
       </table>
-      <form method="dialog"><button>Close</button></form>
+      <form method="dialog"><button type="submit">Done</button></form>
     </dialog>
 
     {!facts.downloadUrl && <div class="release-status glass" id="release-status" role="status" aria-live="polite" data-release-status>

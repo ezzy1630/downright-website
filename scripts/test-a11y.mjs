@@ -183,7 +183,10 @@ const check = (name, ok, detail = "") => {
     try {
       const btn = document.querySelector('[data-download]');
       btn.focus();
-      btn.click();
+      // The CTA is a real anchor so it still works without JavaScript. Fire
+      // the event itself here while the synthetic download anchor remains
+      // stubbed below; calling btn.click() would stub the control under test.
+      btn.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
       await new Promise((r) => setTimeout(r, 160));
       return { panel: !!document.querySelector('.glass-toast--download') };
     } finally { HTMLAnchorElement.prototype.click = orig; }

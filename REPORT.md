@@ -360,3 +360,45 @@ Frame evidence: `verify/shots/spectacle/desktop-*` (travel path: hero split
 → gap ql → gap app → agent → themes) and `film-*` (film beats, built sweep
 sheet). The gap rest states read: slot=gap, 27 blocks, chrome ql→app at
 0.86 progress; departure washes the layer (blocks=0) for agent/themes.
+
+---
+
+# Journey/editor release-candidate verification (2026-08-17)
+
+The current checkout was rebuilt after the journey pass and its pending
+ambient/editor work. The renderer now has one explicit runtime module shared
+by the static window, scenes, drop flow, travel director, and intent-loaded
+editor instead of routing through the full site-data module.
+
+## Fresh rendered evidence
+
+`SWEEP_PORT=9336 npm run audit:sweep -- --phase release-candidate` passed
+**20/20 assertions** with no browser exceptions or failed requests. The fresh
+machine report is [verify/report.json](verify/report.json), and representative
+desktop/mobile seam and rest screenshots are under
+`verify/shots/release-candidate/`.
+
+| Surface | Document height | 100px steps | Rest states |
+| --- | ---: | ---: | ---: |
+| Desktop 1440×900 | 9,113px | 83 | 8 |
+| Film 390×844 | 6,605px | 58 | 12 |
+| Film 414×896 | 6,852px | 60 | 12 |
+
+## Fresh regression evidence
+
+- `npm ci` — 282 packages installed; 0 vulnerabilities.
+- `npm run check` — 0 errors, 0 warnings, 0 hints.
+- `npm run build` — 26 static pages built.
+- `npm run audit:budgets` — green: 20,456 gz entry, 119,925 gz session,
+  20,456 gz mobile film, 33,100-byte Newsreader payload, exactly four
+  download CTAs, no animation framework.
+- `npm run audit:contrast` — green; minimum theme ratio 4.64:1 (Nord).
+- `npm run audit:seo` — 25 HTML routes and sitemap entries passed.
+- `npm run test:editor` — editor contract tests passed.
+- `npm run test:theme` — theme spill assertions passed.
+- `npm run test:acts` — 20/20 passed.
+- `npm run test:a11y` — 23/23 assertions passed.
+
+This is local release-candidate evidence only. It does not assert that the
+public deployment has served this commit; that is verified after the main
+push.

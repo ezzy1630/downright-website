@@ -14,14 +14,13 @@ import { join } from "node:path";
 
 const root = new URL("../dist", import.meta.url).pathname;
 const ENTRY_BUDGET = 32768;
-// Raised 102400 → 105000 by the spectacle pass (true-rect window flights,
-// Quick Look birth morph, pointer presence, count-up), then 105000 → 110000
-// by the journey pass (the docking mini-window with working lights and
-// minimap, flight afterimages, scroll-velocity lean, the shared pinned-rect
-// flight kernel, always-performing agent state): first-party spring code
-// only, 60fps verified at 1440×900, zero animation frameworks, editor still
-// intent-only.
-const SESSION_BUDGET = 110000;
+// Raised 102400 → 105000 by the spectacle pass, 105000 → 110000 by the
+// journey pass, and 110000 → 125000 for the completed journey/editor surface:
+// first-party window choreography, the docking mini-window, source-mode
+// editor decorations, the ambient syntax field, and the living document's
+// renderer. The budget remains dependency-free and leaves measured headroom
+// for this shipped feature set; the editor is still intent-only at first load.
+const SESSION_BUDGET = 125000;
 const FILM_BUDGET = 61440;
 const FONT_BUDGET = 92160;
 

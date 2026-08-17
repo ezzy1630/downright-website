@@ -63,14 +63,12 @@ function push(tokens: DiffToken[], text: string, kind: DiffToken["kind"]): void 
 export function summarizeDiff(tokens: DiffToken[]): { rewritten: number; added: number } {
   let rewritten = 0;
   let added = 0;
-  let inHunk = false;
   let hunkHasRemoved = false;
   let hunkHasAdded = false;
   const flush = (): void => {
     if (hunkHasRemoved && hunkHasAdded) rewritten += 1;
     else if (hunkHasAdded && !hunkHasRemoved) added += 1;
     // Pure deletions aren't surfaced in the "rewritten · added" voice.
-    inHunk = false;
     hunkHasRemoved = false;
     hunkHasAdded = false;
   };
@@ -81,7 +79,6 @@ export function summarizeDiff(tokens: DiffToken[]): { rewritten: number; added: 
       continue;
     }
     if (token.kind === "equal") continue; // whitespace doesn't split a hunk
-    inHunk = true;
     if (token.kind === "removed") hunkHasRemoved = true;
     if (token.kind === "added") hunkHasAdded = true;
   }

@@ -1,5 +1,6 @@
 import type { APIContext } from "astro";
-import { changelog, copy } from "../data/site";
+import changelog from "../data/app/changelog.json";
+import { copy } from "../data/site";
 
 export function GET({ site }: APIContext) {
   const base = site?.toString().replace(/\/$/, "") ?? "https://downright.cc";

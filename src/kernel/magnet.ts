@@ -63,8 +63,11 @@ export function magnetize(root: ParentNode = document): () => void {
     const pull = distance < reach ? 1 - distance / reach : 0;
     const state = ensure(element);
     state.active = pull > 0;
-    state.x.setTarget((-dx / distance) * pull * MAGNET_AMPLITUDE);
-    state.y.setTarget((-dy / distance) * pull * MAGNET_AMPLITUDE);
+    state.x.setTarget((dx / distance) * pull * MAGNET_AMPLITUDE);
+    state.y.setTarget((dy / distance) * pull * MAGNET_AMPLITUDE);
+    if (pull > 0 && !element.classList.contains("is-lifted")) {
+      element.classList.add("is-lifted");
+    }
     run();
   };
 
@@ -74,6 +77,9 @@ export function magnetize(root: ParentNode = document): () => void {
     state.active = false;
     state.x.setTarget(0);
     state.y.setTarget(0);
+    if (document.activeElement !== element) {
+      element.classList.remove("is-lifted");
+    }
     run();
   };
 

@@ -11,7 +11,7 @@
  * travels between acts — split in the hero, document-only everywhere else.
  * ⌘⇧E flips the whole window to its raw source face.
  */
-import { sampleHtml, sourceHtml } from "../data/site";
+import { renderSampleMarkdown, renderSourceMarkdown } from "../kernel/renderer";
 
 interface Props {
   editable?: boolean;
@@ -22,6 +22,8 @@ interface Props {
 }
 
 const { editable = false, flip = true, label = "sample.md", view = "document" } = Astro.props;
+const sourceHtml = renderSourceMarkdown();
+const sampleHtml = renderSampleMarkdown();
 ---
 
 <div
@@ -48,8 +50,10 @@ const { editable = false, flip = true, label = "sample.md", view = "document" } 
         <div class="app-window__bar-controls">
           {/* The Quick Look face: when the window poses as macOS's plain
               preview sheet (data-chrome="ql", the gap act), its own chrome
-              stands down and the sheet's one action stands up. */}
-          <span class="app-window__ql-action" aria-hidden="true">Open with…</span>
+              stands down and the sheet's one action stands up — and it
+              works: clicking it opens the file with Downright (the sweep
+              fast-forwards to the promotion). */}
+          <button type="button" class="app-window__ql-action" data-ql-open aria-label="Open with Downright">Open with…</button>
           {flip && (
             <div class="app-window__segmented" role="tablist" aria-label="Window mode">
               <button type="button" role="tab" aria-selected={view === "document" ? "true" : "false"} data-view-button="document" data-pop>Document</button>
@@ -78,6 +82,7 @@ const { editable = false, flip = true, label = "sample.md", view = "document" } 
 
       <div class="app-window__status">
         <span class="app-window__status-item" data-caret-position>Line 1, Column 1</span>
+        <span class="app-window__status-item app-window__type-invite" data-type-invite aria-hidden="true"><i></i>type to edit</span>
         <span class="app-window__status-item app-window__status-write" data-write-state hidden>external write · reviewing</span>
         <span class="app-window__status-item app-window__status-syntax">Markdown</span>
         <span class="app-window__status-item app-window__status-rate">

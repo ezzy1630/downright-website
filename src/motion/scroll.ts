@@ -1,9 +1,10 @@
 import { SpringScalar } from "./spring";
+import { reducedMotion as switchboardReducedMotion } from "../kernel/switchboard";
 
 const clamp = (value: number, min = 0, max = 1): number => Math.min(max, Math.max(min, value));
 
 export function reducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return switchboardReducedMotion();
 }
 
 export function springScrollTo(target: number, kick = 0): void {

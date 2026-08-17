@@ -11,6 +11,7 @@
   --font-display: "New York", "Iowan Old Style", Georgia, serif;
   --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SF Mono", ui-monospace, monospace;
+  --site-header-height: 68px;
 }
 
 html.fonts-ready {
@@ -64,8 +65,10 @@ html {
 }
 
 body {
+  position: relative;
   min-width: 320px;
   margin: 0;
+  isolation: isolate;
   overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
@@ -75,6 +78,240 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   transition: background-color var(--motion-standard) var(--ease-decelerate), color var(--motion-standard) var(--ease-decelerate);
+}
+
+/* A fixed, low-contrast grain keeps the dark ground from collapsing into a
+   flat black field in still screenshots and on touch devices. It never sits
+   on a scrolling container, so the texture is a single cheap composited
+   layer rather than a continuous repaint. */
+body::before {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.62'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: soft-light;
+  opacity: 0.026;
+}
+
+/* The landing-page atmosphere is one quiet, non-interactive layer. Its
+   content sits at z-index 0; the page and chrome are explicitly above it so
+   neither the canvas nor the spotlight can ever steal a hit target. */
+.ambient-backdrop {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.ambient-backdrop__parallax {
+  position: absolute;
+  inset: -320px 0;
+  overflow: visible;
+  transform: translate3d(0, calc(var(--ambient-scroll-phase, 0px) * -1), 0);
+  transform-origin: center top;
+  will-change: transform;
+}
+
+.ambient-backdrop__field {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(34px);
+  opacity: calc(0.64 + var(--ambient-scroll-energy, 0) * 0.08);
+  will-change: transform;
+}
+
+.ambient-backdrop__field--warm {
+  top: calc(320px + 6vh);
+  left: -14vw;
+  width: 72vw;
+  height: 66vh;
+  background:
+    radial-gradient(ellipse at 48% 48%, color-mix(in oklab, var(--quote-rule) 15%, transparent) 0%, color-mix(in oklab, var(--quote-rule) 6%, transparent) 43%, transparent 76%),
+    radial-gradient(ellipse at 70% 34%, color-mix(in oklab, var(--heading) 4%, transparent), transparent 64%);
+  animation: ambient-field-warm 36s var(--ease-decelerate) infinite alternate;
+}
+
+.ambient-backdrop__field--cool {
+  top: calc(320px + 5vh);
+  right: -15vw;
+  width: 75vw;
+  height: 72vh;
+  background:
+    radial-gradient(ellipse at 48% 46%, color-mix(in oklab, var(--accent) 14%, transparent) 0%, color-mix(in oklab, var(--accent) 5%, transparent) 41%, transparent 75%),
+    radial-gradient(ellipse at 25% 65%, color-mix(in oklab, var(--link) 4%, transparent), transparent 62%);
+  animation: ambient-field-cool 44s var(--ease-decelerate) infinite alternate-reverse;
+}
+
+@keyframes ambient-field-warm {
+  from { transform: translate3d(-1.5%, -1%, 0) scale(0.98); }
+  to { transform: translate3d(2%, 1.5%, 0) scale(1.02); }
+}
+
+@keyframes ambient-field-cool {
+  from { transform: translate3d(1%, 1.5%, 0) scale(0.99); }
+  to { transform: translate3d(-2%, -1%, 0) scale(1.025); }
+}
+
+.ambient-backdrop__grid {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0.9;
+}
+
+.ambient-backdrop__snippets {
+  position: absolute;
+  inset: 0;
+}
+
+.ambient-snippet {
+  position: absolute;
+  top: calc(320px + var(--snippet-y));
+  left: var(--snippet-x);
+  display: inline-grid;
+  min-width: 1ch;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 0.78vw, 12px);
+  line-height: 1;
+  opacity: var(--ambient-snippet-alpha, 0.2);
+  transform: translate3d(-50%, -50%, 0) scale(0.96);
+  transition: opacity 280ms var(--ease-decelerate), transform 360ms var(--ease-snap), color 280ms var(--ease-decelerate);
+  white-space: nowrap;
+}
+
+.ambient-snippet__raw,
+.ambient-snippet__rendered {
+  grid-area: 1 / 1;
+  transition: opacity 260ms var(--ease-decelerate), transform 360ms var(--ease-snap), filter 360ms var(--ease-decelerate);
+}
+
+.ambient-snippet__rendered {
+  color: color-mix(in oklab, var(--accent) 78%, var(--heading));
+  opacity: 0;
+  filter: blur(2px);
+  transform: translateY(3px) scale(0.86);
+}
+
+.ambient-snippet__heading {
+  color: var(--heading);
+  font-family: var(--font-display);
+  font-size: 1.35em;
+  letter-spacing: -0.04em;
+}
+
+.ambient-snippet__rendered code {
+  padding: 2px 5px;
+  border: 1px solid color-mix(in oklab, var(--accent) 24%, transparent);
+  border-radius: var(--radius-chip);
+  background: color-mix(in oklab, var(--code-bg) 72%, transparent);
+  color: var(--syntax-string);
+  font: inherit;
+}
+
+.ambient-snippet__link {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.ambient-snippet__task,
+.ambient-snippet__quote {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--syntax-string);
+  font-family: var(--font-body);
+  font-size: 0.92em;
+}
+
+.ambient-snippet__task i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+
+.ambient-snippet__quote {
+  padding-left: 6px;
+  border-left: 1px solid var(--quote-rule);
+  font-family: var(--font-display);
+  font-size: 1.15em;
+}
+
+.ambient-snippet__quote q {
+  quotes: "“" "”";
+}
+
+.ambient-snippet__divider {
+  display: block;
+  width: 36px;
+  height: 1px;
+  background: var(--rule);
+}
+
+.ambient-snippet.is-lit {
+  color: var(--heading);
+  opacity: min(0.62, calc(var(--ambient-snippet-alpha, 0.2) + 0.3));
+  transform: translate3d(-50%, -50%, 0) scale(1.02);
+}
+
+.ambient-snippet.is-lit .ambient-snippet__raw {
+  opacity: 0;
+  filter: blur(2px);
+  transform: translateY(-3px) scale(0.86);
+}
+
+.ambient-snippet.is-lit .ambient-snippet__rendered {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+
+.ambient-backdrop__spotlight {
+  position: fixed;
+  z-index: 1;
+  top: var(--ambient-spot-y, -30vh);
+  left: var(--ambient-spot-x, -20vw);
+  width: min(48vw, 640px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--accent) 15%, transparent) 0%, color-mix(in oklab, var(--accent) 6%, transparent) 34%, transparent 70%);
+  filter: blur(1px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(-50%, -50%, 0);
+  transition: opacity 260ms var(--ease-decelerate);
+}
+
+.home-page,
+.site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
+  .ambient-backdrop__field {
+    animation: none;
+  }
+
+  .ambient-backdrop__parallax {
+    transform: none;
+  }
+
+  .ambient-backdrop__spotlight {
+    display: none;
+  }
 }
 
 body::selection,
@@ -133,215 +370,190 @@ ol {
   view-transition-name: site-header;
   /* Chrome named for the cross-page morphs; the footer joins it so the
      page's frame persists across navigations (see acts.css for the rail). */
-  z-index: 40;
+  z-index: 50;
   inset: 0 0 auto;
-  height: 56px;
-  border-bottom: 1px solid color-mix(in oklab, var(--rule) 0%, transparent);
-  background: color-mix(in oklab, var(--bg) 78%, transparent);
-  backdrop-filter: blur(12px) saturate(1.5);
-  -webkit-backdrop-filter: blur(12px) saturate(1.5);
-  transition: border-color var(--motion-quick) var(--ease-decelerate), background-color var(--motion-standard) var(--ease-decelerate), box-shadow var(--motion-deliberate) var(--ease-decelerate);
+  height: var(--site-header-height);
+  /* The header is page chrome, not a floating card. Its lower edge fades into
+     the hero so the real document surface owns the first visual weight. */
+  border-bottom: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--bg) 88%, transparent) 0%,
+    color-mix(in oklab, var(--bg) 58%, transparent) 68%,
+    transparent 100%
+  );
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  transition: background-color var(--motion-standard) var(--ease-decelerate), box-shadow var(--motion-deliberate) var(--ease-decelerate), backdrop-filter var(--motion-standard) var(--ease-decelerate);
+}
+
+.site-header::after {
+  position: absolute;
+  right: max(32px, calc((100vw - var(--page-max)) / 2));
+  bottom: 0;
+  left: max(32px, calc((100vw - var(--page-max)) / 2));
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--rule) 72%, transparent) 12%,
+    color-mix(in oklab, var(--accent) 18%, var(--rule)) 50%,
+    color-mix(in oklab, var(--rule) 72%, transparent) 88%,
+    transparent
+  );
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-standard) var(--ease-decelerate);
 }
 
 .site-header.has-scrolled {
-  border-color: var(--rule);
-  box-shadow: 0 12px 32px -20px color-mix(in srgb, #1a1512 36%, transparent);
+  background: color-mix(in oklab, var(--bg) 82%, transparent);
+  box-shadow: 0 16px 42px -28px color-mix(in oklab, var(--heading) 28%, transparent);
 }
 
+.site-header.has-scrolled::after { opacity: 0.34; }
+
 .site-header__inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  width: min(100% - 40px, var(--content-max));
-  height: 56px;
+  width: min(100% - 56px, var(--page-max));
+  height: var(--site-header-height);
   margin: 0 auto;
 }
+
+/* Three columns so the nav sits dead-centre regardless of how wide the
+   brand (left) and utility cluster (right) are — the header stays balanced
+   with the persistent download CTA anchoring the right edge. */
+.brand { justify-self: start; }
+.site-nav { justify-self: center; }
+.site-header__actions { justify-self: end; }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   flex: 0 0 auto;
-  min-height: 40px;
+  min-height: 48px;
   padding: 0 2px;
   color: var(--heading);
   text-decoration: none;
+  border-radius: var(--radius-button);
+  perspective: 600px;
 }
 
 .brand-symbol {
   position: relative;
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   place-items: center;
   isolation: isolate;
+  transform-style: preserve-3d;
 }
 
-.brand-symbol__glow,
+.brand-symbol__card {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateZ(var(--lift-z, 0px));
+  box-shadow:
+    0 calc(2px + var(--lift-z, 0px) * 0.8) calc(6px + var(--lift-z, 0px) * 1.5) rgba(0, 0, 0, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.15s ease-out;
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+
+[data-theme="paper-light"] .brand-symbol__card,
+[data-theme="solarized-light"] .brand-symbol__card,
+[data-theme="high-contrast"] .brand-symbol__card {
+  box-shadow:
+    0 calc(2px + var(--lift-z, 0px) * 0.8) calc(5px + var(--lift-z, 0px) * 1.2) rgba(40, 30, 20, 0.18),
+    0 1px 2px rgba(40, 30, 20, 0.1);
+}
+
 .brand-symbol__shadow {
   position: absolute;
-  display: block;
-  pointer-events: none;
-}
-
-.brand-symbol__glow {
-  z-index: -2;
-  inset: 1px;
-  border: 1px solid color-mix(in oklab, var(--accent) 14%, transparent);
-  border-radius: var(--radius-panel);
-  background: color-mix(in oklab, var(--accent) 7%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--surface) 34%, transparent),
-    0 5px 10px -8px color-mix(in oklab, var(--accent) 58%, transparent);
-  opacity: 0.64;
-  transform: translateY(1px);
-  transition: background-color var(--motion-selection) var(--ease-decelerate), border-color var(--motion-selection) var(--ease-decelerate), box-shadow var(--motion-selection) var(--ease-decelerate), opacity var(--motion-selection) var(--ease-decelerate);
-}
-
-.brand-symbol__shadow {
   z-index: -1;
-  right: 7px;
-  bottom: 1px;
-  left: 7px;
-  height: 2px;
+  right: 3px;
+  bottom: -1px;
+  left: 3px;
+  height: 3px;
   border-radius: 50%;
-  background: color-mix(in oklab, var(--heading) 20%, transparent);
-  opacity: 0.14;
-  transform: translateY(1px) scaleX(0.72);
+  background: color-mix(in oklab, var(--heading) 35%, transparent);
+  opacity: 0.18;
+  transform: translateY(2px) scaleX(0.8);
   transition: opacity var(--motion-standard) var(--ease-decelerate), transform var(--motion-standard) var(--ease-snap);
 }
 
-.brand-mark {
+.brand-tile-svg {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 auto;
   overflow: visible;
-  transform-origin: 48% 52%;
-  transition: transform var(--motion-selection) var(--ease-snap);
+  border-radius: 9px;
 }
 
-.brand-mark__spine,
-.brand-mark__bowl {
-  fill: currentColor;
-  transform-box: fill-box;
+/* 2.5D Parallax Pills & Trenches */
+.brand-pills {
+  transform: translate(var(--parallax-x, 0px), var(--parallax-y, 0px));
   transform-origin: center;
-  transition: transform var(--motion-selection) var(--ease-snap);
+  transition: transform 0.08s linear;
 }
 
-.brand-mark__rule {
-  fill: currentColor;
-  opacity: 0.62;
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: opacity var(--motion-selection) var(--ease-decelerate), transform var(--motion-selection) var(--ease-snap);
+.brand-pill--accent {
+  fill: var(--accent, #307afe);
+  transition: fill 0.3s var(--ease-decelerate), filter var(--motion-standard) var(--ease-decelerate);
 }
 
-.brand-mark__rule--accent {
-  fill: var(--accent);
-  opacity: 1;
-}
-
-.brand:hover .brand-mark,
-.brand:focus-visible .brand-mark {
-  transform: translateY(-1px);
-}
-
-.brand:hover .brand-symbol__glow,
-.brand:focus-visible .brand-symbol__glow {
-  border-color: color-mix(in oklab, var(--accent) 24%, transparent);
-  background: color-mix(in oklab, var(--accent) 11%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--surface) 42%, transparent),
-    0 6px 12px -8px color-mix(in oklab, var(--accent) 72%, transparent);
-  opacity: 1;
-}
-
-.brand:hover .brand-symbol__shadow,
-.brand:focus-visible .brand-symbol__shadow {
-  opacity: 0.22;
-  transform: translateY(2px) scaleX(0.9);
-}
-
-.brand:hover .brand-mark__bowl,
-.brand:focus-visible .brand-mark__bowl {
-  transform: translateX(1px);
-}
-
-.brand:hover .brand-mark__rule--accent,
-.brand:focus-visible .brand-mark__rule--accent {
-  transform: translateX(1px);
-}
-
-.brand:hover .brand-mark__rule--first,
-.brand:focus-visible .brand-mark__rule--first {
-  opacity: 0.76;
-  transform: translateX(1px);
-}
-
-.brand:hover .brand-mark__rule--last,
-.brand:focus-visible .brand-mark__rule--last {
-  opacity: 0.76;
-  transform: translateX(1px);
-}
-
-.brand:active .brand-mark {
-  transform: translateY(1px);
-  transition-duration: var(--motion-press-in);
-}
-
-.brand:active .brand-symbol__glow {
-  opacity: 0.46;
-  transition-duration: var(--motion-press-in);
-}
-
-.brand:active .brand-symbol__shadow {
-  opacity: 0.12;
-  transform: translateY(1px) scaleX(0.62);
-  transition-duration: var(--motion-press-in);
-}
-
-.brand:active .brand-mark__rule {
-  transform: none;
+/* Fallback Hover for non-fine pointers */
+@media (hover: hover) and (pointer: coarse) {
+  .brand:hover .brand-symbol__card {
+    transform: translateY(-1.5px) scale(1.04);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brand-mark,
-  .brand-symbol__glow,
+  .brand-symbol,
+  .brand-symbol__card,
   .brand-symbol__shadow,
-  .brand-wordmark__name,
-  .brand-mark__spine,
-  .brand-mark__bowl,
-  .brand-mark__rule {
-    transition: none;
-  }
-
-  .brand:hover .brand-mark,
-  .brand:focus-visible .brand-mark,
-  .brand:active .brand-mark,
-  .brand:hover .brand-symbol__glow,
-  .brand:focus-visible .brand-symbol__glow,
-  .brand:active .brand-symbol__glow,
-  .brand:hover .brand-symbol__shadow,
-  .brand:focus-visible .brand-symbol__shadow,
-  .brand:active .brand-symbol__shadow,
-  .brand:hover .brand-mark__bowl,
-  .brand:focus-visible .brand-mark__bowl,
-  .brand:hover .brand-mark__rule,
-  .brand:focus-visible .brand-mark__rule {
-    transform: none;
+  .brand-pills,
+  .brand-pill--accent {
+    transition: none !important;
+    transform: none !important;
   }
 }
 
 .brand-wordmark {
   display: inline-flex;
   align-items: center;
+  gap: 10px;
   font-family: var(--font-body);
-  font-size: 15.5px;
+  font-size: 17px;
   font-weight: 650;
   line-height: 1;
   letter-spacing: -0.025em;
+}
+
+.brand-wordmark__descriptor {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding-left: 10px;
+  border-left: 1px solid color-mix(in oklab, var(--rule) 78%, transparent);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .brand-wordmark__name {
@@ -366,10 +578,8 @@ ol {
 }
 
 .site-nav {
-  gap: 24px;
-  margin-left: auto;
-  margin-right: 28px;
-  font-size: 13px;
+  gap: 28px;
+  font-size: 14px;
 }
 
 .site-nav a,
@@ -384,21 +594,13 @@ ol {
 
 .site-nav a {
   position: relative;
+  padding: 8px 10px;
+  margin: -8px -10px;
+  border-radius: 0;
   translate: 0 0;
-  transition: color var(--motion-hover) var(--ease-decelerate), translate var(--motion-hover) var(--ease-decelerate);
-}
-
-.site-nav a::after {
-  position: absolute;
-  right: 0;
-  bottom: -5px;
-  left: 0;
-  height: 1px;
-  background: var(--accent);
-  content: "";
-  transform: scaleX(0);
-  transform-origin: right center;
-  transition: transform var(--motion-hover) var(--ease-snap);
+  transition: color var(--motion-hover) var(--ease-decelerate),
+    background-color var(--motion-hover) var(--ease-decelerate),
+    translate var(--motion-hover) var(--ease-decelerate);
 }
 
 .site-nav a:hover,
@@ -407,19 +609,43 @@ ol {
 }
 
 .site-nav a:hover,
-.site-nav a:focus-visible { translate: 0 -1px; }
+.site-nav a:focus-visible {
+  background: transparent;
+  color: var(--heading);
+  translate: 0 -1px;
+}
+
+.site-nav a::after {
+  position: absolute;
+  right: 10px;
+  bottom: 1px;
+  left: 10px;
+  height: 1px;
+  background: var(--accent);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--motion-hover) var(--ease-snap);
+}
+
 .site-nav a:hover::after,
-.site-nav a:focus-visible::after { transform: scaleX(1); transform-origin: left center; }
+.site-nav a:focus-visible::after {
+  transform: scaleX(1);
+}
 .site-nav a:active { translate: 0 0; }
 
 .site-header__actions {
-  gap: 16px;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 .header-download {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
+  margin-left: 4px;
+  padding-left: 12px;
+  border-left: 1px solid color-mix(in oklab, var(--rule) 58%, transparent);
 }
 
 .header-download small,
@@ -431,15 +657,19 @@ ol {
 }
 
 .button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   min-height: 44px;
-  padding: 0 17px;
+  padding: 0 18px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-button);
-  background: transparent;
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--btn-bevel-top), var(--btn-bevel-bottom), var(--btn-shadow-rest);
   color: var(--heading);
   cursor: pointer;
   font-size: 13px;
@@ -447,51 +677,125 @@ ol {
   letter-spacing: -0.01em;
   line-height: 1;
   text-decoration: none;
-  transition: background-color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), color var(--motion-hover) var(--ease-decelerate), transform var(--motion-press-out) var(--ease-decelerate);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background-color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate),
+    color var(--motion-hover) var(--ease-decelerate),
+    box-shadow var(--motion-hover) var(--ease-decelerate),
+    translate var(--motion-press-out) var(--ease-decelerate),
+    scale var(--motion-press-out) var(--ease-decelerate),
+    filter var(--motion-hover) var(--ease-decelerate);
 }
 
 .button:hover {
-  border-color: var(--accent);
-  background: color-mix(in oklab, var(--accent) 9%, var(--bg));
+  border-color: color-mix(in oklab, var(--accent) 60%, var(--rule));
+  background: color-mix(in oklab, var(--accent) 9%, var(--surface));
+  box-shadow: var(--btn-bevel-top), var(--btn-bevel-bottom), var(--btn-shadow-hover);
+  translate: 0 -1px;
+  filter: brightness(1.05);
 }
 
-/* The primary CTA is the theme's accent, filled. --cta-fill/--cta-ink are
-   generated per theme from the app's own JSON and are guaranteed to clear
-   AA — the accent itself where it can carry a label, the link colour where
-   it cannot (Solarized). The old rule was scoped to [data-theme="paper-light"],
-   which never matches on a first visit, so the CTA rendered plain ink. */
+.button:active {
+  translate: 0 1px;
+  box-shadow: var(--btn-shadow-active);
+  transition-duration: var(--motion-press-in);
+}
+
+.button:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cta-fill) 60%, transparent);
+  outline-offset: 2px;
+}
+
+/* The primary CTA is a quiet field of color. Its feedback comes from the
+   press and state changes, rather than a decorative light sweep. */
 .button--primary {
-  border-color: transparent;
+  border-color: color-mix(in oklab, var(--cta-fill) 85%, white 15%);
   background: var(--cta-fill);
+  box-shadow: var(--btn-bevel-top), var(--btn-bevel-bottom), 0 2px 6px -1px rgba(0, 0, 0, 0.16), 0 6px 22px -4px var(--cta-glow);
   color: var(--cta-ink);
 }
 
 .button--primary:hover {
-  border-color: transparent;
-  background: color-mix(in oklab, var(--cta-fill) 88%, var(--cta-ink));
+  border-color: color-mix(in oklab, var(--cta-fill) 75%, white 25%);
+  background: color-mix(in oklab, var(--cta-fill) 90%, black 10%);
+  box-shadow: var(--btn-bevel-top), var(--btn-bevel-bottom), 0 4px 12px -1px rgba(0, 0, 0, 0.22), 0 10px 30px -3px var(--cta-glow);
   color: var(--cta-ink);
+  translate: 0 -1.5px;
+}
+
+.button--primary:active {
+  translate: 0 1px;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.28), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  transition-duration: var(--motion-press-in);
+}
+
+/* Site-side CTA divergence: the primary action is Native Apple blue with
+   white ink — deliberately decoupled from the theme accent so the one
+   saturated CTA reads the same in every theme (and stays the visual anchor
+   while the theme spill re-inks the rest of the page). */
+.button--primary {
+  --cta-fill: #0a84ff;
+  --cta-ink: #ffffff;
 }
 
 .button--quiet {
   border-color: transparent;
+  background: transparent;
+  box-shadow: none;
   color: var(--text-secondary);
 }
 
 .button--quiet:hover {
   border-color: var(--rule);
-  background: transparent;
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
+  box-shadow: var(--btn-shadow-rest);
   color: var(--heading);
+  translate: 0 -0.5px;
+}
+
+.button--quiet:active {
+  translate: 0 1px;
+  box-shadow: var(--btn-shadow-active);
 }
 
 .button--compact {
-  min-height: 32px;
-  padding: 0 11px;
-  font-size: 12px;
+  min-height: 40px;
+  padding: 0 17px;
+  font-size: 13.5px;
+  font-weight: 550;
+  border-radius: 10px;
+  /* The nav CTA stays clean: a crisp top highlight, no blue halo. */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+}
+.button--compact:hover {
+  box-shadow: var(--btn-bevel-top), var(--btn-bevel-bottom), 0 2px 6px -1px rgba(0, 0, 0, 0.14);
+}
+/* Tighten the glyph–label gap on the nav-scale button; the hero keeps 12px.
+   The higher-specificity compound also pins the 8px radius against the
+   .download-button pop-radius rule. */
+.button--compact.download-button { gap: 9px; border-radius: 10px; }
+
+/* The compact nav CTA's glyph scales down with the button so it stays
+   proportioned against the 32px height instead of dominating it. */
+.button--compact .download-button__icon-wrap {
+  width: 15px;
+  height: 15px;
+}
+.button--compact .download-button__icon--apple {
+  width: 15px;
+  height: 15px;
 }
 
 .button__arrow {
   font-size: 15px;
   line-height: 0;
+  transition: translate var(--motion-quick) var(--ease-snap);
+}
+
+.button:hover .button__arrow {
+  translate: 2px 0;
 }
 
 .theme-control {
@@ -502,8 +806,8 @@ ol {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 32px;
-  padding: 0 7px;
+  min-height: 40px;
+  padding: 0 10px;
   border: 1px solid transparent;
   border-radius: var(--radius-chip);
   background: transparent;
@@ -533,7 +837,8 @@ ol {
   border: 1px solid var(--rule);
   border-radius: 50%;
   background: var(--accent);
-  transition: background-color var(--motion-selection) var(--ease-decelerate), border-color var(--motion-selection) var(--ease-decelerate), box-shadow var(--motion-selection) var(--ease-decelerate), transform var(--motion-hover) var(--ease-snap);
+  /* The dot springs between states (0.25s ease-out-snap, Motion.swift). */
+  transition: background-color var(--motion-selection) var(--ease-decelerate), border-color var(--motion-selection) var(--ease-decelerate), box-shadow var(--motion-selection) var(--ease-decelerate), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .theme-control__trigger:hover .theme-control__swatch,
@@ -544,14 +849,14 @@ ol {
 
 .theme-panel {
   position: fixed;
-  top: 58px;
+  top: calc(var(--site-header-height) + 2px);
   right: max(16px, calc((100vw - var(--content-max)) / 2));
   left: auto;
   bottom: auto;
   margin: 0;
   width: 190px;
   padding: 13px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-panel);
   background: color-mix(in oklab, var(--surface) 90%, transparent);
   backdrop-filter: blur(12px) saturate(1.2);
@@ -698,8 +1003,11 @@ ol {
   min-width: 150px;
   padding: 8px 10px;
   border-left: 1px solid var(--accent);
+  border-top: 1px solid var(--depth-rim);
+  border-right: 1px solid var(--depth-rim);
+  border-bottom: 1px solid var(--depth-rim);
   background: var(--surface);
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--text) 9%, transparent);
+  box-shadow: var(--panel-shadow);
   opacity: 0;
   pointer-events: none;
   transform: translate(5px, -50%);
@@ -733,20 +1041,29 @@ ol {
 }
 
 .hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 170svh;
+  min-height: 170dvh;
+}
+
+.hero__stage {
+  position: sticky;
+  top: 0;
   display: grid;
-  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr);
+  grid-template-columns: minmax(260px, 0.64fr) minmax(0, 1.36fr);
   gap: clamp(24px, 5vw, 84px);
   align-items: center;
   width: min(100% - 96px, var(--page-max));
-  min-height: 100svh;
-  min-height: 100dvh;
+  height: 100svh;
+  height: 100dvh;
   margin: 0 auto;
-  padding: 88px 0 32px;
+  padding: 80px 0 32px;
 }
 
 .hero__copy {
   width: min(100%, 430px);
-  margin-left: clamp(0px, 4vw, 56px);
+  margin-left: clamp(24px, 4vw, 56px);
 }
 
 .hero h1,
@@ -769,24 +1086,41 @@ ol {
 .hero__copy > p:not(.hero__micro) {
   max-width: 34ch;
   margin-top: 24px;
-  color: var(--text-secondary);
+  color: color-mix(in oklab, var(--text-secondary) 72%, var(--text) 28%);
   font-size: 17px;
   line-height: 1.5;
 }
 
 .hero__actions {
   display: grid;
-  grid-template-columns: max-content minmax(220px, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   align-items: stretch;
-  gap: 10px;
-  width: 100%;
+  gap: 12px;
+  width: min(100%, 414px);
   margin-top: 28px;
 }
 
 .hero__actions > .button,
-.hero__actions > .terminal-install { min-width: 0; }
+.hero__actions > .terminal-install {
+  width: 100%;
+  min-width: 0;
+}
 
-.hero__actions > .button { min-height: 48px; }
+.hero__actions > .button,
+.hero__actions .terminal-install__trigger { height: 44px; min-height: 44px; }
+
+.hero__actions .terminal-install__trigger {
+  gap: 8px;
+  padding-inline: 12px;
+}
+
+.hero__actions .terminal-install__prompt {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+}
+
+.hero__actions .terminal-install__label { font-size: 10.5px; }
 
 .hero__micro {
   margin-top: 15px;
@@ -796,13 +1130,69 @@ ol {
   letter-spacing: 0.025em;
 }
 
+/* The left column is intentionally two-up only while it can give both
+   controls a real measure. Before that point, equal-width stacked controls
+   preserve the hierarchy without spilling into the live window. */
+@media (min-width: 901px) and (max-width: 1439px) {
+  .hero__actions {
+    grid-template-columns: minmax(0, 290px);
+    gap: 10px;
+    width: min(100%, 290px);
+  }
+}
+
 .hero__window {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
   min-width: 0;
+}
+
+/* The static halo is the base layer; the second pseudo-element is only a
+   low-contrast pointer wash on fine pointers. Both sit behind the real window. */
+.hero__window::before,
+.hero__window::after {
+  position: absolute;
+  pointer-events: none;
+  content: "";
+}
+
+.hero__window::before {
+  z-index: -1;
+  inset: -8% -7% 14%;
+  border-radius: clamp(24px, 4vw, 60px);
+  background: radial-gradient(ellipse at 50% 44%, color-mix(in oklab, var(--accent) 8%, transparent) 0%, color-mix(in oklab, var(--accent) 3%, transparent) 46%, transparent 74%);
+  filter: blur(24px);
+  opacity: 0.9;
+}
+
+.hero__window::after {
+  z-index: 0;
+  inset: -3% -3% 11%;
+  border-radius: clamp(24px, 4vw, 60px);
+  background: radial-gradient(260px circle at var(--hero-px, 50%) var(--hero-py, 42%), color-mix(in oklab, var(--accent) 7%, transparent), transparent 72%);
+  opacity: 0;
+  transition: opacity 280ms var(--ease-decelerate);
+}
+
+@media (hover: hover) {
+  .hero__window:hover::after { opacity: 0.95; }
+}
+
+.hero__window > .app-window,
+.hero__annotation,
+.film-invite-row { position: relative; z-index: 1; }
+
+/* Let the live surface share the header's 24px content boundary. The left
+   edge stays anchored so the extra width is borrowed from the quiet right
+   margin, not from the hero copy or its gutter. */
+@media (min-width: 901px) {
+  .hero__window { margin-right: -24px; }
 }
 
 .document-window {
   overflow: hidden;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-window);
   background: var(--surface);
   box-shadow: var(--window-shadow);
@@ -826,8 +1216,12 @@ ol {
   align-items: center;
   min-height: 50px;
   padding: 0 17px;
-  border-bottom: 1px solid var(--rule);
-  background: color-mix(in oklab, var(--surface) 92%, var(--text));
+  border-bottom: 1px solid color-mix(in oklab, var(--rule) 82%, var(--depth-inset));
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--surface) 88%, var(--depth-highlight) 12%),
+      color-mix(in oklab, var(--surface) 92%, var(--bg) 8%));
+  box-shadow: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
   font-size: 12px;
 }
 
@@ -1274,7 +1668,7 @@ ol {
 
 .preview-window {
   overflow: hidden;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-window);
   background: var(--surface);
   box-shadow: var(--window-shadow);
@@ -1283,7 +1677,11 @@ ol {
 .preview-window__bar { gap: 14px; }
 .preview-window__title { color: var(--heading); font-weight: 650; }
 .preview-window__file { margin-left: auto; color: var(--text-secondary); font-family: var(--font-mono); font-size: 10px; }
-.preview-window__body { min-height: 430px; padding: 34px; background: var(--surface); }
+.preview-window__body {
+  min-height: 430px;
+  padding: 34px;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--surface) 94%, var(--bg) 6%), var(--surface));
+}
 .plain-preview { overflow: hidden; min-height: 365px; color: var(--text-secondary); font-family: var(--font-mono); font-size: 12px; line-height: 1.75; white-space: pre-wrap; }
 .preview-rendered-copy { max-width: 52ch; margin: 0 auto; font-family: var(--font-display); font-size: 18px; line-height: 1.5; }
 .preview-rendered-copy h3 { margin-bottom: 20px; color: var(--heading); font-size: 30px; font-weight: 600; line-height: 1.08; }
@@ -1307,13 +1705,13 @@ ol {
 
 .render-stage__sticky {
   position: sticky;
-  top: 56px;
+  top: var(--site-header-height);
   display: grid;
   grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
   gap: clamp(24px, 5vw, 80px);
   align-items: center;
   width: min(100%, 1600px);
-  min-height: calc(100dvh - 56px);
+  min-height: calc(100dvh - var(--site-header-height));
   margin: 0 auto;
 }
 
@@ -1416,10 +1814,11 @@ ol {
 .site-footer__bottom div span { color: var(--text-secondary); font-family: var(--font-mono); font-size: 10px; }
 .brand--compact { gap: 6px; min-height: 32px; }
 .brand--compact .brand-symbol { width: 26px; height: 26px; }
-.brand--compact .brand-mark { width: 22px; height: 22px; }
+.brand--compact .brand-symbol__card,
+.brand--compact .brand-tile-svg { width: 26px; height: 26px; border-radius: 6px; }
 .brand--compact .brand-wordmark { font-size: 13px; }
 
-.release-status { position: fixed; z-index: 60; right: 22px; bottom: 22px; display: flex; align-items: center; gap: 22px; max-width: min(420px, calc(100% - 44px)); padding: 14px 16px; border: 1px solid var(--rule); border-radius: var(--radius-panel); background: color-mix(in oklab, var(--surface) 90%, transparent); backdrop-filter: blur(12px); opacity: 0; transform: translateY(8px); transition: opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-decelerate); }
+.release-status { position: fixed; z-index: 60; right: 22px; bottom: 22px; display: flex; align-items: center; gap: 22px; max-width: min(420px, calc(100% - 44px)); padding: 14px 16px; border: 1px solid var(--depth-rim); border-radius: var(--radius-panel); background: color-mix(in oklab, var(--surface) 90%, transparent); backdrop-filter: blur(12px); box-shadow: var(--panel-shadow); opacity: 0; transform: translateY(8px); transition: opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-decelerate); }
 /* display:flex above would override the UA's [hidden]{display:none}, leaving a
    transparent banner in the layout at all times; make `hidden` authoritative. */
 .release-status[hidden] { display: none; }
@@ -1549,7 +1948,8 @@ ol {
 @media (max-width: 1120px) {
   .site-nav { gap: 16px; margin-right: 16px; }
   .header-download small { display: none; }
-  .hero { grid-template-columns: minmax(250px, 0.75fr) minmax(0, 1.25fr); width: min(100% - 64px, var(--page-max)); }
+  .brand-wordmark__descriptor { display: none; }
+  .hero__stage { grid-template-columns: minmax(250px, 0.75fr) minmax(0, 1.25fr); width: min(100% - 64px, var(--page-max)); }
   .hero__copy { margin-left: 0; }
   .render-stage { padding: 0 32px; }
   .dark-band .dark-band__inner,
@@ -1559,13 +1959,15 @@ ol {
 }
 
 @media (max-width: 900px) {
-  .site-header { height: 60px; }
+  :root { --site-header-height: 62px; }
+  .site-header { height: var(--site-header-height); }
   .site-nav,
   .site-header__actions { display: none; }
-  .site-header__inner { position: relative; justify-content: flex-start; width: min(100% - 32px, var(--content-max)); height: 60px; }
-  .brand:not(.brand--compact) { min-height: 44px; gap: 8px; }
-  .brand:not(.brand--compact) .brand-symbol { width: 32px; height: 32px; }
-  .brand:not(.brand--compact) .brand-mark { width: 32px; height: 32px; }
+  .site-header__inner { position: relative; display: flex; justify-content: flex-start; width: min(100% - 32px, var(--content-max)); height: var(--site-header-height); }
+  .brand:not(.brand--compact) { min-height: 48px; gap: 10px; }
+  .brand:not(.brand--compact) .brand-symbol,
+  .brand:not(.brand--compact) .brand-symbol__card,
+  .brand:not(.brand--compact) .brand-tile-svg { width: 36px; height: 36px; }
   .brand:not(.brand--compact) .brand-wordmark { font-size: 17px; letter-spacing: -0.03em; }
   .menu-toggle { position: absolute; right: 0; display: grid; gap: 4px; width: 44px; height: 44px; place-content: center; border: 1px solid var(--rule); border-radius: var(--radius-button); background: transparent; cursor: pointer; transition: background-color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), transform var(--motion-press-out) var(--ease-snap); }
   .menu-toggle:hover,
@@ -1574,7 +1976,7 @@ ol {
   .menu-toggle span { display: block; width: 14px; height: 1px; background: var(--text-secondary); transform-origin: center; transition: background-color var(--motion-hover) var(--ease-decelerate), opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-snap); }
   .menu-toggle[aria-expanded="true"] span:first-child { transform: translateY(2.5px) rotate(45deg); }
   .menu-toggle[aria-expanded="true"] span:last-child { transform: translateY(-2.5px) rotate(-45deg); }
-  .mobile-menu { position: absolute; top: 60px; right: 16px; left: 16px; display: grid; gap: 3px; padding: 10px; border: 1px solid var(--rule); border-radius: var(--radius-panel); background: var(--surface); opacity: 0; pointer-events: none; transform: translateY(-6px) scale(0.985); transform-origin: top right; transition: opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-snap); }
+  .mobile-menu { position: absolute; top: var(--site-header-height); right: 16px; left: 16px; display: grid; gap: 3px; padding: 10px; border: 1px solid var(--depth-rim); border-radius: var(--radius-panel); background: var(--surface); box-shadow: var(--panel-shadow); opacity: 0; pointer-events: none; transform: translateY(-6px) scale(0.985); transform-origin: top right; transition: opacity var(--motion-quick) var(--ease-decelerate), transform var(--motion-quick) var(--ease-snap); }
   .mobile-menu.is-open { opacity: 1; pointer-events: auto; transform: none; }
   .mobile-menu[hidden] { display: none; }
   .mobile-menu > a { padding: 11px; color: var(--text-secondary); text-decoration: none; transition: background-color var(--motion-hover) var(--ease-decelerate), color var(--motion-hover) var(--ease-decelerate), transform var(--motion-hover) var(--ease-snap); }
@@ -1582,7 +1984,7 @@ ol {
   .mobile-menu > a:focus-visible { background: color-mix(in oklab, var(--accent) 8%, transparent); color: var(--heading); transform: translateX(3px); }
   .mobile-menu__download { display: grid; gap: 8px; padding: 10px; border-top: 1px solid var(--rule); }
   .density-rail { display: none; }
-  .hero { grid-template-columns: 1fr; gap: 42px; min-height: auto; padding-top: 116px; }
+  .hero__stage { position: static; grid-template-columns: 1fr; gap: 42px; height: auto; min-height: auto; padding-top: 116px; }
   .hero__copy { width: min(100%, 600px); }
   .hero h1 { max-width: 11ch; }
   .hero__window { width: min(100%, 760px); margin-left: auto; }
@@ -1603,17 +2005,18 @@ ol {
 }
 
 @media (max-width: 680px) {
-  .hero,
+  .hero__stage,
   .page-section,
   .dark-band .dark-band__inner,
   .site-footer,
   .subpage,
   .render-stage__sticky { width: min(100% - 32px, var(--content-max)); }
-  .hero { padding-top: 100px; }
+  .hero__stage { padding-top: 100px; }
   .hero h1 { max-width: 12ch; font-size: clamp(42px, 12.5vw, 62px); }
   .hero__copy > p:not(.hero__micro) { font-size: 16px; }
-  .hero__actions { grid-template-columns: max-content minmax(190px, 1fr); }
-  .hero__actions > .button { min-height: 48px; }
+  .hero__actions { grid-template-columns: minmax(0, 290px); gap: 10px; width: min(100%, 290px); }
+  .hero__actions > .button,
+.hero__actions .terminal-install__trigger { height: 44px; min-height: 44px; }
   .document-window--hero { height: 600px; min-height: 0; }
   .document-window__bar { min-height: 46px; padding: 0 11px; }
   .document-window__controls { gap: 5px; }

@@ -15,7 +15,7 @@ import { sourceEditor, decorateSourceState } from "./livedown";
 import { recordParse } from "./stats";
 import { doc } from "../kernel/store";
 import { sound } from "../kernel/sound";
-import { renderSampleMarkdown } from "../data/site";
+import { renderSampleMarkdown } from "../kernel/renderer";
 
 export interface MountedWindow {
   view: EditorView;

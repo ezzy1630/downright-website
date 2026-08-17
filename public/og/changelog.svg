@@ -1,12 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#f7f4ee"/><path d="M72 86h1056M72 550h1056" stroke="#d9d2c8"/><g transform="translate(77 100) scale(1.1)">
   <title>Downright</title>
+  <defs>
+    <linearGradient id="fav-tile" x1="16" y1="0" x2="16" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f8f5ee"/>
+      <stop offset="100%" stop-color="#e3ded5"/>
+    </linearGradient>
+    <linearGradient id="fav-groove" x1="16" y1="4" x2="16" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f1b28"/>
+      <stop offset="100%" stop-color="#18283a"/>
+    </linearGradient>
+  </defs>
   <style>
-    .mark,.rule{fill:#172b45}
-    @media (prefers-color-scheme:dark){.mark,.rule{fill:#f7f4ee}}
+    .fav-accent { fill: #307afe; }
+    @media (prefers-color-scheme: dark) {
+      .fav-accent { fill: #6ea8ff; }
+    }
   </style>
-  <rect class="mark" x="2" y="4" width="6" height="24" rx="3"/>
-  <path class="mark" d="M11 4h7c7 0 12 5.2 12 12s-5 12-12 12h-7v-5h7c4.2 0 7-3 7-7s-2.8-7-7-7h-7V4Z"/>
-  <rect class="rule" x="11" y="11" width="9" height="3" rx="1.5" opacity=".62"/>
-  <rect x="11" y="15" width="9" height="3" rx="1.5" fill="#307afe"/>
-  <rect class="rule" x="11" y="19" width="9" height="3" rx="1.5" opacity=".62"/>
+
+  <!-- Squircle Base (Tactile Cream Paper) -->
+  <rect width="32" height="32" rx="7.2" fill="url(#fav-tile)"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6.7" stroke="#ffffff" stroke-opacity="0.95" stroke-width="0.9"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6.7" stroke="#c4bcaf" stroke-opacity="0.35" stroke-width="0.9"/>
+
+  <!-- Left Vertical Trench -->
+  <rect x="6" y="5.2" width="3.4" height="21.6" rx="1.7" fill="url(#fav-groove)"/>
+
+  <!-- Outer D Horseshoe Groove -->
+  <path d="M11.4 5.2h5.6c5.5 0 9.2 3.6 9.2 10.8s-3.7 10.8-9.2 10.8h-5.6v-3.8h5.6c3.2 0 5.4-2.1 5.4-7s-2.2-7-5.4-7h-5.6V5.2Z" fill="url(#fav-groove)"/>
+
+  <!-- 3 Tactile Pill Rules on Cream Face -->
+  <rect x="11.6" y="10.8" width="8.2" height="2.5" rx="1.25" fill="#aba399"/>
+  <rect x="12" y="11.1" width="7.4" height="0.8" rx="0.4" fill="#ffffff" fill-opacity="0.65"/>
+
+  <rect class="fav-accent" x="11.6" y="14.8" width="8.2" height="2.5" rx="1.25"/>
+  <rect x="12" y="15.1" width="7.4" height="0.8" rx="0.4" fill="#ffffff" fill-opacity="0.65"/>
+
+  <rect x="11.6" y="18.8" width="8.2" height="2.5" rx="1.25" fill="#aba399"/>
+  <rect x="12" y="19.1" width="7.4" height="0.8" rx="0.4" fill="#ffffff" fill-opacity="0.65"/>
 </g><text x="116" y="123" fill="#292522" font-family="Arial,sans-serif" font-size="22" font-weight="700">Downright</text><text x="72" y="285" fill="#181513" font-family="Georgia,serif" font-size="72">Version truth,</text><text x="72" y="365" fill="#181513" font-family="Georgia,serif" font-size="72">in public.</text><text x="76" y="460" fill="#685f56" font-family="Arial,sans-serif" font-size="24">A changelog generated from the app payload.</text><rect x="700" y="132" width="428" height="310" rx="12" fill="#fffdfa" stroke="#d9d2c8"/><path d="M746 212h238M746 236h310M746 260h270M746 316h190M746 340h258M746 364h224" stroke="#8b8178" stroke-width="3" stroke-linecap="round" opacity=".72"/><text x="746" y="420" fill="#307afe" font-family="monospace" font-size="17">LIVE MARKDOWN / NO IMAGE</text><text x="1080" y="595" fill="#8b8178" font-family="monospace" font-size="14" text-anchor="end">downright.cc</text></svg>

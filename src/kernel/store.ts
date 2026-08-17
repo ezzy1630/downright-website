@@ -21,7 +21,7 @@ export interface DocState {
   revision: DocRevision | null;
 }
 
-import { sampleMarkdown as CLEAN_TEXT } from "../data/site";
+import { sampleMarkdown as CLEAN_TEXT } from "./renderer";
 
 class DocumentStore {
   private state: DocState = {

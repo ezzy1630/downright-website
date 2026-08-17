@@ -19,6 +19,10 @@ export function hydrateOnIntent(windowEl: HTMLElement, onMount?: (mounted: Mount
     if (isMounted() || loading) return;
     // Only the hero slot is editable — the window is read-only elsewhere.
     if (windowEl.dataset.slot !== "hero") return;
+    if (event instanceof PointerEvent) {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.closest("[data-window-body]")) return;
+    }
     if (event instanceof KeyboardEvent) {
       if (event.key !== "Enter" && event.key !== " ") return;
       if (document.activeElement !== windowEl && !windowEl.contains(document.activeElement)) return;
@@ -27,6 +31,8 @@ export function hydrateOnIntent(windowEl: HTMLElement, onMount?: (mounted: Mount
     const pointer = event instanceof MouseEvent ? { x: event.clientX, y: event.clientY } : null;
     loading = true;
     cleanup();
+    // The invitation has been answered.
+    windowEl.querySelector("[data-type-invite]")?.remove();
     import("./mount").then(({ mountEditor }) => {
       const mounted = mountEditor(windowEl, body);
       requestAnimationFrame(() => {

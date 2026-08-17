@@ -3,13 +3,21 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import DensityRail from "../components/DensityRail.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import AppWindow from "../components/AppWindow.astro";
+import AmbientBackdrop from "../components/AmbientBackdrop.astro";
 import { benchmarks, brewCommand, copy, curlCommand, facts, npmCommand, themes } from "../data/site";
+import { renderSampleMarkdown } from "../kernel/renderer";
+import agentDump from "../data/agent-dump.md?raw";
 import { pageMeta, reviewedOn } from "../data/seo";
 
+const agentWallHtml = renderSampleMarkdown(agentDump);
 const benchmarkNames = ["Parse 100 KB", "Source edit and paragraph map", "Text diff, external rewrite", "End-to-end semantic convergence", "Syntax highlight, 10 KB Swift"];
 const benchmarkRows = benchmarkNames
   .map((name) => benchmarks.rows.find((row) => row.measurement === name))
   .filter((row): row is NonNullable<typeof row> => Boolean(row));
+const budgetMilliseconds = (target: string): number | null => {
+  const match = target.match(/\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : null;
+};
 const architectureClaims = [
   "Your text is the only source of truth",
   "One window for reading, editing, and source",
@@ -24,22 +32,32 @@ const annotations: [selector: string, label: string, detail: string][] = [
   [".doc-footnote", "Footnotes", "Numbered and linked, at the bottom."],
   [".doc-code", "Code", "Syntax colours from the app's own themes."],
 ];
-const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target) || 8));
+const maxBudgetMs = Math.max(
+  8,
+  ...benchmarkRows
+    .map((row) => budgetMilliseconds(row.target))
+    .filter((value): value is number => value !== null),
+);
 ---
 
 <BaseLayout {...pageMeta.home} dateModified={reviewedOn}>
+  <AmbientBackdrop />
   <main class="home-page" data-theme-zone>
     <DensityRail />
 
     {/* 8.1 — Hero: it's real, type in it */}
     <section class="hero section-anchor" id="hero" data-act="hero" data-rest="hero" data-rail-section data-section-label="Start" data-section-detail="The native Markdown app" data-theme-zone>
+      {/* The dwell beat: the composition holds (sticky) for the first ~70%
+          of an extra viewport before it releases, so the hero is inhabited
+          instead of flicked past. */}
+      <div class="hero__stage">
       <div class="hero__copy">
         <h1>{copy.hero.heading}</h1>
         <p>{copy.hero.body}</p>
         <div class="hero__actions">
           <DownloadButton />
           <div class="terminal-install" data-open="false">
-            <button type="button" class="terminal-install__trigger" data-magnet aria-controls="terminal-install-menu" aria-expanded="false">
+            <button type="button" class="terminal-install__trigger" data-magnet data-pop aria-controls="terminal-install-menu" aria-expanded="false">
               <span class="terminal-install__prompt" aria-hidden="true">$</span>
               <span class="terminal-install__label">Install via Terminal</span>
               <span class="terminal-install__toggle" aria-hidden="true"></span>
@@ -49,21 +67,21 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
                 <span>Choose an install path</span>
                 <span>Click a command to copy</span>
               </div>
-              <button type="button" class="terminal-install__option" data-pop data-install-command={brewCommand} aria-label="Copy Homebrew install command">
+              <div class="terminal-install__option" data-pop data-install-command={brewCommand} role="group" aria-label="Copy Homebrew install command">
                 <span class="terminal-install__method">Homebrew</span>
-                <code>{brewCommand}</code>
-                <span class="terminal-install__copy" data-install-label>Copy</span>
-              </button>
-              <button type="button" class="terminal-install__option" data-pop data-install-command={npmCommand} aria-label="Copy npm install command">
+                <code><input class="terminal-install__command" data-install-value type="text" readonly value={brewCommand} aria-label="Homebrew install command" spellcheck="false" /></code>
+                <button type="button" class="terminal-install__copy" data-install-copy><span data-install-label aria-live="polite">Copy</span></button>
+              </div>
+              <div class="terminal-install__option" data-pop data-install-command={npmCommand} role="group" aria-label="Copy npm install command">
                 <span class="terminal-install__method">npm</span>
-                <code>{npmCommand}</code>
-                <span class="terminal-install__copy" data-install-label>Copy</span>
-              </button>
-              <button type="button" class="terminal-install__option" data-pop data-install-command={curlCommand} aria-label="Copy curl install command">
+                <code><input class="terminal-install__command" data-install-value type="text" readonly value={npmCommand} aria-label="npm install command" spellcheck="false" /></code>
+                <button type="button" class="terminal-install__copy" data-install-copy><span data-install-label aria-live="polite">Copy</span></button>
+              </div>
+              <div class="terminal-install__option" data-pop data-install-command={curlCommand} role="group" aria-label="Copy curl install command">
                 <span class="terminal-install__method">curl</span>
-                <code>{curlCommand}</code>
-                <span class="terminal-install__copy" data-install-label>Copy</span>
-              </button>
+                <code><input class="terminal-install__command" data-install-value type="text" readonly value={curlCommand} aria-label="curl install command" spellcheck="false" /></code>
+                <button type="button" class="terminal-install__copy" data-install-copy><span data-install-label aria-live="polite">Copy</span></button>
+              </div>
             </div>
           </div>
         </div>
@@ -73,8 +91,8 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <AppWindow editable view="split" />
         <p class="hero__annotation">
           <svg class="hero__annotation-arrow" viewBox="0 0 60 40" aria-hidden="true" focusable="false">
-            <path d="M56 35C43 36 23 33 13 12" />
-            <path d="M13 12l1.5 13.5M13 12l13.5 2" />
+            <path d="M4 34C18 38 38 31 50 8" />
+            <path d="M50 8l-13 2M50 8l-3 13" />
           </svg>
           <span>This window is real. Type in it.</span>
         </p>
@@ -83,6 +101,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <button type="button" class="film-chip" data-film-type data-pop>Tap to type</button>
           <button type="button" class="film-chip" data-film-insert data-pop>Insert an edit</button>
         </div>
+      </div>
       </div>
     </section>
 
@@ -115,6 +134,8 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <div class="sweep__slot window-slot window-slot--gap" data-window-slot="gap"></div>
 
         <p class="sweep__capture">
+          <span class="sweep__phase" data-sweep-phase>RAW MARKDOWN · QUICK LOOK</span>
+          <span class="sweep__phase-separator" aria-hidden="true"> · </span>
           <span>{copy.gap.capture}</span>{" "}
         </p>
         <p class="sweep__annotation" data-sweep-annotation aria-hidden="true">{copy.gap.annotation}</p>
@@ -124,7 +145,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       <div class="gap-wall" data-fingerprint="agent-wall" aria-label="An agent's Markdown output">
         <h3 class="gap-wall__heading">{copy.gap.beatTwoHeading}</h3>
         <p class="gap-wall__line">{copy.gap.beatTwoLine}</p>
-        <div class="gap-wall__scroller" data-agent-wall data-agent-wall-scroll tabindex="0" aria-label="Real agent-generated Markdown from a refactoring session"></div>
+        <div class="gap-wall__scroller" data-agent-wall data-agent-wall-scroll tabindex="0" aria-label="Real agent-generated Markdown from a refactoring session" set:html={agentWallHtml}></div>
       </div>
     </section>
 
@@ -172,12 +193,19 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
             <thead><tr><th scope="col">Measurement</th><th scope="col">p50</th><th scope="col">p95</th><th scope="col">Budget</th><th scope="col" aria-hidden="true"></th></tr></thead>
             <tbody>
               {benchmarkRows.map((row) => (
-                <tr data-budget-row data-value={parseFloat(row.p50) || 0.15} data-scale={maxBudgetMs}>
+                <tr
+                  data-budget-row
+                  data-budget-kind={budgetMilliseconds(row.target) === null ? "informational" : "timed"}
+                  data-value={parseFloat(row.p50) || 0.15}
+                  data-scale={maxBudgetMs}
+                >
                   <th scope="row">{row.measurement}</th>
                   <td>{row.p50}</td>
                   <td>{row.p95}</td>
                   <td>{row.target}</td>
-                  <td class="benchmark-bar-cell" aria-hidden="true"><span class="benchmark-bar" data-budget-bar></span></td>
+                  <td class="benchmark-bar-cell" aria-hidden="true">
+                    {budgetMilliseconds(row.target) === null ? <span class="benchmark-budget-note">baseline</span> : <span class="benchmark-bar" data-budget-bar></span>}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -273,7 +301,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         <h2>{copy.close.heading}</h2>
         <p>{copy.close.body}</p>
         <DownloadButton />
-        <small>macOS {facts.minimumMacOS}+ · signed {facts.artifactName} · {facts.version} · or <code>brew tap ezzy1630/downright &amp;&amp; brew trust --cask ezzy1630/downright/downright &amp;&amp; brew install --cask downright</code></small>
+        <small>macOS {facts.minimumMacOS}+ · signed {facts.artifactName} · {facts.version} · or <code>{brewCommand}</code></small>
         <p class="close-sponsor" data-fingerprint="sponsor">Built by one person, funded by people, not telemetry. If Downright earns its place in your dock — <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">sponsor it</a>.</p>
         <div class="film-handoff" data-fingerprint="handoff" aria-label="Send this page to your Mac">
           <p class="film-handoff__line">Downright lives on your Mac. Send it there.</p>
@@ -281,8 +309,6 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
           <div class="film-handoff__row">
             <button type="button" data-share="copy">Copy link</button>
             <button type="button" data-share="mail">Mail it to yourself</button>
-            {facts.repository && <a href={facts.repository} target="_blank" rel="noreferrer">★ Star</a>}
-            {facts.sponsorsUrl && <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">♥ Sponsor</a>}
           </div>
           <p class="film-handoff__note">No email, no server. On iPhone the first option in the share sheet is AirDrop.</p>
         </div>
@@ -306,6 +332,11 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
         terminalMenu.toggleAttribute("inert", !open);
       };
       terminalTrigger.addEventListener("click", () => setTerminalOpen(terminalInstall.dataset.open !== "true"));
+      document.addEventListener("pointerdown", (event) => {
+        if (terminalInstall.dataset.open !== "true") return;
+        const target = event.target;
+        if (target instanceof Node && !terminalInstall.contains(target)) setTerminalOpen(false);
+      }, { passive: true });
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && terminalInstall.dataset.open === "true") {
           setTerminalOpen(false);
@@ -315,14 +346,26 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
       let resetTimer;
       terminalMenu.querySelectorAll("[data-install-command]").forEach((option) => {
         const label = option.querySelector("[data-install-label]");
+        const commandInput = option.querySelector("[data-install-value]");
         if (!label) return;
         const defaultLabel = label.textContent?.trim() || "Copy";
+        const selectCommand = () => {
+          if (commandInput instanceof HTMLInputElement) {
+            commandInput.focus();
+            commandInput.select();
+          }
+          label.textContent = "Select command";
+        };
+        commandInput?.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (commandInput instanceof HTMLInputElement) commandInput.select();
+        });
         option.addEventListener("click", async () => {
           const command = option.dataset.installCommand;
           if (!command) return;
           if (!navigator.clipboard) {
             option.dataset.copyState = "unavailable";
-            label.textContent = "Select command";
+            selectCommand();
             return;
           }
           try {
@@ -331,7 +374,7 @@ const maxBudgetMs = Math.max(...benchmarkRows.map((row) => parseFloat(row.target
             label.textContent = "Copied";
           } catch {
             option.dataset.copyState = "unavailable";
-            label.textContent = "Try again";
+            selectCommand();
           }
           if (resetTimer) window.clearTimeout(resetTimer);
           resetTimer = window.setTimeout(() => {

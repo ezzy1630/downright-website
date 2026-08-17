@@ -14,6 +14,7 @@ import { doc } from "../kernel/store";
 import { repaintDocumentSurfaces } from "./drop";
 import { setWindowView, windowView } from "./flip";
 import { springScrollTo } from "../motion/scroll";
+import { toast } from "./toast";
 
 interface Action {
   id: string;
@@ -53,7 +54,7 @@ export function buildActions(): Action[] {
     },
   }));
 
-  const themeActions: Action[] = themes.map((theme) => ({
+  const themeActions = themes.map((theme) => ({
     id: `theme:${theme.id}`,
     label: `Theme: ${theme.name}`,
     hint: theme.appearance,
@@ -61,12 +62,13 @@ export function buildActions(): Action[] {
     run: (close: () => void) => {
       close();
       const rect = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-      switchTheme(theme.id === themes[0].id ? "system" : theme.id, rect);
+      switchTheme(theme.id, rect);
     },
   }));
 
   return [
     ...acts,
+    ...themeActions,
     {
       id: "flip",
       label: "Show the source",
@@ -80,8 +82,8 @@ export function buildActions(): Action[] {
     },
     {
       id: "reset",
-      label: "Reset the document",
-      hint: "back to sample.md",
+      label: "Reset document to sample text",
+      hint: "sample.md",
       group: "Document",
       run: (close) => {
         close();
@@ -89,21 +91,26 @@ export function buildActions(): Action[] {
         repaintDocumentSurfaces();
       },
     },
-    ...themeActions,
     {
       id: "brew",
-      label: "Copy brew install command",
+      label: "Copy Homebrew install command",
       hint: "brew",
       group: "Install",
       run: (close) => {
         close();
-        void navigator.clipboard.writeText(brewCommand);
+        if (!navigator.clipboard) {
+          toast("<strong>Clipboard unavailable.</strong><span>Select the Homebrew command from Install via Terminal.</span>");
+          return;
+        }
+        void navigator.clipboard.writeText(brewCommand).catch(() => {
+          toast("<strong>Copy failed.</strong><span>Select the Homebrew command from Install via Terminal.</span>");
+        });
       },
     },
     {
       id: "download",
-      label: "Download for macOS",
-      hint: facts.artifactName,
+      label: "Download Downright for macOS",
+      hint: facts.artifactName || `v${facts.version}`,
       group: "Install",
       run: (close) => {
         close();
@@ -112,8 +119,8 @@ export function buildActions(): Action[] {
     },
     {
       id: "sound",
-      label: "Toggle sound",
-      hint: "off by default",
+      label: "Toggle interface audio",
+      hint: sound.enabled ? "On" : "Off",
       group: "Preferences",
       run: () => {
         sound.setEnabled(!sound.enabled);
@@ -122,7 +129,7 @@ export function buildActions(): Action[] {
     {
       id: "motion",
       label: "Toggle reduced motion",
-      hint: "reduce ≠ remove",
+      hint: document.documentElement.dataset.reducedMotion === "true" ? "Reduced" : "Full",
       group: "Preferences",
       run: () => {
         setInPageReduce(document.documentElement.dataset.reducedMotion !== "true");
@@ -130,7 +137,7 @@ export function buildActions(): Action[] {
     },
     {
       id: "shortcuts",
-      label: "Keyboard shortcuts",
+      label: "Keyboard shortcuts cheat sheet",
       hint: "?",
       group: "Help",
       run: (close) => {
@@ -140,25 +147,28 @@ export function buildActions(): Action[] {
     },
     {
       id: "changelog",
-      label: "Changelog",
+      label: "View changelog & releases",
+      hint: `v${facts.version}`,
       group: "Site",
       run: () => {
-        window.location.href = "/changelog";
+        window.location.href = "/changelog/";
       },
     },
     {
       id: "themes-page",
-      label: "Themes page",
+      label: "Explore theme gallery",
+      hint: `${themes.length} themes`,
       group: "Site",
       run: () => {
-        window.location.href = "/themes";
+        window.location.href = "/themes/";
       },
     },
     ...(facts.repository
       ? [
           {
             id: "github",
-            label: "GitHub repository",
+            label: "View source on GitHub",
+            hint: "github.com",
             group: "Site",
             run: () => {
               window.open(facts.repository, "_blank", "noreferrer");
@@ -169,14 +179,6 @@ export function buildActions(): Action[] {
   ];
 }
 
-const SHORTCUTS: [keys: string, action: string][] = [
-  ["⌘K", "This palette"],
-  ["⌘⇧E", "Show the window's source"],
-  ["Space", "Quick Look the focused file card"],
-  ["← → ↑ ↓", "Move the divider, the rail, the palette"],
-  ["Esc", "Close whatever opened"],
-];
-
 export function openShortcutSheet(): void {
   const sheet = document.querySelector<HTMLDialogElement>("[data-shortcut-sheet]");
   if (!sheet) return;
@@ -184,10 +186,11 @@ export function openShortcutSheet(): void {
 }
 
 export function initPalette(): void {
-  const dialog = document.querySelector<HTMLDialogElement>("[data-command-palette]");
-  const input = dialog?.querySelector<HTMLInputElement>("[data-palette-input]");
-  const list = dialog?.querySelector<HTMLElement>("[data-palette-list]");
-  if (!dialog || !input || !list) return;
+  const dialog = document.querySelector<HTMLDialogElement>("[data-command-palette], [data-palette-dialog]");
+  if (!dialog) return;
+  const input = dialog.querySelector<HTMLInputElement>("[data-palette-input]");
+  const list = dialog.querySelector<HTMLElement>("[data-palette-list]");
+  if (!input || !list) return;
 
   let actions: Action[] = [];
   let filtered: Action[] = [];
@@ -202,6 +205,7 @@ export function initPalette(): void {
       button.dataset.paletteRow = String(index);
       button.innerHTML = `<span>${action.label}</span>${action.hint ? `<kbd>${action.hint}</kbd>` : ""}`;
       button.addEventListener("click", () => {
+        sound.tick();
         action.run(() => dialog.close());
       });
       list.append(button);
@@ -228,7 +232,9 @@ export function initPalette(): void {
     actions = buildActions();
     filtered = actions;
     input.value = "";
+    cursor = 0;
     dialog.showModal();
+    sound.whoosh();
     refilter();
     input.focus();
   };
@@ -236,7 +242,11 @@ export function initPalette(): void {
   window.addEventListener("keydown", (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
-      open();
+      if (dialog.open) {
+        dialog.close();
+      } else {
+        open();
+      }
     }
     if (event.key === "?" && !dialog.open && !(event.target as HTMLElement).closest("input, textarea, [contenteditable]")) {
       openShortcutSheet();
@@ -244,22 +254,90 @@ export function initPalette(): void {
   });
 
   input.addEventListener("input", refilter);
+
+  // Close when clicking outside of the dialog box (on the backdrop)
+  let pointerDownOutside = false;
+  dialog.addEventListener("pointerdown", (event) => {
+    if (event.target === dialog) {
+      const rect = dialog.getBoundingClientRect();
+      const isInside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+      pointerDownOutside = !isInside;
+    } else {
+      pointerDownOutside = false;
+    }
+  });
+
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog && pointerDownOutside) {
+      const rect = dialog.getBoundingClientRect();
+      const isInside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+      if (!isInside) {
+        dialog.close();
+      }
+    }
+  });
+
   dialog.addEventListener("keydown", (event) => {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
-      cursor = Math.min(filtered.length - 1, Math.max(0, cursor + (event.key === "ArrowDown" ? 1 : -1)));
-      renderList();
-      list.querySelector(".is-cursor")?.scrollIntoView({ block: "nearest" });
+      if (filtered.length > 0) {
+        cursor = Math.min(filtered.length - 1, Math.max(0, cursor + (event.key === "ArrowDown" ? 1 : -1)));
+        sound.thock();
+        renderList();
+        list.querySelector(".is-cursor")?.scrollIntoView({ block: "nearest" });
+      }
     }
     if (event.key === "Enter") {
       event.preventDefault();
-      filtered[cursor]?.run(() => dialog.close());
+      if (filtered[cursor]) {
+        sound.tick();
+        filtered[cursor].run(() => dialog.close());
+      }
     }
     if (event.key === "Escape") {
-      // Explicit, not just the native <dialog> close, so Esc stays reliable
-      // when focus sits in the filter input.
       event.preventDefault();
       dialog.close();
     }
   });
+
+  // Shortcut sheet backdrop click & escape dismiss
+  const sheet = document.querySelector<HTMLDialogElement>("[data-shortcut-sheet]");
+  if (sheet) {
+    let sheetPointerOutside = false;
+    sheet.addEventListener("pointerdown", (event) => {
+      if (event.target === sheet) {
+        const rect = sheet.getBoundingClientRect();
+        const isInside =
+          event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom;
+        sheetPointerOutside = !isInside;
+      } else {
+        sheetPointerOutside = false;
+      }
+    });
+
+    sheet.addEventListener("click", (event) => {
+      if (event.target === sheet && sheetPointerOutside) {
+        const rect = sheet.getBoundingClientRect();
+        const isInside =
+          event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom;
+        if (!isInside) {
+          sheet.close();
+        }
+      }
+    });
+  }
 }

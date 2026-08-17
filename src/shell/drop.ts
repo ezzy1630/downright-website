@@ -7,15 +7,21 @@
  */
 
 import { doc } from "../kernel/store";
-import { renderSampleMarkdown } from "../data/site";
+import { renderSampleMarkdown } from "../kernel/renderer";
+import { toast } from "./toast";
 
 const ACCEPT = /\.(md|markdown|mdown|mkd|mdx|mdc|qmd|rmd)$/i;
 
-async function ingest(file: File): Promise<void> {
-  if (!ACCEPT.test(file.name) && file.type !== "text/markdown") return;
+function isMarkdownFile(file: File): boolean {
+  return ACCEPT.test(file.name) || file.type === "text/markdown";
+}
+
+async function ingest(file: File): Promise<boolean> {
+  if (!isMarkdownFile(file)) return false;
   const text = await file.text();
   doc.replaceFile(text, file.name);
   repaintDocumentSurfaces();
+  return true;
 }
 
 /**
@@ -36,7 +42,15 @@ export function initDrop(): void {
   const veil = document.createElement("div");
   veil.className = "drop-veil";
   veil.setAttribute("aria-hidden", "true");
-  veil.innerHTML = '<p>Drop it. Nothing uploads — this page has no server.</p>';
+  veil.innerHTML = '<p>Drop a Markdown file. Nothing uploads — this page has no server.</p>';
+
+  const setVeilCopy = (valid: boolean | null): void => {
+    const message = valid === false
+      ? "Markdown only. Drop a .md file or supported Markdown document."
+      : "Drop a Markdown file. Nothing uploads — this page has no server.";
+    const paragraph = veil.querySelector("p");
+    if (paragraph) paragraph.textContent = message;
+  };
 
   let depth = 0;
   const showVeil = (): void => {
@@ -53,12 +67,17 @@ export function initDrop(): void {
     (event) => {
       if (![...(event.dataTransfer?.types ?? [])].includes("Files")) return;
       event.preventDefault();
+      const files = [...(event.dataTransfer?.files ?? [])];
+      setVeilCopy(files.length ? files.some(isMarkdownFile) : null);
       depth += 1;
       showVeil();
     },
   );
   window.addEventListener("dragover", (event) => {
-    if ([...(event.dataTransfer?.types ?? [])].includes("Files")) event.preventDefault();
+    if (![...(event.dataTransfer?.types ?? [])].includes("Files")) return;
+    event.preventDefault();
+    const files = [...(event.dataTransfer?.files ?? [])];
+    setVeilCopy(files.length ? files.some(isMarkdownFile) : null);
   });
   window.addEventListener("dragleave", () => {
     depth = Math.max(0, depth - 1);
@@ -69,16 +88,26 @@ export function initDrop(): void {
     event.preventDefault();
     depth = 0;
     hideVeil();
-    const file = [...event.dataTransfer.files].find((candidate) => ACCEPT.test(candidate.name) || candidate.type === "text/markdown");
-    if (file) await ingest(file);
+    const files = [...event.dataTransfer.files];
+    const file = files.find(isMarkdownFile);
+    if (file) {
+      await ingest(file);
+    } else {
+      toast("<strong>Markdown only.</strong><span>Drop a .md file or supported Markdown document.</span>");
+    }
   });
 
   window.addEventListener("paste", (event) => {
+    if (isEditableTarget(event.target)) return;
     const text = event.clipboardData?.getData("text/plain");
     if (!text || !looksLikeMarkdown(text)) return;
     doc.replaceFile(text, "pasted.md");
     repaintDocumentSurfaces();
   });
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest("input, textarea, select, [contenteditable], .cm-editor"));
 }
 
 function looksLikeMarkdown(text: string): boolean {

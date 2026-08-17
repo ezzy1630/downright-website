@@ -9,8 +9,7 @@
 import { ticker } from "../kernel/ticker";
 import { PointerTracker } from "../kernel/pointer";
 import { reducedMotion } from "../kernel/switchboard";
-import { renderSampleMarkdown } from "../data/site";
-import agentDumpSource from "../data/agent-dump.md?raw";
+import { renderSampleMarkdown } from "../kernel/renderer";
 import { doc } from "../kernel/store";
 import { repaintDocumentSurfaces } from "../shell/drop";
 import { flyPinnedRect, pinRect } from "../kernel/fly";
@@ -39,7 +38,8 @@ const CARD_FILENAMES: [name: string, key: string][] = [
 
 const SOURCES: Record<string, () => string> = {
   sample: () => doc.current.text,
-  agent: () => agentDumpSource,
+  agent: () =>
+    "# Refactor notes — session 8f3c\n\n## Summary\n\nRefactored the renderer pipeline to isolate decoration from parsing.\n\n- `Sources/MarkdownRender/Renderer.swift` — split into `Renderer` + `Decorator`\n- `Tests/RendererTests.swift` — +9 cases\n",
   readme: () =>
     "# Downright\n\nA native Markdown reader and editor for macOS. Exact bytes in, exact bytes out.\n\n- [x] No WebView\n- [x] No account\n- [ ] Your file here\n",
   architecture: () =>
@@ -208,10 +208,15 @@ function initVerlet(): void {
     wake();
     // Dropped on a document window: the file becomes the living document.
     const overWindow = (event.target as Element | null)?.closest("[data-window], [data-static-document]");
-    if (overWindow) {
+    const dock = document.querySelector<HTMLElement>("[data-window-dock]");
+    const hit = document.elementFromPoint(event.clientX, event.clientY);
+    const overDock = !!dock && !dock.classList.contains("is-dismissed") && !!hit && dock.contains(hit);
+    if (overWindow || overDock) {
       doc.replaceFile(sourceFor(card), card.name);
       repaintDocumentSurfaces();
       sound.tick();
+      // Let the docked companion know its document changed (minimap refresh).
+      document.dispatchEvent(new CustomEvent("downright:doc-swapped"));
     }
   };
   surface.addEventListener("pointerup", drop);
@@ -381,8 +386,36 @@ function initTerminal(): void {
   }
 
   let typed = false;
+  let running = false;
+  const armReplay = (): void => {
+    terminal.dataset.replay = "ready";
+    terminal.tabIndex = 0;
+    terminal.setAttribute("role", "button");
+    terminal.setAttribute("aria-label", "Replay the terminal session");
+    const hint = document.createElement("div");
+    hint.className = "terminal-replay";
+    hint.textContent = "↻ replay";
+    code.append(hint);
+  };
+  const replay = (): void => {
+    if (running || typed === false) return;
+    running = true;
+    code.replaceChildren();
+    typeLine(0);
+  };
+  terminal.addEventListener("click", replay);
+  terminal.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      replay();
+    }
+  });
   const typeLine = (index: number): void => {
-    if (index >= TERMINAL_LINES.length) return;
+    if (index >= TERMINAL_LINES.length) {
+      running = false;
+      armReplay();
+      return;
+    }
     const [command, output] = TERMINAL_LINES[index];
     const line = document.createElement("div");
     const prompt = document.createElement("span");
@@ -396,6 +429,7 @@ function initTerminal(): void {
     const step = (): void => {
       character += 1;
       typedEl.textContent = command.slice(0, character);
+      sound.thock();
       if (character < command.length) {
         window.setTimeout(step, 34 + Math.random() * 40);
         return;
@@ -404,6 +438,7 @@ function initTerminal(): void {
       result.className = "terminal-output";
       result.textContent = output;
       code.append(result);
+      sound.tick();
       window.setTimeout(() => typeLine(index + 1), 420);
     };
     step();

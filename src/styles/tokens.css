@@ -82,7 +82,29 @@
   --radius-panel: 16px;
   --radius-window: 20px;
   --focus-ring: color-mix(in oklab, var(--accent) 40%, transparent);
-  --window-shadow: 0 22px 52px -26px color-mix(in srgb, #1a1512 58%, transparent);
+  /* Elevation is layered rather than a single blur. The short contact shadow
+     anchors a surface, the long tint gives it altitude, and the inset pair
+     keeps the edge legible in both paper and dark themes. */
+  --depth-shadow: rgb(75 58 43 / 0.20);
+  --depth-shadow-strong: rgb(61 45 33 / 0.28);
+  --depth-highlight: rgb(255 255 255 / 0.80);
+  --depth-inset: rgb(50 36 26 / 0.10);
+  --depth-rim: color-mix(in oklab, var(--heading) 12%, var(--rule));
+  --surface-inset: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
+  --panel-shadow: var(--surface-inset), 0 0 0 0.5px var(--depth-rim), 0 9px 18px -12px var(--depth-shadow), 0 24px 52px -24px var(--depth-shadow-strong);
+  --panel-shadow-hover: var(--surface-inset), 0 0 0 0.5px var(--depth-rim), 0 12px 24px -12px var(--depth-shadow), 0 34px 68px -26px var(--depth-shadow-strong);
+  --window-shadow: var(--surface-inset), 0 0 0 0.5px var(--depth-rim), 0 9px 15px -10px var(--depth-shadow), 0 28px 58px -22px var(--depth-shadow), 0 58px 104px -38px var(--depth-shadow-strong);
+  --window-shadow-hover: var(--surface-inset), 0 0 0 0.5px var(--depth-rim), 0 12px 20px -10px var(--depth-shadow), 0 34px 70px -22px var(--depth-shadow), 0 68px 122px -38px var(--depth-shadow-strong);
+  --window-shadow-hero: var(--surface-inset), 0 0 0 0.5px var(--depth-rim), 0 14px 24px -12px var(--depth-shadow), 0 36px 76px -24px var(--depth-shadow), 0 74px 132px -46px var(--depth-shadow-strong);
+  --window-shadow-flying: var(--surface-inset), 0 0 0 0.5px var(--depth-rim), 0 18px 28px -10px var(--depth-shadow), 0 48px 96px -24px var(--depth-shadow), 0 88px 154px -40px var(--depth-shadow-strong);
+  --card-shadow: var(--surface-inset), 0 4px 10px -6px var(--depth-shadow);
+  --card-shadow-hover: var(--surface-inset), 0 14px 30px -12px var(--depth-shadow-strong);
+  --btn-bevel-top: inset 0 1px 0 0 var(--depth-highlight);
+  --btn-bevel-bottom: inset 0 -1px 0 0 var(--depth-inset);
+  --btn-shadow-rest: 0 1px 3px -1px var(--depth-shadow), 0 1px 2px -1px var(--depth-inset);
+  --btn-shadow-hover: 0 4px 16px -2px color-mix(in oklab, var(--accent) 28%, transparent), 0 2px 4px -1px var(--depth-shadow);
+  --btn-shadow-active: inset 0 1px 2px 0 var(--depth-inset);
+  --cta-glow: color-mix(in oklab, var(--cta-fill) 38%, transparent);
 }
 
 [data-theme="paper-light"] {
@@ -406,5 +428,46 @@
     --syntax-diff-header: #a29a90;
     --cta-fill: #6ea8ff;
     --cta-ink: #171614;
+  }
+}
+
+/* Theme-specific shadow tints keep elevation believable instead of adding a
+   generic black drop shadow to every palette. */
+[data-theme="paper-light"],
+[data-theme="solarized-light"],
+[data-theme="system"] {
+  --depth-shadow: rgb(86 64 44 / 0.19);
+  --depth-shadow-strong: rgb(71 52 37 / 0.28);
+  --depth-highlight: rgb(255 255 255 / 0.84);
+  --depth-inset: rgb(86 63 42 / 0.11);
+}
+
+[data-theme="warm-dark"] {
+  --depth-shadow: rgb(5 4 3 / 0.48);
+  --depth-shadow-strong: rgb(5 4 3 / 0.64);
+  --depth-highlight: rgb(255 247 235 / 0.13);
+  --depth-inset: rgb(4 3 2 / 0.30);
+}
+
+[data-theme="nord"] {
+  --depth-shadow: rgb(12 15 21 / 0.46);
+  --depth-shadow-strong: rgb(10 12 18 / 0.62);
+  --depth-highlight: rgb(236 239 244 / 0.14);
+  --depth-inset: rgb(10 12 18 / 0.28);
+}
+
+[data-theme="high-contrast"] {
+  --depth-shadow: rgb(10 10 10 / 0.34);
+  --depth-shadow-strong: rgb(10 10 10 / 0.48);
+  --depth-highlight: rgb(255 255 255 / 0.92);
+  --depth-inset: rgb(10 10 10 / 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] {
+    --depth-shadow: rgb(5 4 3 / 0.48);
+    --depth-shadow-strong: rgb(5 4 3 / 0.64);
+    --depth-highlight: rgb(255 247 235 / 0.13);
+    --depth-inset: rgb(4 3 2 / 0.30);
   }
 }

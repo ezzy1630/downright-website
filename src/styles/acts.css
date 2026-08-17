@@ -8,13 +8,16 @@
 /* ── Glass: three tiers (§6), floating surfaces only ─────────────────── */
 
 .glass {
-  border: 0.5px solid color-mix(in oklab, var(--rule) 80%, transparent);
-  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  position: relative;
+  isolation: isolate;
+  border: 1px solid color-mix(in oklab, var(--depth-rim) 86%, transparent);
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--surface) 84%, var(--depth-highlight) 16%),
+      color-mix(in oklab, var(--surface) 68%, transparent));
   backdrop-filter: blur(12px) saturate(1.5);
   -webkit-backdrop-filter: blur(12px) saturate(1.5);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--surface) 55%, transparent),
-    0 12px 32px -18px color-mix(in oklab, var(--text) 28%, transparent);
+  box-shadow: var(--panel-shadow);
 }
 
 [data-glass="t1"] .glass {
@@ -28,7 +31,7 @@
   background: var(--surface);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  box-shadow: 0 8px 24px -16px color-mix(in oklab, var(--text) 24%, transparent);
+  box-shadow: var(--panel-shadow);
 }
 
 /* ── Magnetized controls (never a fake cursor) ────────────────────────── */
@@ -92,18 +95,174 @@
 }
 
 .button:active {
-  --press-scale: 0.985;
+  --press-scale: 0.97;
   transition-duration: var(--motion-press-in);
 }
 
-/* pop(): the download press — the site's one squash-stretch, with the
-   radius swelling ×1.15 on the same press. */
+/* Download CTA: a small physical control with a clear handoff state. The
+   progress layer uses transform rather than width so it stays cheap to paint. */
 .download-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   scale: calc(var(--lift-scale, 1) * var(--pop-scale, 1) * var(--press-scale, 1));
   border-radius: calc(var(--radius-button) * var(--pop-radius, 1));
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: background-color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate),
+    color var(--motion-hover) var(--ease-decelerate),
     scale var(--motion-press-out) var(--ease-snap),
-    border-radius var(--motion-press-out) var(--ease-decelerate);
+    border-radius var(--motion-press-out) var(--ease-decelerate),
+    box-shadow var(--motion-hover) var(--ease-decelerate),
+    translate var(--motion-press-out) var(--ease-decelerate),
+    filter var(--motion-hover) var(--ease-decelerate);
+}
+
+.download-button__label {
+  min-width: 132px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.button--compact.download-button .download-button__label {
+  min-width: 122px;
+}
+
+.download-button:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--cta-fill) 76%, white 24%);
+  outline-offset: 3px;
+}
+
+.download-button[aria-disabled="true"] {
+  cursor: progress;
+  filter: saturate(0.82);
+}
+
+.download-button[aria-disabled="true"].is-lifted { --lift-scale: 1; }
+
+.download-button[aria-disabled="true"]:hover {
+  border-color: color-mix(in oklab, var(--cta-fill) 85%, white 15%);
+  background: var(--cta-fill);
+  box-shadow: var(--btn-bevel-top), var(--btn-bevel-bottom), 0 2px 6px -1px rgba(0, 0, 0, 0.16), 0 6px 22px -4px var(--cta-glow);
+  translate: 0;
+  filter: saturate(0.82);
+}
+
+.download-button__progress {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  background: color-mix(in oklab, white 24%, transparent);
+  pointer-events: none;
+  z-index: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.62s var(--ease-snap);
+}
+
+.download-button[data-download-state="starting"] .download-button__progress,
+.download-button[data-download-state="started"] .download-button__progress {
+  transform: scaleX(1);
+}
+
+.download-button__icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.download-button__icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  transition: opacity var(--motion-standard) var(--ease-snap),
+    scale var(--motion-standard) var(--ease-snap);
+}
+
+.download-button__icon--apple {
+  opacity: 1;
+  scale: 1;
+}
+
+.download-button__icon--spinner {
+  opacity: 0;
+  scale: 0.5;
+  color: currentColor;
+}
+
+.download-button__icon--check {
+  opacity: 0;
+  scale: 0.5;
+  color: color-mix(in oklab, #10b981 85%, white);
+}
+
+.download-button[data-download-state="starting"] .download-button__icon--apple {
+  opacity: 0;
+  scale: 0.5;
+}
+
+.download-button[data-download-state="starting"] .download-button__icon--spinner {
+  opacity: 1;
+  scale: 1;
+  animation: download-spin 0.8s linear infinite;
+}
+
+.download-button[data-download-state="started"] .download-button__icon--apple {
+  opacity: 0;
+  scale: 0.5;
+}
+
+.download-button[data-download-state="started"] .download-button__icon--spinner {
+  opacity: 0;
+  scale: 0.5;
+}
+
+.download-button[data-download-state="started"] .download-button__icon--check {
+  opacity: 1;
+  scale: 1.15;
+  animation: download-pop 0.35s var(--ease-snap);
+}
+
+.download-button[data-download-state="started"] {
+  border-color: color-mix(in oklab, #34d399 55%, var(--cta-fill));
+  box-shadow: var(--btn-bevel-top), var(--btn-bevel-bottom), var(--btn-shadow-rest);
+}
+
+.download-button__label {
+  position: relative;
+  z-index: 1;
+  transition: opacity var(--motion-quick) var(--ease-decelerate);
+}
+
+@keyframes download-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes download-pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1.15); }
+}
+
+@media (hover: none) {
+  .download-button:hover {
+    border-color: color-mix(in oklab, var(--cta-fill) 85%, white 15%);
+    background: var(--cta-fill);
+    box-shadow: var(--btn-bevel-top), var(--btn-bevel-bottom), 0 2px 6px -1px rgba(0, 0, 0, 0.16), 0 6px 22px -4px var(--cta-glow);
+    translate: 0;
+    filter: none;
+  }
 }
 
 /* ── The app window: two faces, one document ──────────────────────────── */
@@ -117,22 +276,60 @@
 .app-window__inner { position: relative; height: 100%; }
 
 .app-window__face {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-window);
-  background: var(--surface);
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--surface) 96%, var(--depth-highlight) 4%) 0,
+      var(--surface) 78px,
+      color-mix(in oklab, var(--surface) 96%, var(--bg) 4%) 100%);
   box-shadow: var(--window-shadow);
   transition: background-color var(--motion-deliberate) var(--ease-decelerate),
     box-shadow var(--motion-deliberate) var(--ease-decelerate);
 }
 
+.app-window__face::before {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--surface-inset);
+  pointer-events: none;
+  content: "";
+}
+
+.app-window__bar,
+.app-window__body,
+.app-window__status {
+  position: relative;
+  z-index: 1;
+}
+
 /* Hover: the window leans toward the pointer with a breath of shadow. */
 @media (hover: hover) {
   .app-window:hover .app-window__face {
-    box-shadow: 0 30px 66px -28px color-mix(in srgb, #1a1512 62%, transparent);
+    box-shadow: var(--window-shadow-hover);
+  }
+}
+
+/* The hero window is the foreground object. Give its edge a quiet lift from
+   the page ground without turning the product surface into a glowing card. */
+.hero__window .app-window__face {
+  border-color: var(--depth-rim);
+  box-shadow: var(--window-shadow-hero);
+}
+
+@media (hover: hover) {
+  .hero__window:hover .app-window__face {
+    box-shadow:
+      var(--window-shadow-hover),
+      0 12px 34px -18px color-mix(in oklab, var(--accent) 22%, transparent);
   }
 }
 
@@ -140,22 +337,37 @@
    altitude while it morphs between slots, and settles again on landing. */
 .app-window[data-flying] .app-window__face {
   box-shadow:
-    0 48px 96px -34px color-mix(in srgb, #1a1512 64%, transparent),
-    0 14px 36px -18px color-mix(in srgb, #1a1512 48%, transparent);
+    var(--window-shadow-flying),
+    0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent);
 }
 
-/* The flight's afterimage: two accent outlines chasing the window on slower
-   springs. Fixed to the viewport (the window flies in document space), pure
-   decoration, gone the moment they catch up. */
+/* The director owns geometry during a flight. Promote the moving surface and
+   isolate its layout so a fast scroll cannot make the rest of the page pay for
+   every rect update. Width/height still morph for honest text proportions;
+   position remains a compositor-friendly individual translate. */
+.app-window[data-flying] {
+  contain: layout paint;
+  will-change: translate, width, height;
+}
+
+/* The window leaves the hero before it has visually cleared the copy. Fade
+   the copy during that handoff so the document stays the foreground object at
+   every sampled frame, including a fast scroll reversal. */
+.hero__copy {
+  transition: opacity var(--motion-quick) var(--ease-decelerate),
+    translate var(--motion-quick) var(--ease-decelerate);
+}
+html[data-hero-window-flying="true"] .hero__copy {
+  opacity: 0.22;
+  translate: -8px 0;
+}
+html[data-hero-window-flying="true"] .hero__window {
+  position: relative;
+  z-index: 2;
+}
+
 .window-ghost {
-  position: fixed;
-  z-index: 39;
-  pointer-events: none;
-  border: 1px solid color-mix(in oklab, var(--accent) 55%, transparent);
-  border-radius: var(--radius-window);
-  opacity: var(--ghost-opacity, 0.2);
-  transition: opacity var(--motion-quick) var(--ease-decelerate);
-  will-change: top, left, width, height;
+  display: none;
 }
 
 /* ── The dock: the window between acts ───────────────────────────────────
@@ -278,7 +490,7 @@
 @media (hover: hover) {
   .window-dock:hover { opacity: 1; }
   .window-dock:hover .app-window__face {
-    box-shadow: 0 26px 56px -26px color-mix(in srgb, #1a1512 60%, transparent);
+    box-shadow: var(--window-shadow-hover);
   }
 }
 .window-dock.is-collapsed { height: 44px; }
@@ -322,7 +534,27 @@
 
 /* The window is one node; each act's slot sizes it. */
 .app-window { width: 100%; height: 100%; }
-.hero__window .app-window { height: min(728px, calc(100dvh - 112px)); min-height: 540px; }
+.hero__window .app-window { height: min(680px, calc(100dvh - 144px)); min-height: 500px; }
+/* The wider hero window earns a small desktop readability pass of its own:
+   the document and its controls should grow with the surface, while the
+   lower status bar stays compact enough to read as chrome. */
+@media (min-width: 901px) {
+  .hero__window .app-window__bar {
+    min-height: 44px;
+    padding-inline: 16px;
+  }
+
+  .hero__window .app-window__bar-controls { gap: 12px; }
+  .hero__window .app-window__segmented button {
+    min-width: 62px;
+    padding-inline: 12px;
+    font-size: 11.5px;
+  }
+
+  .hero__window .source-pane { font-size: 13px; }
+  .hero__window .document-content { font-size: 17px; }
+  .hero__window .document-content h1 { font-size: 32px; }
+}
 /* The window arrives with the page: transform-only and backwards-filled, so
    the prerendered LCP text paints immediately and nothing the animation set
    can out-rank the travel director's inline geometry later. */
@@ -338,13 +570,13 @@
 .window-slot--render { height: 100%; }
 .window-slot--agent { height: 100%; }
 .window-slot--theme { height: 540px; }
-/* The fold crops the DOCUMENT, not the window. Masking the whole face also
-   erased the status bar. Both panes run past the visible slice and fade over
-   the last 96px, so the crop lands on a soft edge, not half a code line. */
+/* The fold is a hard, honest pane edge. The slightly taller hero window leaves
+   the visible link paragraph fully above the status bar, so no glyph fades or
+   stops halfway through a line inside the rendered pane. */
 .hero__window .app-window__read,
 .hero__window .app-window__source {
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 96px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 96px), transparent 100%);
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 
 /* ── The split: raw bytes | rendered document ──────────────────────────
@@ -363,10 +595,19 @@
   height: 100%;
   overflow: hidden;
   border-right: 1px solid var(--rule);
-  background: color-mix(in oklab, var(--bg) 88%, var(--code-bg));
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--code-bg) 82%, var(--bg) 18%), var(--code-bg)),
+    var(--code-bg);
+  box-shadow: inset -14px 0 22px -22px var(--depth-shadow-strong);
 }
 
 .app-window__read { min-width: 0; height: 100%; overflow-y: auto; scrollbar-width: thin; }
+.app-window[data-scroll-owner="page"] .app-window__read {
+  /* The gap scrubs this pane from page progress. Keep programmatic scrollTop
+     available, but let wheel/touch input continue to belong to the page. */
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
 .app-window__editor { height: 100%; }
 .app-window[data-mode="edit"] [data-static-source] { display: none; }
 .app-window[data-mode="read"] .app-window__editor { display: none; }
@@ -433,8 +674,12 @@
   gap: 14px;
   min-height: 42px;
   padding: 0 14px;
-  border-bottom: 0.5px solid var(--rule);
-  background: color-mix(in oklab, var(--surface) 94%, var(--text));
+  border-bottom: 1px solid color-mix(in oklab, var(--rule) 82%, var(--depth-inset));
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--surface) 88%, var(--depth-highlight) 12%),
+      color-mix(in oklab, var(--surface) 92%, var(--bg) 8%));
+  box-shadow: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
   font-size: 12px;
 }
 
@@ -463,6 +708,8 @@
   grid-template-columns: repeat(3, 1fr);
   border: 0.5px solid var(--rule);
   border-radius: var(--radius-chip);
+  background: color-mix(in oklab, var(--surface) 72%, var(--bg) 28%);
+  box-shadow: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
 }
 
 .app-window__segmented button {
@@ -489,7 +736,7 @@
   translate: calc(var(--segment-index, 0) * 100%) 0;
   border-radius: var(--radius-chip);
   background: var(--bg);
-  box-shadow: inset 0 0 0 1px var(--rule);
+  box-shadow: var(--surface-inset), 0 0 0 0.5px var(--depth-rim);
   transition: translate var(--motion-selection) var(--ease-snap);
 }
 
@@ -505,7 +752,11 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-  background: var(--bg);
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--bg) 92%, var(--surface) 8%),
+      var(--bg) 72px,
+      color-mix(in oklab, var(--bg) 96%, var(--surface) 4%));
 }
 
 .app-window__status {
@@ -515,9 +766,13 @@
   min-height: 30px;
   padding: 0 17px;
   border-top: 1px solid var(--rule);
+  background: color-mix(in oklab, var(--surface) 90%, var(--bg) 10%);
+  box-shadow: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
   color: var(--text-faint);
   font-family: var(--font-mono);
   font-size: 10px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .app-window__status-item { display: inline-flex; gap: 6px; align-items: baseline; }
@@ -527,11 +782,15 @@
 .app-window__status-hint { color: var(--text-faint); }
 [data-film="true"] .app-window__status-hint,
 [data-film="true"] .app-window__write-dot,
-[data-film="true"] .app-window__status-write { display: none; }
+[data-film="true"] .app-window__status-write,
+[data-film="true"] .app-window__status-rate,
+[data-film="true"] .app-window__status-honesty small { display: none; }
 @media (max-width: 900px) {
   .app-window__status-hint,
   .app-window__write-dot,
-  .app-window__status-write { display: none; }
+  .app-window__status-write,
+  .app-window__status-rate,
+  .app-window__status-honesty small { display: none; }
 }
 .app-window__status-syntax { color: var(--text-secondary); }
 .app-window__status-rate { align-items: center; margin-left: auto; }
@@ -539,6 +798,18 @@
 .app-window__status-honesty [data-honesty-meter] { color: var(--heading); font-variant-numeric: tabular-nums; }
 .app-window__status-honesty small { font-size: 9px; letter-spacing: 0.02em; }
 [data-caret-position] { font-variant-numeric: tabular-nums; }
+
+/* A small live pulse gives the measured status cluster a heartbeat. It is
+   feedback for the real window, not decoration, and collapses with reduced
+   motion through the site's global motion guard. */
+@media (prefers-reduced-motion: no-preference) {
+  .app-window__status-rate i { animation: status-live-breathe 3.2s var(--ease-decelerate) infinite; }
+}
+
+@keyframes status-live-breathe {
+  0%, 100% { opacity: 0.55; }
+  48% { opacity: 1; }
+}
 
 /* ── Chrome states: the window can pose as macOS's plain Quick Look sheet ──
    The gap act receives the window as a preview sheet (data-chrome="ql") and
@@ -555,18 +826,59 @@
 .app-window[data-chrome="ql"] .app-window__file small { display: none; }
 .app-window[data-chrome="ql"] .traffic-lights i:nth-child(n + 2) { display: none; }
 
+/* The hero's invitation: a caret waiting in the status bar. Hero slot
+   only; removed the moment the visitor means to type. */
+.app-window__type-invite {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+.app-window__type-invite i {
+  display: block;
+  width: 2px;
+  height: 10px;
+  background: var(--accent);
+  animation: type-caret 1.1s steps(1) infinite;
+}
+@keyframes type-caret {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0; }
+}
+.hero__window .app-window__type-invite { display: inline-flex; }
+
 .app-window__ql-action {
   display: none;
+  min-height: 28px;
   padding: 4px 10px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-chip);
+  background: transparent;
   color: var(--text-secondary);
+  cursor: pointer;
   font-size: 11px;
+  transition: border-color var(--motion-hover) var(--ease-decelerate),
+    color var(--motion-hover) var(--ease-decelerate);
+}
+@media (hover: hover) {
+  .app-window__ql-action:hover {
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--rule));
+    color: var(--heading);
+  }
 }
 .app-window[data-chrome="ql"] .app-window__ql-action {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   animation: chrome-in var(--motion-quick) var(--ease-decelerate) both;
 }
+@media (max-width: 680px) {
+  .app-window__ql-action { min-height: 44px; padding: 0 14px; }
+}
+html[data-film="true"] .app-window__ql-action { min-height: 44px; padding: 0 14px; }
 
 /* The gap receives the window as the sweep's surface: the read pane becomes
    the sheet the render line travels, sized and masked like the old bespoke
@@ -785,20 +1097,29 @@
   top: calc(100% + 8px);
   right: 0;
   display: grid;
-  width: min(520px, calc(100vw - 32px), calc(100% + 172px));
-  gap: 6px;
-  padding: 8px;
+  width: min(420px, calc(100vw - 48px), calc(100% + 218px));
+  gap: 0;
+  padding: 10px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-panel);
-  background: color-mix(in oklab, var(--surface) 96%, transparent);
-  box-shadow: var(--window-shadow);
+  overflow: hidden;
+  background: color-mix(in oklab, var(--surface) 94%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--heading) 8%, transparent),
+    0 22px 52px -26px color-mix(in oklab, #1a1512 64%, transparent);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  scale: 0.985;
+  scale: 0.98;
   transform-origin: top right;
-  translate: 0 -6px;
-  transition: opacity var(--motion-standard) var(--ease-decelerate), scale var(--motion-standard) var(--ease-snap), translate var(--motion-standard) var(--ease-snap);
+  translate: 0 -8px;
+  transition:
+    opacity 180ms var(--ease-decelerate),
+    scale 220ms var(--ease-snap),
+    translate 220ms var(--ease-snap),
+    visibility 0s linear 260ms;
 }
 
 .terminal-install[data-open="true"] .terminal-install__menu {
@@ -807,13 +1128,14 @@
   pointer-events: auto;
   scale: 1;
   translate: 0;
+  transition-delay: 0s;
 }
 
 .terminal-install[data-menu-placement="above"] .terminal-install__menu {
   top: auto;
   bottom: calc(100% + 8px);
   transform-origin: bottom right;
-  translate: 0 6px;
+  translate: 0 8px;
 }
 .terminal-install[data-menu-placement="above"][data-open="true"] .terminal-install__menu { translate: 0; }
 
@@ -822,70 +1144,158 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  padding: 3px 8px 7px;
+  padding: 2px 8px 10px;
+  border-bottom: 1px solid color-mix(in oklab, var(--rule) 82%, transparent);
   color: var(--text-faint);
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .terminal-install__menu-head span:last-child { color: var(--text-secondary); text-transform: none; letter-spacing: 0; }
 
 .terminal-install__option {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
   min-width: 0;
-  min-height: 44px;
-  padding: 8px 10px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-button);
+  min-height: 48px;
+  padding: 11px 8px;
+  border: 0;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
   font: inherit;
   text-align: left;
-  transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), background-color var(--motion-hover) var(--ease-decelerate), translate var(--motion-press-out) var(--ease-snap);
+  opacity: 0;
+  translate: 0 -4px;
+  transition:
+    color var(--motion-hover) var(--ease-decelerate),
+    background-color var(--motion-hover) var(--ease-decelerate),
+    box-shadow var(--motion-hover) var(--ease-decelerate),
+    opacity 180ms var(--ease-decelerate),
+    translate 220ms var(--ease-snap);
 }
 
+.terminal-install__option + .terminal-install__option {
+  border-top: 1px solid color-mix(in oklab, var(--rule) 74%, transparent);
+}
+
+.terminal-install[data-open="true"] .terminal-install__option {
+  opacity: 1;
+  translate: 0;
+}
+
+.terminal-install[data-open="true"] .terminal-install__option:nth-child(2) { transition-delay: 20ms; }
+.terminal-install[data-open="true"] .terminal-install__option:nth-child(3) { transition-delay: 44ms; }
+.terminal-install[data-open="true"] .terminal-install__option:nth-child(4) { transition-delay: 68ms; }
+
+/* Close in the opposite order so the menu folds back into the trigger instead
+   of flattening all three rows at once. Keep the visibility handoff slightly
+   longer than the final row's fade so the exit is fully seen. */
+.terminal-install[data-open="false"] .terminal-install__option:nth-child(2) { transition-delay: 44ms; }
+.terminal-install[data-open="false"] .terminal-install__option:nth-child(3) { transition-delay: 22ms; }
+.terminal-install[data-open="false"] .terminal-install__option:nth-child(4) { transition-delay: 0s; }
+
 .terminal-install__option:hover,
-.terminal-install__option:focus-visible {
-  border-color: color-mix(in oklab, var(--accent) 72%, var(--rule));
+.terminal-install__option:focus-within {
   background: color-mix(in oklab, var(--accent) 7%, var(--surface));
   color: var(--heading);
 }
-.terminal-install__option:active { translate: 0 1px; }
-.terminal-install__option[data-copy-state="copied"] { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 10%, var(--surface)); }
+.terminal-install__option:active {
+  translate: 0 1px;
+  background: color-mix(in oklab, var(--accent) 11%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+.terminal-install__option[data-copy-state="copied"] {
+  background: color-mix(in oklab, var(--accent) 10%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 20%, transparent);
+}
 
 .terminal-install__method,
 .terminal-install__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: var(--link);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
+  transition: color var(--motion-hover) var(--ease-decelerate), translate var(--motion-press-out) var(--ease-snap);
+}
+.terminal-install__copy {
+  display: inline-flex;
+  min-width: 48px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.terminal-install__copy:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .terminal-install__option code {
+  display: block;
   min-width: 0;
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+.terminal-install__command {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  cursor: text;
+  font: inherit;
+  line-height: inherit;
+  user-select: text;
+}
 
 .terminal-install__option:hover code,
-.terminal-install__option:focus-visible code,
+.terminal-install__option:focus-within code,
 .terminal-install__option[data-copy-state="copied"] code { color: var(--heading); }
 .terminal-install__option[data-copy-state="copied"] .terminal-install__copy { color: var(--accent); }
+.terminal-install__option[data-copy-state="copied"] .terminal-install__copy { translate: 0 -1px; }
+.terminal-install__option[data-copy-state="copied"] .terminal-install__copy::before {
+  content: "✓";
+  font-size: 10px;
+  font-weight: 700;
+}
 
 @media (max-width: 480px) {
   .terminal-install__menu { left: 0; width: 100%; transform-origin: top left; }
   .terminal-install[data-menu-placement="above"] .terminal-install__menu { transform-origin: bottom left; }
   .terminal-install__option { grid-template-columns: auto minmax(0, 1fr); }
   .terminal-install__copy { grid-column: 2; justify-self: start; margin-top: -3px; }
+}
+
+@media (min-width: 901px) and (max-width: 1439px) {
+  .terminal-install__menu {
+    right: auto;
+    left: 0;
+    width: min(360px, calc(100vw - 48px));
+    transform-origin: top left;
+  }
+
+  .terminal-install[data-menu-placement="above"] .terminal-install__menu {
+    transform-origin: bottom left;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -929,14 +1339,6 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   visibility: visible;
 }
 
-/* The global header is chrome, not a translucent content layer. */
-.site-header.glass {
-  border-bottom: 1px solid var(--rule);
-  background: var(--bg);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
 /* ── The gap: the sweep ───────────────────────────────────────────────
    A pinned stage where the raw bytes become the page under the reader's own
    scroll. Both halves of every block are in the DOM from first paint, stacked
@@ -947,14 +1349,14 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 
 /* The stage owns the scroll length the scrub reads. Beat two lives after it,
    so the wall can never paint over the pinned sweep. */
-.sweep-stage { position: relative; height: 240svh; }
+.sweep-stage { position: relative; height: var(--sweep-stage-height, 260svh); }
 
 .sweep {
   position: sticky;
-  top: 56px;
+  top: var(--site-header-height);
   display: grid;
   width: min(100%, var(--page-max));
-  height: calc(100svh - 56px);
+  height: calc(100svh - var(--site-header-height));
   margin: 0 auto;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
   grid-template-rows: auto auto 1fr auto;
@@ -998,13 +1400,11 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 /* The lede follows the sweep progress while its parent remains in the native
    document flow, so the hero can hand off to the next scene without a void. */
 .sweep__lede {
-  --lede-in: clamp(0, calc(var(--sweep-progress, 0) * 12.5), 1);
-  --lede-out: clamp(0, calc((0.62 - var(--sweep-progress, 0)) * 5), 1);
-  opacity: calc(var(--lede-in) * var(--lede-out));
+  opacity: 1;
 }
 .sweep__closing {
   color: var(--heading);
-  opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.72) * 5), 1);
+  opacity: 0;
 }
 
 /* The slot that hosts THE window inside the pinned stage. No enter clamp:
@@ -1088,19 +1488,8 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 72px), transparent 100%);
 }
 
-/* The render line: one hairline travelling the visible sheet, accent-tinted,
-   no glow. The desktop sweep positions it from JS (it rides the pane while
-   the content scrolls beneath); position is a transform, never a layout. */
 .sweep__line {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.3) * 12), 0.75);
-  container-type: size;
+  display: none !important;
 }
 
 .sweep__surface { container-type: size; }
@@ -1118,9 +1507,16 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   line-height: 1.45;
   white-space: pre-wrap;
   word-break: break-word;
+  will-change: opacity, transform;
 }
 
-.sweep-block__rendered { width: 100%; min-height: 0; padding: 0; opacity: 0; }
+.sweep-block__rendered {
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  opacity: 0;
+  will-change: opacity, transform;
+}
 .sweep-block__rendered > :first-child { margin-top: 0; }
 .sweep-block + .sweep-block { margin-top: 14px; }
 
@@ -1136,6 +1532,14 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   opacity: var(--enter, 1);
 }
 
+.sweep__phase {
+  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+}
+
+.sweep__phase-separator { color: var(--text-faint); }
+
 /* The page's second and last handwritten aside. */
 .sweep__annotation {
   grid-row: 4;
@@ -1145,7 +1549,8 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   color: var(--text-faint);
   font-family: "Caveat Subset", "Snell Roundhand", cursive;
   font-size: 20px;
-  opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.8) * 6), 1);
+  opacity: clamp(0, calc((var(--sweep-progress, 0) - 0.78) * 5), 1);
+  transition: opacity 0.2s ease-out;
 }
 
 [data-sweep-static="true"] .sweep__lede,
@@ -1153,7 +1558,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 [data-sweep-static="true"] .sweep__annotation { opacity: 1; }
 [data-sweep-static="true"] .sweep__line { display: none; }
 
-.gap-wall { margin-top: 64px; border-top: 1px solid var(--rule); padding-top: 28px; }
+.gap-wall { margin-top: 128px; border-top: 1px solid var(--rule); padding-top: 44px; }
 .gap-wall__line {
   max-width: 22ch;
   margin-bottom: 40px;
@@ -1171,6 +1576,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   border: 1px solid var(--rule);
   border-radius: var(--radius-window);
   background: color-mix(in oklab, var(--code-bg) 60%, var(--bg));
+  box-shadow: var(--panel-shadow);
   padding: 26px clamp(18px, 4vw, 60px);
   color: var(--text-faint);
   font-family: var(--font-mono);
@@ -1195,9 +1601,8 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 
 .annotation-rail { display: grid; gap: 0; margin-top: 40px; list-style: none; padding: 0; }
 
-/* Resting notes sit at a reduced but readable secondary tone (the lower
-   alpha is state, not a dimmer of the ink); bloomed notes read at heading /
-   secondary weight. Faint-on-dark here was a verified sub-AA reading. */
+/* Resting notes sit at a reduced but readable secondary tone; bloomed notes
+   read at heading weight with a glowing connector. */
 .annotation-rail li {
   display: grid;
   grid-template-columns: 20px 96px 1fr;
@@ -1207,12 +1612,12 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   border-top: 1px solid var(--rule);
   color: var(--text-secondary);
   font-size: 12px;
-  opacity: calc(0.62 * var(--enter, 1));
-  transform: translateX(-6px);
-  transition: opacity var(--motion-deliberate) var(--ease-structural), transform var(--motion-deliberate) var(--ease-structural);
+  opacity: calc(0.52 * var(--enter, 1));
+  transform: translateX(-4px);
+  transition: opacity 0.25s var(--ease-structural), transform 0.25s var(--ease-structural), color 0.25s ease;
 }
 
-.annotation-rail li strong { color: var(--text); font-size: 12px; font-weight: 600; letter-spacing: -0.01em; }
+.annotation-rail li strong { color: var(--text); font-size: 12px; font-weight: 600; letter-spacing: -0.01em; transition: color 0.25s ease; }
 .annotation-rail li span { color: var(--text-secondary); font-size: 11px; }
 
 .annotation-rail li.is-bloomed, .annotation-rail li.is-static {
@@ -1221,7 +1626,10 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   color: var(--text);
 }
 
-.annotation-rail li.is-bloomed strong { color: var(--heading); }
+.annotation-rail li.is-bloomed strong {
+  color: var(--heading);
+  text-shadow: 0 0 10px color-mix(in oklab, var(--accent) 30%, transparent);
+}
 
 .annotation-rail__connector {
   position: relative;
@@ -1230,7 +1638,8 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   width: 0;
   height: 1px;
   background: var(--accent);
-  transition: width var(--motion-deliberate) var(--ease-structural);
+  box-shadow: 0 0 4px color-mix(in oklab, var(--accent) 55%, transparent);
+  transition: width 0.28s var(--ease-structural);
 }
 
 .annotation-rail li.is-bloomed .annotation-rail__connector,
@@ -1265,6 +1674,13 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 .agent-stage__document .app-window { height: 100%; }
 
 .change-mark { padding: 0 2px; border-radius: 3px; opacity: 0; transition: opacity 0.12s var(--ease-decelerate); }
+/* While the conflict is open, every marked word is a door into its review
+   (agent.ts scrolls the diff to the clicked phrase). */
+.app-window[data-reviewable] .change-mark { cursor: pointer; }
+.app-window[data-reviewable] .change-mark:hover {
+  outline: 1px solid color-mix(in oklab, var(--accent) 55%, transparent);
+  outline-offset: 1px;
+}
 .change-mark.is-live { opacity: 1; }
 
 .change-modified { background: color-mix(in oklab, var(--change-modified) 22%, transparent); box-shadow: inset 0 -2px 0 var(--change-modified); }
@@ -1281,8 +1697,10 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   gap: 10px;
   margin-top: 18px;
   padding: 12px 16px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-panel);
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  box-shadow: var(--panel-shadow);
   font-size: 13px;
 }
 
@@ -1294,16 +1712,43 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   padding: 0 16px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-button);
-  background: transparent;
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
+  box-shadow: var(--btn-bevel-top), var(--btn-shadow-rest);
   color: var(--text-secondary);
   cursor: pointer;
   font-size: 12px;
   font-weight: 600;
-  transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate), background-color var(--motion-hover) var(--ease-decelerate);
+  transition: color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate),
+    background-color var(--motion-hover) var(--ease-decelerate),
+    box-shadow var(--motion-hover) var(--ease-decelerate),
+    translate var(--motion-press-out) var(--ease-decelerate);
 }
 
-.conflict-bar button:hover { border-color: var(--accent); color: var(--heading); }
-.conflict-bar button[data-conflict-action="theirs"] { border-color: var(--heading); background: var(--heading); color: var(--bg); }
+.conflict-bar button:hover {
+  border-color: var(--accent);
+  color: var(--heading);
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  box-shadow: var(--btn-bevel-top), var(--btn-shadow-hover);
+  translate: 0 -1px;
+}
+
+.conflict-bar button:active {
+  translate: 0 1px;
+  box-shadow: var(--btn-shadow-active);
+}
+
+.conflict-bar button[data-conflict-action="theirs"] {
+  border-color: var(--heading);
+  background: var(--heading);
+  color: var(--bg);
+  box-shadow: var(--btn-bevel-top), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.conflict-bar button[data-conflict-action="theirs"]:hover {
+  background: color-mix(in oklab, var(--heading) 90%, var(--accent));
+  box-shadow: var(--btn-bevel-top), 0 4px 12px -1px rgba(0, 0, 0, 0.28);
+}
 
 .change-toast {
   position: absolute;
@@ -1333,6 +1778,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   width: min(920px, 100%);
   max-height: min(72vh, 640px);
   overflow: hidden;
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-panel);
   background: var(--surface);
   box-shadow: var(--window-shadow);
@@ -1360,13 +1806,43 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   padding: 0 18px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-button);
-  background: transparent;
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
+  box-shadow: var(--btn-bevel-top), var(--btn-shadow-rest);
   color: var(--text-secondary);
   cursor: pointer;
   font-size: 12px;
   font-weight: 600;
+  transition: color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate),
+    background-color var(--motion-hover) var(--ease-decelerate),
+    box-shadow var(--motion-hover) var(--ease-decelerate),
+    translate var(--motion-press-out) var(--ease-decelerate);
 }
-.review-diff footer button[data-review-take] { border-color: var(--heading); background: var(--heading); color: var(--bg); }
+
+.review-diff footer button:hover {
+  border-color: var(--accent);
+  color: var(--heading);
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  box-shadow: var(--btn-bevel-top), var(--btn-shadow-hover);
+  translate: 0 -1px;
+}
+
+.review-diff footer button:active {
+  translate: 0 1px;
+  box-shadow: var(--btn-shadow-active);
+}
+
+.review-diff footer button[data-review-take] {
+  border-color: var(--heading);
+  background: var(--heading);
+  color: var(--bg);
+  box-shadow: var(--btn-bevel-top), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.review-diff footer button[data-review-take]:hover {
+  background: color-mix(in oklab, var(--heading) 90%, var(--accent));
+  box-shadow: var(--btn-bevel-top), 0 4px 12px -1px rgba(0, 0, 0, 0.28);
+}
 
 .agent-contextual { margin-top: 72px; padding-top: 34px; border-top: 1px solid var(--rule); }
 .agent-contextual[hidden] { display: none; }
@@ -1583,7 +2059,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   width: min(100%, 940px);
   margin: 36px auto 0;
   overflow: hidden;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-window);
   background: var(--surface);
   box-shadow: var(--window-shadow);
@@ -1596,8 +2072,12 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   gap: 12px;
   min-height: 46px;
   padding: 0 14px;
-  border-bottom: 1px solid var(--rule);
-  background: color-mix(in oklab, var(--surface) 92%, var(--text));
+  border-bottom: 1px solid color-mix(in oklab, var(--rule) 82%, var(--depth-inset));
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--surface) 88%, var(--depth-highlight) 12%),
+      color-mix(in oklab, var(--surface) 92%, var(--bg) 8%));
+  box-shadow: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
   font-size: 12px;
 }
 .file-surface__bar strong { color: var(--heading); font-weight: 650; }
@@ -1606,6 +2086,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 .file-surface__field {
   position: relative;
   height: 220px;
+  touch-action: none;
   overflow: hidden;
   background:
     linear-gradient(color-mix(in oklab, var(--rule) 30%, transparent) 0.5px, transparent 0.5px),
@@ -1625,13 +2106,13 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   border: 1px solid var(--rule);
   border-radius: var(--radius-panel);
   background: var(--surface);
-  box-shadow: 0 3px 10px -6px color-mix(in oklab, var(--text) 35%, transparent);
+  box-shadow: var(--card-shadow);
   cursor: grab;
   user-select: none;
   will-change: translate;
 }
 
-.file-card.is-dragged { cursor: grabbing; scale: 1.04; box-shadow: 0 14px 30px -12px color-mix(in oklab, var(--text) 45%, transparent); }
+.file-card.is-dragged { cursor: grabbing; scale: 1.04; box-shadow: var(--card-shadow-hover); }
 .file-card__kind { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--accent); border-radius: var(--radius-chip); color: var(--accent); font-family: var(--font-mono); font-size: 10px; }
 .file-card__name { overflow: hidden; max-width: 96px; color: var(--heading); font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .file-card:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
@@ -1646,6 +2127,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   width: min(720px, 100%);
   max-height: min(76vh, 680px);
   overflow: hidden;
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-window);
   background: color-mix(in oklab, var(--surface) 82%, transparent);
   backdrop-filter: blur(18px) saturate(1.4);
@@ -1653,7 +2135,17 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   box-shadow: var(--window-shadow);
 }
 
-.quick-look__bar { display: flex; align-items: center; gap: 14px; min-height: 50px; padding: 0 17px; border-bottom: 1px solid var(--rule); font-size: 12px; }
+.quick-look__bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 50px;
+  padding: 0 17px;
+  border-bottom: 1px solid color-mix(in oklab, var(--rule) 82%, var(--depth-inset));
+  background: linear-gradient(180deg, color-mix(in oklab, var(--surface) 88%, var(--depth-highlight) 12%), color-mix(in oklab, var(--surface) 92%, var(--bg) 8%));
+  box-shadow: inset 0 1px 0 var(--depth-highlight), inset 0 -1px 0 var(--depth-inset);
+  font-size: 12px;
+}
 .quick-look__bar strong { color: var(--heading); }
 .quick-look__bar button { margin-left: auto; border: 0; background: none; color: var(--text-faint); cursor: pointer; font-family: var(--font-mono); font-size: 11px; }
 .quick-look__body { overflow: auto; padding: 26px clamp(20px, 5vw, 56px); background: var(--bg); }
@@ -1663,9 +2155,10 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 .terminal-artifact {
   overflow: hidden;
   margin-top: 16px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--depth-rim);
   border-radius: var(--radius-window);
   background: var(--code-bg);
+  box-shadow: var(--panel-shadow);
 }
 
 .terminal-artifact__bar {
@@ -1688,6 +2181,21 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 }
 
 .terminal-prompt { color: var(--link); }
+
+/* The session ends, the artifact invites a replay (click or Enter). */
+.terminal-artifact[data-replay="ready"] { cursor: pointer; }
+.terminal-replay {
+  margin-top: 12px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+  transition: color var(--motion-hover) var(--ease-decelerate);
+}
+@media (hover: hover) {
+  .terminal-artifact[data-replay="ready"]:hover .terminal-replay { color: var(--accent); }
+}
 .terminal-output { color: var(--text-faint); }
 .reach-note { max-width: 60ch; }
 
@@ -1700,18 +2208,18 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 /* The app's map is a small centred stack, not a second scrollbar. Keep the
    lane wide enough for a calm hit target while drawing only the short marks. */
 .density-rail {
-  view-transition-name: density-rail; position: fixed; z-index: 30; top: 50%; right: auto; left: 12px; width: 72px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
+  view-transition-name: density-rail; position: fixed; z-index: 30; top: 50%; right: auto; left: 4px; width: 28px; height: min(72vh, 640px); transform: translateY(-50%); cursor: pointer; }
 .density-rail canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
 .density-rail__nav { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 
 .density-rail__hud {
   position: absolute;
-  left: 68px;
+  left: 32px;
   top: 50%;
   display: grid;
   gap: 4px;
-  width: min(300px, calc(100vw - 100px));
+  width: min(300px, calc(100vw - 60px));
   padding: 12px 14px;
   border-radius: var(--radius-window);
   border: 1px solid var(--rule);
@@ -1731,7 +2239,7 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   position: absolute;
   top: 50%;
   right: 100%;
-  width: 8px;
+  width: 6px;
   height: 1px;
   background: var(--rule);
 }
@@ -1755,121 +2263,600 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 /* ── ⌘K palette + shortcut sheet ──────────────────────────────────────── */
 
 .command-palette {
-  width: min(560px, calc(100vw - 40px));
+  position: fixed;
+  top: max(40px, 13vh);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: min(590px, calc(100vw - 28px));
+  max-height: min(490px, calc(100vh - 90px));
   padding: 0;
+  border: 1px solid color-mix(in oklab, var(--rule) 85%, transparent);
   border-radius: var(--radius-window);
+  background: color-mix(in oklab, var(--surface) 88%, transparent);
+  backdrop-filter: blur(30px) saturate(1.85);
+  -webkit-backdrop-filter: blur(30px) saturate(1.85);
   color: var(--text);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--surface) 45%, transparent) inset,
+    inset 0 1px 0 0 color-mix(in oklab, #ffffff 50%, transparent),
+    0 4px 14px -2px color-mix(in srgb, #000 12%, transparent),
+    0 16px 40px -6px color-mix(in srgb, #000 24%, transparent),
+    0 36px 84px -12px color-mix(in srgb, #000 30%, transparent);
+  overflow: hidden;
 }
 
-.command-palette::backdrop { background: color-mix(in oklab, var(--text) 26%, transparent); backdrop-filter: blur(2px); }
+.command-palette:not([open]),
+.shortcut-sheet:not([open]) {
+  display: none;
+}
+
+.command-palette[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.shortcut-sheet[open] {
+  display: block;
+}
+
+.command-palette::backdrop {
+  background: color-mix(in srgb, #060402 46%, transparent);
+  backdrop-filter: blur(9px) brightness(0.88);
+  -webkit-backdrop-filter: blur(9px) brightness(0.88);
+}
+
+.command-palette__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 0 18px;
+  border-bottom: 1px solid color-mix(in oklab, var(--rule) 75%, transparent);
+  background: color-mix(in oklab, var(--surface) 35%, transparent);
+}
+
+.command-palette__search-icon {
+  flex-shrink: 0;
+  color: var(--text-faint);
+  transition: color var(--motion-hover) var(--ease-decelerate);
+}
+
+.command-palette:focus-within .command-palette__search-icon {
+  color: var(--accent);
+}
 
 .command-palette input {
+  flex: 1;
   width: 100%;
-  min-height: 54px;
-  padding: 0 20px;
+  min-height: 48px;
+  padding: 0;
   border: 0;
-  border-bottom: 1px solid var(--rule);
   background: transparent;
   color: var(--heading);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 14.5px;
+  font-weight: 450;
+  letter-spacing: -0.01em;
   outline: none;
 }
 
-.command-palette input::placeholder { color: var(--text-faint); }
+.command-palette input::placeholder {
+  color: var(--text-faint);
+  font-weight: 400;
+}
 
-.command-palette__list { max-height: min(46vh, 400px); overflow: auto; padding: 7px; }
+.command-palette__esc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid color-mix(in oklab, var(--rule) 70%, transparent);
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--text) 5%, transparent);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 0 1px 0 color-mix(in srgb, #000 5%, transparent);
+  transition: all var(--motion-hover) var(--ease-decelerate);
+}
+
+.command-palette__esc-badge:hover {
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  border-color: color-mix(in oklab, var(--accent) 30%, transparent);
+  color: var(--heading);
+}
+
+.command-palette__list {
+  max-height: min(44vh, 360px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.command-palette__list::-webkit-scrollbar {
+  width: 5px;
+}
+.command-palette__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.command-palette__list::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--rule) 75%, transparent);
+  border-radius: 99px;
+}
+.command-palette__list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+}
+
+.palette-group-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 6px 4px 2px 4px;
+  padding: 4px 6px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 4px;
+}
 
 .palette-row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  min-height: 44px;
-  padding: 0 13px;
+  min-height: 40px;
+  padding: 0 10px;
   border: 0;
-  border-radius: var(--radius-chip);
+  border-radius: var(--radius-chip, 8px);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 13.5px;
   text-align: left;
-  transition: background-color var(--motion-hover) var(--ease-decelerate), color var(--motion-hover) var(--ease-decelerate), translate var(--motion-hover) var(--ease-snap);
+  user-select: none;
+  transition:
+    background-color 0.1s var(--ease-decelerate),
+    color 0.1s var(--ease-decelerate),
+    translate 0.1s var(--ease-snap);
 }
 
-.palette-row kbd { color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
-.palette-row:hover { background: color-mix(in oklab, var(--accent) 8%, transparent); color: var(--heading); translate: 2px 0; }
-.palette-row.is-cursor { background: color-mix(in oklab, var(--accent) 12%, transparent); color: var(--heading); }
+.palette-row__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+  flex: 1;
+}
 
-.shortcut-sheet { width: min(420px, calc(100vw - 40px)); padding: 22px 26px; border-radius: var(--radius-window); color: var(--text); }
+.palette-row__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--text) 5%, transparent);
+  color: var(--text-faint);
+  transition: all 0.1s var(--ease-decelerate);
+}
 
-/* ── Dialog entrances ────────────────────────────────────────────────────
-   The palette and shortcut sheet are dialogs; with @starting-style +
-   allow-discrete (Chromium) they rise in on the site's own curve and settle
-   back down on close, instead of snapping. Other engines keep the native
-   instant dialog — still correct, just quieter. */
+.palette-row__label {
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 450;
+  letter-spacing: -0.01em;
+}
+
+.palette-match {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent);
+  text-underline-offset: 2px;
+}
+
+.palette-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.palette-row__category {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  opacity: 0.8;
+}
+
+.palette-row__hint,
+.palette-row kbd {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in oklab, var(--rule) 75%, transparent);
+  border-radius: 5px;
+  background: color-mix(in oklab, var(--text) 4%, transparent);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  box-shadow: 0 1px 0 color-mix(in srgb, #000 5%, transparent);
+  transition: all 0.1s var(--ease-decelerate);
+}
+
+.palette-row:hover {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  color: var(--heading);
+  translate: 2px 0;
+}
+
+.palette-row:hover .palette-row__icon {
+  background: color-mix(in oklab, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+
+.palette-row.is-cursor {
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--heading);
+  box-shadow: inset 2.5px 0 0 var(--accent);
+}
+
+.palette-row.is-cursor .palette-row__icon {
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+  color: var(--accent);
+}
+
+.palette-row.is-cursor kbd {
+  border-color: color-mix(in oklab, var(--accent) 30%, transparent);
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  color: var(--heading);
+}
+
+.palette-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--text-faint);
+}
+
+.palette-empty__icon {
+  margin-bottom: 10px;
+  opacity: 0.6;
+  color: var(--text-faint);
+}
+
+.palette-empty__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--heading);
+}
+
+.palette-empty__sub {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.command-palette__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 0 16px;
+  border-top: 1px solid color-mix(in oklab, var(--rule) 70%, transparent);
+  background: color-mix(in oklab, var(--surface) 40%, transparent);
+  font-size: 11px;
+  color: var(--text-faint);
+  user-select: none;
+}
+
+.command-palette__hints {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.command-palette__hints span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.command-palette__hints kbd {
+  padding: 1px 4px;
+  border: 1px solid color-mix(in oklab, var(--rule) 70%, transparent);
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--text) 4%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.command-palette__brand {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 0.02em;
+}
+
+.shortcut-sheet {
+  width: min(440px, calc(100vw - 32px));
+  padding: 20px 24px;
+  border: 1px solid color-mix(in oklab, var(--rule) 85%, transparent);
+  border-radius: var(--radius-window);
+  background: color-mix(in oklab, var(--surface) 88%, transparent);
+  backdrop-filter: blur(28px) saturate(1.8);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  color: var(--text);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--surface) 40%, transparent) inset,
+    inset 0 1px 0 0 color-mix(in oklab, #ffffff 40%, transparent),
+    0 4px 12px -2px color-mix(in srgb, #000 10%, transparent),
+    0 16px 36px -6px color-mix(in srgb, #000 24%, transparent),
+    0 32px 72px -12px color-mix(in srgb, #000 28%, transparent);
+}
+
+.shortcut-sheet::backdrop {
+  background: color-mix(in srgb, #080604 42%, transparent);
+  backdrop-filter: blur(8px) brightness(0.9);
+  -webkit-backdrop-filter: blur(8px) brightness(0.9);
+}
+
+.shortcut-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in oklab, var(--rule) 75%, transparent);
+}
+
+.shortcut-sheet__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--heading);
+  font-size: 14px;
+}
+
+.shortcut-sheet__close-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid color-mix(in oklab, var(--rule) 70%, transparent);
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--text) 5%, transparent);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all var(--motion-hover) var(--ease-decelerate);
+}
+
+.shortcut-sheet__close-badge:hover {
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  border-color: color-mix(in oklab, var(--accent) 30%, transparent);
+  color: var(--heading);
+}
+
+/* ── Dark theme & reduced transparency overrides for dialogs ─────────── */
+
+[data-theme="warm-dark"] .command-palette,
+[data-theme="nord"] .command-palette,
+[data-theme="high-contrast"] .command-palette,
+[data-theme="warm-dark"] .shortcut-sheet,
+[data-theme="nord"] .shortcut-sheet,
+[data-theme="high-contrast"] .shortcut-sheet {
+  border-color: color-mix(in oklab, var(--rule) 90%, transparent);
+  background: color-mix(in oklab, var(--surface) 82%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--text) 14%, transparent),
+    inset 0 1px 0 0 color-mix(in oklab, var(--heading) 15%, transparent),
+    0 6px 18px -3px color-mix(in srgb, #000 45%, transparent),
+    0 20px 48px -8px color-mix(in srgb, #000 65%, transparent),
+    0 36px 84px -14px color-mix(in srgb, #000 75%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] .command-palette,
+  [data-theme="system"] .shortcut-sheet {
+    border-color: color-mix(in oklab, var(--rule) 90%, transparent);
+    background: color-mix(in oklab, var(--surface) 82%, transparent);
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--text) 14%, transparent),
+      inset 0 1px 0 0 color-mix(in oklab, var(--heading) 15%, transparent),
+      0 6px 18px -3px color-mix(in srgb, #000 45%, transparent),
+      0 20px 48px -8px color-mix(in srgb, #000 65%, transparent),
+      0 36px 84px -14px color-mix(in srgb, #000 75%, transparent);
+  }
+}
+
+[data-reduced-transparency="true"] .command-palette,
+[data-reduced-transparency="true"] .shortcut-sheet {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 16px 48px -12px color-mix(in srgb, #000 45%, transparent);
+}
+
+/* ── Dialog entrances and exits ──────────────────────────────────────────
+   The palette and shortcut sheet animate gracefully on entrance with a
+   downward settle and fade; coordinated exit transitions scale slightly up
+   and out without abrupt clipping across engines. */
 .command-palette,
 .shortcut-sheet {
   opacity: 0;
-  translate: 0 8px;
-  scale: 0.985;
+  translate: 0 -12px;
+  scale: 0.96;
+  transform-origin: center top;
   transition:
-    opacity var(--motion-deliberate) var(--ease-decelerate),
-    translate var(--motion-deliberate) var(--ease-decelerate),
-    scale var(--motion-deliberate) var(--ease-decelerate),
-    display var(--motion-deliberate) allow-discrete,
-    overlay var(--motion-deliberate) allow-discrete;
+    opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    translate 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    scale 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    display 0.24s allow-discrete,
+    overlay 0.24s allow-discrete;
 }
+
 .command-palette[open],
 .shortcut-sheet[open] {
   opacity: 1;
   translate: 0 0;
   scale: 1;
 }
+
 @starting-style {
   .command-palette[open],
   .shortcut-sheet[open] {
     opacity: 0;
-    translate: 0 12px;
-    scale: 0.98;
+    translate: 0 -14px;
+    scale: 0.95;
   }
 }
+
+.command-palette.is-closing,
+.shortcut-sheet.is-closing {
+  opacity: 0 !important;
+  translate: 0 -8px !important;
+  scale: 0.96 !important;
+  transition:
+    opacity 0.12s cubic-bezier(0.3, 0, 0.8, 0.15) !important,
+    translate 0.12s cubic-bezier(0.3, 0, 0.8, 0.15) !important,
+    scale 0.12s cubic-bezier(0.3, 0, 0.8, 0.15) !important;
+  pointer-events: none !important;
+}
+
 .command-palette::backdrop,
 .shortcut-sheet::backdrop {
   opacity: 0;
-  transition: opacity var(--motion-deliberate) var(--ease-decelerate), display var(--motion-deliberate) allow-discrete;
+  transition: opacity 0.22s cubic-bezier(0.22, 0.82, 0.28, 1), display 0.22s allow-discrete;
 }
+
 .command-palette[open]::backdrop,
 .shortcut-sheet[open]::backdrop {
   opacity: 1;
 }
+
 @starting-style {
   .command-palette[open]::backdrop,
   .shortcut-sheet[open]::backdrop {
     opacity: 0;
   }
 }
+
+.command-palette.is-closing::backdrop,
+.shortcut-sheet.is-closing::backdrop {
+  opacity: 0 !important;
+  transition: opacity 0.12s ease-in !important;
+}
+
+[data-reduced-motion="true"] .command-palette,
+[data-reduced-motion="true"] .shortcut-sheet,
+[data-reduced-motion="true"] .command-palette::backdrop,
+[data-reduced-motion="true"] .shortcut-sheet::backdrop {
+  transition: none !important;
+  animation: none !important;
+  translate: none !important;
+  scale: 1 !important;
+}
+
 .shortcut-sheet table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .shortcut-sheet td { padding: 9px 0; border-bottom: 1px solid var(--rule); color: var(--text-secondary); }
 .shortcut-sheet kbd { color: var(--heading); font-family: var(--font-mono); font-size: 12px; }
 .shortcut-sheet form { display: flex; justify-content: flex-end; margin-top: 16px; }
-.shortcut-sheet button { border: 0; background: none; color: var(--text-faint); cursor: pointer; font-size: 12px; }
-
-.palette-trigger {
-  min-height: 32px;
-  padding: 0 10px;
+.shortcut-sheet form button {
+  padding: 6px 14px;
   border: 1px solid var(--rule);
   border-radius: var(--radius-chip);
-  background: transparent;
+  background: color-mix(in oklab, var(--text) 6%, transparent);
+  color: var(--heading);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color var(--motion-hover) var(--ease-decelerate);
+}
+.shortcut-sheet form button:hover {
+  background: color-mix(in oklab, var(--accent) 15%, transparent);
+}
+
+.palette-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-chip);
+  background: color-mix(in oklab, var(--surface) 65%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--btn-bevel-top), var(--btn-shadow-rest);
   color: var(--text-faint);
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 11px;
-  transition: color var(--motion-hover) var(--ease-decelerate), border-color var(--motion-hover) var(--ease-decelerate);
+  font-weight: 550;
+  transition: color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate),
+    background-color var(--motion-hover) var(--ease-decelerate),
+    box-shadow var(--motion-hover) var(--ease-decelerate),
+    translate var(--motion-press-out) var(--ease-decelerate);
 }
 
-.palette-trigger:hover { color: var(--heading); border-color: var(--accent); }
+.palette-trigger:hover {
+  color: var(--heading);
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  box-shadow: var(--btn-bevel-top), var(--btn-shadow-hover);
+  translate: 0 -0.5px;
+}
+
+.palette-trigger:active {
+  translate: 0 1px;
+  scale: 0.95;
+  box-shadow: var(--btn-shadow-active);
+}
+
+.palette-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 /* ── Toasts + drop veil ───────────────────────────────────────────────── */
 
@@ -1884,51 +2871,414 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   border-radius: var(--radius-panel);
   opacity: 0;
   translate: 0 8px;
-  transition: opacity var(--motion-quick) var(--ease-decelerate), translate var(--motion-quick) var(--ease-decelerate);
+  scale: .98;
+  transition:
+    opacity var(--motion-quick) var(--ease-decelerate),
+    translate var(--motion-quick) var(--ease-decelerate),
+    scale var(--motion-quick) var(--ease-decelerate);
 }
 
-.glass-toast.is-open { opacity: 1; translate: 0 0; }
+.glass-toast.is-open { opacity: 1; translate: 0 0; scale: 1; }
 .glass-toast strong { color: var(--heading); font-size: 13px; }
 .glass-toast span { color: var(--text-secondary); font-size: 12px; }
 .glass-toast a { color: var(--link); }
 
-/* The post-download panel (§8.1): slightly larger, bottom-centre, the one
-   ask on desktop. It lives outside the toast-host's end-aligned column. */
-.glass-toast--download {
+/* The post-download onboarding companion sheet (§8.1) */
+.glass-toast--download.glass-toast--companion {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: auto;
+  right: 22px;
   bottom: 22px;
-  width: fit-content;
+  width: 420px;
+  max-width: calc(100vw - 44px);
+  max-height: min(520px, calc(100svh - 28px));
+  margin-inline: 0;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in oklab, var(--rule) 85%, transparent);
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.42), 0 0 0 1px color-mix(in oklab, white 12%, transparent) inset;
+  background: color-mix(in oklab, var(--surface) 90%, transparent);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 99;
+  scrollbar-width: thin;
+}
+
+.glass-toast--download.glass-toast--companion,
+.glass-toast--download.glass-toast--companion > * {
   min-width: 0;
-  max-width: min(560px, calc(100vw - 44px));
-  margin-inline: auto;
-  gap: 12px;
-  padding: 16px 18px;
 }
-.glass-toast--download .glass-toast__head {
+
+/* The companion is persistent, so keep it on the opposite side of the
+   travelling window dock instead of letting the two fixed surfaces stack. */
+html[data-download-companion="open"] .glass-toast--download.glass-toast--companion {
+  left: 22px;
+  right: auto;
+}
+
+@media (max-width: 600px) {
+  .glass-toast--download.glass-toast--companion {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100svh - 28px);
+    padding: 12px 12px 10px;
+  }
+
+  .glass-toast__install-card {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .glass-toast__route {
+    width: 100%;
+  }
+}
+
+.glass-toast--companion .glass-toast__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
-.glass-toast--download .glass-toast__head strong { font-size: 14px; }
-.glass-toast--download [data-toast-dismiss] {
-  padding: 4px 7px;
-  border: 0;
-  background: none;
-  color: var(--text-faint);
-  font-size: 13px;
-  line-height: 1;
-  cursor: pointer;
-}
-.glass-toast--download [data-toast-dismiss]:hover { color: var(--heading); }
-.glass-toast--download .glass-toast__actions {
+
+.glass-toast__title-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
+  align-items: center;
+  gap: 11px;
 }
-.glass-toast--download .glass-toast__actions a { font-size: 13px; }
+
+.glass-toast__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  box-shadow: 0 3px 10px -2px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.glass-toast__title-group strong {
+  display: block;
+  color: var(--heading);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.glass-toast__sub {
+  display: block;
+  color: var(--text-faint);
+  font-size: 11px;
+  margin-top: 1px;
+}
+
+.glass-toast__sub code {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.glass-toast__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: transform var(--motion-standard) var(--ease-snap),
+    color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate),
+    background-color var(--motion-hover) var(--ease-decelerate);
+}
+
+.glass-toast__dismiss:hover {
+  color: var(--heading);
+  border-color: var(--accent);
+  transform: rotate(90deg) scale(1.08);
+  background: color-mix(in oklab, var(--accent) 12%, var(--surface));
+}
+
+.glass-toast__dismiss:active {
+  transform: scale(0.92);
+}
+
+/* The hand-drawn moment previews the real Finder window in the DMG. */
+.glass-toast__install-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 164px;
+  gap: 12px;
+  align-items: stretch;
+  padding: 10px 11px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in oklab, var(--accent) 26%, var(--rule));
+  border-radius: var(--radius-button);
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--accent) 9%, transparent), transparent 58%),
+    color-mix(in oklab, var(--surface) 78%, var(--bg));
+}
+
+.glass-toast__install-copy {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+}
+
+.glass-toast__eyebrow {
+  color: var(--accent) !important;
+  font-family: var(--font-mono);
+  font-size: 9px !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.glass-toast__install-copy b {
+  max-width: 32ch;
+  color: var(--heading);
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.glass-toast__install-copy > span:last-child {
+  color: var(--text-secondary);
+  font-size: 10.5px;
+}
+
+/* A quiet route map gives the Finder destination one glanceable shape. */
+.glass-toast__route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-height: 58px;
+}
+
+.glass-toast__route-node {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 7px 5px 6px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-chip);
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+}
+
+.glass-toast__route-node b {
+  color: var(--heading);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.glass-toast__route-node small {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: -0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glass-toast__route-node--target {
+  border-color: color-mix(in oklab, var(--accent) 38%, var(--rule));
+  background: color-mix(in oklab, var(--accent) 9%, var(--surface));
+}
+
+.glass-toast__route-node--target b,
+.glass-toast__route-node--target small { color: var(--accent); }
+
+.glass-toast__route-arrow {
+  color: var(--accent);
+  font-size: 17px;
+  line-height: 1;
+}
+
+/* 3-Step Visual DMG Guide */
+.glass-toast__steps {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 9px 11px;
+  list-style: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-button);
+  background: color-mix(in oklab, var(--bg) 50%, transparent);
+}
+
+.glass-toast__step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 28px;
+  font-size: 12px;
+}
+
+.glass-toast__step + .glass-toast__step {
+  padding-top: 6px;
+  border-top: 1px solid color-mix(in oklab, var(--rule) 65%, transparent);
+}
+
+.glass-toast__step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--accent) 20%, transparent);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.glass-toast__step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.glass-toast__step-info b {
+  color: var(--heading);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.glass-toast__step-info span {
+  color: var(--text-secondary);
+  font-size: 10.5px;
+}
+
+.glass-toast__step-info code {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: color-mix(in oklab, var(--rule) 50%, transparent);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* Terminal one-click copy */
+.glass-toast__terminal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.glass-toast__terminal-lead {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.glass-toast__copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 9px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-chip);
+  background: var(--code-bg);
+  color: var(--heading);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  transition: border-color var(--motion-hover) var(--ease-decelerate),
+    background-color var(--motion-hover) var(--ease-decelerate),
+    translate var(--motion-press-out) var(--ease-decelerate);
+}
+
+.glass-toast__copy-btn code {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glass-toast__copy-btn:hover {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 8%, var(--code-bg));
+  translate: 0 -0.5px;
+}
+
+.glass-toast__copy-btn:active {
+  translate: 0 1px;
+}
+
+.glass-toast__copy-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.glass-toast__copy-btn.is-copied .glass-toast__copy-label {
+  color: #10b981;
+}
+
+.glass-toast__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 3px;
+}
+
+.glass-toast__links {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 11.5px;
+}
+
+.toast-action-link {
+  color: var(--link);
+  text-decoration: none;
+  font-weight: 550;
+  transition: color var(--motion-hover) var(--ease-decelerate);
+}
+
+.toast-action-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.toast-action-link--quiet {
+  color: var(--text-faint);
+}
+
+.glass-toast__direct-link {
+  font-size: 11px;
+  color: var(--text-faint);
+  text-decoration: none;
+}
+
+.glass-toast__direct-link:hover {
+  color: var(--heading);
+}
+
 
 .drop-veil {
   position: fixed;
@@ -1987,17 +3337,17 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
    in six beats — hero, gap, zoom, agent, spill, handoff — and hides the
    desktop-only sections, so no speed/architecture/reach/themes text leaks
    into the thumb-sized page (the "dual-DOM" the film is built to avoid). */
+html[data-film="true"] .speed-section,
+html[data-film="true"] .architecture-section,
+html[data-film="true"] .reach-section,
+html[data-film="true"] .themes-section,
+html[data-film="true"] .gap-wall,
 [data-film="true"] .speed-section,
 [data-film="true"] .architecture-section,
 [data-film="true"] .reach-section,
-[data-film="true"] .themes-section {
-  display: none;
-}
-
-/* The gap-wall is desktop furniture. On the film the gap is the thumb scrub;
-   keeping the wall out of the film leaves the authored beats readable. */
+[data-film="true"] .themes-section,
 [data-film="true"] .gap-wall {
-  display: none;
+  display: none !important;
 }
 
 /* The film has no density rail; a two-pixel accent hairline under the header
@@ -2063,10 +3413,15 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 }
 
 /* ── Beat 1 · hero: the document fills the frame ────────────────────────── */
-[data-film="true"] .hero {
+/* No dwell pin on the film: a sticky full-viewport stage fights the URL
+   bar and the thumb. The stage un-pins and carries the layout instead. */
+[data-film="true"] .hero { min-height: auto; }
+[data-film="true"] .hero__stage {
+  position: static;
+  height: auto;
+  min-height: 0;
   grid-template-columns: 1fr;
   gap: 18px;
-  min-height: auto;
   padding-top: 92px;
 }
 [data-film="true"] .hero__copy { width: 100%; }
@@ -2105,17 +3460,39 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 }
 
 .film-chip {
-  min-height: 44px;
-  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
   border: 1px solid var(--rule);
-  border-radius: 22px;
-  background: var(--surface);
+  border-radius: 24px;
+  background: color-mix(in oklab, var(--surface) 85%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--btn-bevel-top), var(--btn-shadow-rest);
   color: var(--heading);
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
+  transition: background-color var(--motion-hover) var(--ease-decelerate),
+    border-color var(--motion-hover) var(--ease-decelerate),
+    color var(--motion-hover) var(--ease-decelerate),
+    box-shadow var(--motion-hover) var(--ease-decelerate),
+    translate var(--motion-press-out) var(--ease-decelerate),
+    scale var(--motion-press-out) var(--ease-decelerate);
 }
-.film-chip:active { background: var(--code-bg); }
+.film-chip:hover {
+  border-color: color-mix(in oklab, var(--accent) 70%, var(--rule));
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  box-shadow: var(--btn-bevel-top), var(--btn-shadow-hover);
+  translate: 0 -1px;
+}
+.film-chip:active {
+  translate: 0 1px;
+  background: var(--code-bg);
+  box-shadow: var(--btn-shadow-active);
+}
 
 /* ── Beat 2 · the gap, by thumb: a scrubber the reader drags ──────────────
    On the film the pinned scrub collapses; the reader drives the render line
@@ -2199,20 +3576,22 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   bottom: 0;
   left: 0;
   display: flex;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
   z-index: 2;
   padding: 12px;
   background: var(--surface);
 }
 .film-zoom__levels button {
-  min-width: 44px;
-  min-height: 44px;
+  flex: 0 0 48px;
+  min-width: 48px;
+  min-height: 48px;
   border: 1px solid var(--rule);
-  border-radius: 22px;
+  border-radius: 24px;
   background: color-mix(in oklab, var(--surface) 88%, transparent);
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
 }
 .film-zoom__levels button[aria-pressed="true"] {
@@ -2356,10 +3735,15 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   .architecture-section,
   .reach-section,
   .themes-section,
-  .close-section { min-height: 100svh; }
+  .close-section { min-height: 88svh; }
+  /* The architecture copy nearly fills the compact floor; keep the next
+     headline below the rest frame instead of letting it enter at the edge. */
+  .architecture-section { min-height: 96svh; }
 
   .gap-section { min-height: 220svh; padding-inline: 48px; }
-  .sweep-stage { height: 150svh; }
+  /* At 1440×900 this gives a little over two viewport-heights of travel: a
+     quiet raw hold, a deliberate cascade, and a short closing settle. */
+  .sweep-stage { height: var(--sweep-stage-height, 220svh); }
   .gap-wall {
     min-height: 60svh;
     margin: 0 -48px;
@@ -2388,13 +3772,13 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
 
   .speed-section .dark-band__inner,
   .architecture-section .dark-band__inner {
-    min-height: 100svh;
+    min-height: 88svh;
     justify-content: flex-start;
-    padding-top: calc(56px + 8svh);
-    padding-bottom: 7svh;
+    padding-top: calc(44px + 6svh);
+    padding-bottom: 5svh;
   }
   .dark-band .architecture-layout { display: grid; }
-  .architecture-section .dark-band__inner { padding-top: 104px; }
+  .architecture-section .dark-band__inner { padding-top: 96px; }
   .architecture-quote > p:first-child { font-size: clamp(50px, 4.7vw, 68px); }
   .architecture-quote__body { margin-top: 16px; font-size: 15px; line-height: 1.4; }
   .architecture-quote a { margin-top: 16px; }
@@ -2422,7 +3806,12 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
    targets clear 44px, and sections paint lazily below the fold. */
 @media (max-width: 900px) {
   .site-header {
-    background: var(--surface);
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--bg) 88%, transparent),
+      color-mix(in oklab, var(--bg) 58%, transparent) 72%,
+      transparent
+    );
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -2437,7 +3826,9 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   .app-window[data-view="split"][data-mode="read"] .app-window__source { display: none; }
   .app-window[data-view="split"][data-mode="edit"] .app-window__read { display: none; }
   .app-window[data-view="split"][data-mode="edit"] .app-window__source { border-right: 0; }
-  .app-window__segmented button { min-width: 0; padding: 5px 7px; font-size: 10px; }
+  .app-window__bar { min-height: 52px; }
+  .app-window__segmented { min-width: 144px; min-height: 46px; height: 46px; }
+  .app-window__segmented button { min-width: 48px; min-height: 46px; height: 46px; padding: 0 10px; font-size: 10px; }
 
   /* The sweep is one column on a phone. The margin annotations are a desktop
      affordance — at 390px they fight the lede for the same 200px and the
@@ -2452,11 +3843,15 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   .sweep__lede, .sweep__closing { font-size: 19px; margin-bottom: 14px; }
   .sweep-block__raw { font-size: 11.5px; line-height: 1.6; }
   .sweep__surface { padding: 18px 16px 0; }
-  .sweep-stage { height: 200svh; }
+  .sweep-stage { height: var(--sweep-stage-height, 200svh); }
   .app-window__status-shortcut { display: none; }
   .conflict-bar button { min-height: 48px; flex: 1 1 auto; }
   .theme-showroom__list button { min-height: 52px; }
   .film-handoff__row button, .film-handoff__row a { min-height: 48px; }
+}
+
+@media (max-width: 900px) and (prefers-reduced-transparency: reduce) {
+  .site-header { background: var(--surface); }
 }
 
 /* ── Media / preference folds ─────────────────────────────────────────── */
@@ -2476,9 +3871,9 @@ html:not([data-film="true"])[data-enhanced="true"] [data-act]:not([data-active="
   .app-window__status-shortcut { display: none; }
   /* No hardware keyboard, and the titlebar has 390px to spend: the shortcut
      hint goes, and the mode control tightens rather than overflowing. */
-  .app-window__hint { display: none; }
-  .app-window__bar { gap: 8px; padding: 0 10px; }
-  .app-window__segmented button { min-width: 44px; min-height: 44px; padding: 5px 9px; }
+  .app-window__bar { min-height: 52px; gap: 8px; padding: 0 10px; }
+  .app-window__segmented { min-width: 144px; min-height: 46px; height: 46px; }
+  .app-window__segmented button { min-width: 48px; min-height: 46px; height: 46px; padding: 0 10px; }
   .app-window__segmented button {
     font-size: 0;
     line-height: 1;
@@ -2567,20 +3962,26 @@ html[data-film="true"] #themes { display: none; }
 html[data-film="true"] .gap-section {
   display: flex;
   min-height: 100svh;
-  padding: 72px 16px 34px;
+  padding: 64px 16px 28px;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 html[data-film="true"] .gap-section .sweep-stage { height: auto; }
 html[data-film="true"] .gap-section .sweep { padding-top: 0; }
 html[data-film="true"] .gap-section .sweep__slot { margin-top: 18px; }
+html[data-film="true"] .gap-section .sweep__surface {
+  height: 38svh;
+  max-height: 38svh;
+}
 html[data-film="true"] .gap-section .sweep__capture,
 html[data-film="true"] .gap-section .sweep__annotation { display: none; }
 
-html[data-film="true"] .hero {
-  display: grid;
-  width: min(100% - 32px, 760px);
+html[data-film="true"] .hero { min-height: auto; padding: 0; }
+html[data-film="true"] .hero__stage {
+  position: static;
+  height: auto;
   min-height: 100svh;
+  width: min(100% - 32px, 760px);
   padding: 92px 0 28px;
   gap: 14px;
 }
@@ -2594,8 +3995,10 @@ html[data-film="true"] .hero__window .app-window { height: 38svh; min-height: 30
 html[data-film="true"] .hero__annotation { display: none; }
 html[data-film="true"] .film-invite-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 html[data-film="true"] .film-invite { flex: 0 0 100%; min-height: 24px; color: var(--text-faint); font: 12px var(--font-mono); }
-html[data-film="true"] .film-invite::after { animation: none; }
-html[data-film="true"] .film-chip { min-height: 44px; }
+html[data-film="true"] .app-window__bar { min-height: 52px; }
+html[data-film="true"] .app-window__segmented { min-width: 144px; min-height: 46px; height: 46px; }
+html[data-film="true"] .app-window__segmented button { min-width: 48px; min-height: 46px; height: 46px; }
+html[data-film="true"] .film-chip { min-height: 48px; }
 
 /* The gap has a composed raw Quick Look state at progress zero. The old
    entrance clamp made the first rest frame an empty dark stage. */
@@ -2649,7 +4052,8 @@ html[data-film="true"] .film-compact-benchmark div { display: flex; justify-cont
 html[data-film="true"] .film-compact-benchmark div:first-child { border-top: 0; }
 html[data-film="true"] .film-compact-benchmark span { color: var(--text-secondary); }
 html[data-film="true"] .film-compact-benchmark strong { color: var(--heading); font-weight: 500; }
-html[data-film="true"] #film-cta .download-button { width: 100%; margin-top: 22px; }
+html[data-film="true"] #film-cta .film-cta__handoff { margin-top: 22px; padding: 18px 14px; }
+html[data-film="true"] #film-cta .film-handoff__line { font-size: 17px; }
 
 html[data-film="true"] .film-theme-stage { display: grid; gap: 16px; margin-top: 24px; }
 html[data-film="true"] .film-beat--theme { justify-content: flex-start; }
@@ -2666,12 +4070,19 @@ html[data-film="true"] .close-section {
 html[data-film="true"] .close-section__inner { width: min(100%, 760px); }
 html[data-film="true"] .close-section h2 { max-width: 11ch; margin-inline: auto; font-size: clamp(42px, 12vw, 60px); }
 html[data-film="true"] .close-section small,
-html[data-film="true"] .close-section .film-handoff { display: none; }
-html[data-film="true"] .close-section .download-button {
-  display: inline-flex;
-  width: min(100%, 360px);
+html[data-film="true"] .close-section .download-button { display: none; }
+html[data-film="true"] .close-section .film-handoff {
+  display: grid;
+  width: 100%;
   margin-top: 22px;
+  padding: 22px 16px;
+  gap: 13px;
 }
+html[data-film="true"] .close-section .film-handoff__primary {
+  width: 100%;
+}
+html[data-film="true"] .close-section .film-handoff__row { display: none; }
+html[data-film="true"] .close-section .film-handoff__note { display: none; }
 html[data-film="true"] .close-section .close-sponsor {
   display: block;
   margin-top: 22px;

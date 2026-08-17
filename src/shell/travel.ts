@@ -22,15 +22,16 @@
  *  - Only the hero slot is editable. Every other slot forces read mode.
  */
 
-import { MOTION, SpringScalar } from "../kernel/springs";
+import { SpringScalar } from "../kernel/springs";
 import { ticker } from "../kernel/ticker";
 import { reducedMotion } from "../kernel/switchboard";
 import { doc } from "../kernel/store";
-import { renderSampleMarkdown } from "../data/site";
+import { renderSampleMarkdown } from "../kernel/renderer";
 import { springScrollTo } from "../motion/scroll";
 import { toast } from "../shell/toast";
 
 export type SlotId = "hero" | "gap" | "agent" | "theme" | "dock";
+type ReadOwner = "director" | "gap" | "agent";
 
 interface Slot {
   id: SlotId;
@@ -40,9 +41,42 @@ interface Slot {
   host: () => HTMLElement | null;
   /** Where in the host to insert (before this element, if present). */
   before?: () => HTMLElement | null;
+  /** Which scene may mutate the shared read layer while this slot is active. */
+  readOwner: ReadOwner;
 }
 
 const CLAMP = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
+
+interface FlightRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Give a dock arrival a visible edge to leave from when a fast scroll has
+ * already carried the source slot beyond the viewport. Using the stale,
+ * fully offscreen rect makes the dock look as if it disappears and later
+ * reappears; a small visible slice preserves the handoff without inventing a
+ * second window or animating the whole page.
+ */
+function dockArrivalRect(rect: DOMRect): FlightRect {
+  const width = Math.max(1, rect.width);
+  const height = Math.max(1, rect.height);
+  const visibleSlice = CLAMP(Math.min(width, height) * 0.22, 72, 128);
+  const left = rect.right < 0
+    ? -width + visibleSlice
+    : rect.left > window.innerWidth
+      ? window.innerWidth - visibleSlice
+      : CLAMP(rect.left, -width + visibleSlice, window.innerWidth - visibleSlice);
+  const top = rect.bottom < 0
+    ? -height + visibleSlice
+    : rect.top > window.innerHeight
+      ? window.innerHeight - visibleSlice
+      : CLAMP(rect.top, -height + visibleSlice, window.innerHeight - visibleSlice);
+  return { left, top, width, height };
+}
 
 /**
  * Flight timing. Distance-driven like a spring scroll, but floored higher:
@@ -56,9 +90,13 @@ function flightDuration(distance: number): number {
 export class WindowDirector {
   readonly window: HTMLElement;
   private readonly slots: Slot[];
+  private readonly cleanups: Array<() => void> = [];
   private current: SlotId | null = null;
-  private flying = false;
+  flying = false;
   private cancelFlight: (() => void) | null = null;
+  private transitionSerial = 0;
+  private started = false;
+  private destroyed = false;
 
   constructor(windowEl: HTMLElement) {
     this.window = windowEl;
@@ -68,21 +106,25 @@ export class WindowDirector {
         section: "hero",
         host: () => document.querySelector<HTMLElement>(".hero__window"),
         before: () => document.querySelector<HTMLElement>(".hero__annotation"),
+        readOwner: "director",
       },
       {
         id: "gap",
         section: "gap",
         host: () => document.querySelector<HTMLElement>("[data-window-slot=gap]"),
+        readOwner: "gap",
       },
       {
         id: "agent",
         section: "agent",
         host: () => document.querySelector<HTMLElement>("[data-window-slot=agent]"),
+        readOwner: "agent",
       },
       {
         id: "theme",
         section: "themes",
         host: () => document.querySelector<HTMLElement>("[data-window-slot=theme]"),
+        readOwner: "director",
       },
       {
         // The dock is not claimed by any section (empty section id): it is
@@ -91,12 +133,21 @@ export class WindowDirector {
         id: "dock",
         section: "",
         host: () => document.querySelector<HTMLElement>("[data-window-dock]"),
+        readOwner: "director",
       },
     ];
     this.paintStore();
-    doc.subscribe(() => this.paintStore());
-    window.addEventListener("resize", () => this.snapToCurrent(), { passive: true });
+    this.cleanups.push(doc.subscribe(() => this.paintStore()));
+    const onResize = (): void => this.snapToCurrent();
+    window.addEventListener("resize", onResize, { passive: true });
+    this.cleanups.push(() => window.removeEventListener("resize", onResize));
     this.wireDockControls();
+    // A dropped card can swap the document while the window is docked.
+    const onDocumentSwap = (): void => {
+      if (this.current === "dock") this.dressDockFace();
+    };
+    document.addEventListener("downright:doc-swapped", onDocumentSwap);
+    this.cleanups.push(() => document.removeEventListener("downright:doc-swapped", onDocumentSwap));
   }
 
   /* ── The dock: a real mini window, not a shrunken prop ───────────────────
@@ -114,7 +165,6 @@ export class WindowDirector {
   }
 
   private wireDockControls(): void {
-    const labels = ["Dismiss until the next act", "Minimise", "Zoom"];
     const act = (index: number): void => {
       if (this.current !== "dock") return;
       const dock = this.dockHost();
@@ -129,30 +179,41 @@ export class WindowDirector {
       } else if (index === 2) {
         const zoomed = dock.classList.toggle("is-zoomed");
         dock.classList.remove("is-collapsed");
+        this.window.dataset.scrollOwner = "dock";
         if (zoomed) this.window.dataset.dockZoom = "true";
         else delete this.window.dataset.dockZoom;
       }
     };
-    this.window.querySelector(".traffic-lights")?.addEventListener("click", (event) => {
+    const trafficLights = this.window.querySelector(".traffic-lights");
+    if (!trafficLights) return;
+    const onClick = (event: Event): void => {
       const bar = (event.target as Element | null)?.closest("i");
       if (!bar) return;
       event.stopPropagation();
       act(this.lightBars().indexOf(bar));
-    });
-    this.window.querySelector(".traffic-lights")?.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      const index = this.lightBars().indexOf(event.target as HTMLElement);
+    };
+    const onKeydown = (event: Event): void => {
+      const e = event as KeyboardEvent;
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const index = this.lightBars().indexOf(e.target as HTMLElement);
       if (index < 0) return;
-      event.preventDefault();
-      event.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
       act(index);
-    });
-    void labels;
+    };
+    trafficLights.addEventListener("click", onClick);
+    trafficLights.addEventListener("keydown", onKeydown);
+    this.cleanups.push(() => trafficLights.removeEventListener("click", onClick));
+    this.cleanups.push(() => trafficLights.removeEventListener("keydown", onKeydown));
   }
 
   /** The lights become real controls while docked; plain chrome elsewhere. */
   private paintDockControls(on: boolean): void {
     const labels = ["Dismiss the docked window until the next act", "Minimise the docked window", "Zoom the docked window"];
+    this.dockHost()?.setAttribute("aria-hidden", on ? "false" : "true");
+    const trafficLights = this.window.querySelector(".traffic-lights");
+    if (on) trafficLights?.removeAttribute("aria-hidden");
+    else trafficLights?.setAttribute("aria-hidden", "true");
     this.lightBars().forEach((bar, index) => {
       if (on) {
         bar.setAttribute("role", "button");
@@ -171,8 +232,17 @@ export class WindowDirector {
   /** Dress the dock face: the document's skeleton and the journey caption. */
   private dressDockFace(): void {
     const minimap = this.window.querySelector<HTMLElement>("[data-minimap]");
+    if (minimap && minimap.childElementCount) {
+      // Swapped while docked (a card dropped on the companion): rebuild.
+      const text = doc.current.text;
+      if (minimap.dataset.for !== text) {
+        minimap.dataset.for = text;
+        minimap.replaceChildren();
+      }
+    }
     if (minimap && !minimap.childElementCount) {
       const rows = doc.current.text.split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 44);
+      minimap.dataset.for = doc.current.text;
       minimap.replaceChildren(...rows.map((line) => {
         const bar = document.createElement("i");
         bar.dataset.kind = line.startsWith("#") ? "h"
@@ -230,9 +300,9 @@ export class WindowDirector {
     // repaint erases them. The gap scene owns it the same way: its two-state
     // blocks (raw | rendered halves stacked) live in the read layer, and the
     // sweep rebuilds them itself through the store subscription.
-    const agentOwns = doc.current.agent !== "idle" && this.current === "agent";
-    const gapOwns = this.current === "gap";
-    if (!agentOwns && !gapOwns) {
+    const owner = this.slots.find((slot) => slot.id === this.current)?.readOwner ?? "director";
+    const sceneOwns = owner === "gap" || (owner === "agent" && doc.current.agent !== "idle");
+    if (!sceneOwns) {
       const surface = this.readLayer();
       if (surface) surface.innerHTML = renderSampleMarkdown(doc.current.text);
     }
@@ -245,7 +315,11 @@ export class WindowDirector {
 
   /** Determine which slot the viewport currently claims. */
   private resolveActive(): SlotId {
-    const reference = window.scrollY + window.innerHeight * 0.45;
+    // 0.60, not the reading line's 0.46: the window is a heavy object and
+    // leaves late — the visitor is well into the next act before it flies,
+    // so no handoff ever feels snatched. (The hero's dwell pin keeps the
+    // origin on screen through the whole approach.)
+    const reference = window.scrollY + window.innerHeight * 0.6;
     let active: SlotId = "hero";
     for (const slot of this.slots) {
       const section = document.getElementById(slot.section);
@@ -260,25 +334,34 @@ export class WindowDirector {
   }
 
   private snapToCurrent(): void {
-    const slot = this.slots.find((candidate) => candidate.id === this.current);
-    const host = slot?.host();
-    if (!host) return;
     this.cancelFlight?.();
     this.cancelFlight = null;
     this.flying = false;
     delete this.window.dataset.flying;
+    delete document.documentElement.dataset.heroWindowFlying;
     this.window.style.translate = "";
     this.window.style.width = "";
     this.window.style.height = "";
-    host.style.overflow = "";
+    const slot = this.slots.find((candidate) => candidate.id === this.current);
+    const host = slot?.host();
+    host?.style.setProperty("overflow", "");
   }
 
   /** Move the window into a slot and FLIP-morph it there. */
   moveTo(target: SlotId): void {
-    if (this.current === target) return;
+    if (this.destroyed || this.current === target) return;
     const slot = this.slots.find((candidate) => candidate.id === target);
     const host = slot?.host();
     if (!slot || !host) return;
+
+    // A new claim owns every subsequent geometry write. Cancel before any
+    // early return can leave the old ticker job attached to the new parent.
+    this.cancelFlight?.();
+    this.cancelFlight = null;
+    this.transitionSerial += 1;
+    const transitionSerial = this.transitionSerial;
+
+    const previous = this.current;
 
     // Claim the slot BEFORE anything repaints. setMode() below runs a store
     // paint, and if `current` still named the previous slot that paint did not
@@ -320,6 +403,7 @@ export class WindowDirector {
         delete this.window.dataset.chrome;
       }
     }
+    this.window.dataset.scrollOwner = target === "gap" ? "page" : target === "dock" ? "dock" : "scene";
 
     // Every arrival opens at the top of the document.
     const read = this.window.querySelector<HTMLElement>("[data-document-read]");
@@ -335,7 +419,6 @@ export class WindowDirector {
     // First: capture the flight origin (includes any in-flight state, so a
     // reverse claim mid-air simply bends the flight, never snaps).
     const before = this.window.getBoundingClientRect();
-    const wasVisible = before.bottom > -80 && before.top < window.innerHeight + 80;
 
     // Last: re-parent.
     const anchor = slot.before?.() ?? null;
@@ -350,13 +433,22 @@ export class WindowDirector {
     // trail slightly heavier, and a ballistic arc lifts the flight off the
     // straight line between slots. Perceptual, physical, never bouncy.
     const after = this.window.getBoundingClientRect();
-    const dx = before.left - after.left;
-    const dy = before.top - after.top;
-    const dw = before.width - after.width;
-    const dh = before.height - after.height;
+    const sourceVisible = before.bottom > 0
+      && before.top < window.innerHeight
+      && before.right > 0
+      && before.left < window.innerWidth;
+    const flightFrom = target === "dock" && !sourceVisible ? dockArrivalRect(before) : before;
+    const dx = flightFrom.left - after.left;
+    const dy = flightFrom.top - after.top;
+    const dw = flightFrom.width - after.width;
+    const dh = flightFrom.height - after.height;
     const noDelta = Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(dw) < 1 && Math.abs(dh) < 1;
 
-    if (reducedMotion() || !wasVisible || noDelta) {
+    // Keep the morph even when a fast scroll has carried the current slot
+    // above the viewport. An offscreen source uses a visible edge slice as its
+    // origin so the dock does not disappear before the flight becomes visible.
+    if (reducedMotion() || noDelta) {
+      delete document.documentElement.dataset.heroWindowFlying;
       this.window.style.translate = "";
       this.window.style.width = "";
       this.window.style.height = "";
@@ -375,14 +467,14 @@ export class WindowDirector {
 
     // Freeze the origin inline (position via translate, size via box), then
     // spring everything to the slot's own geometry.
-    this.window.style.width = `${before.width.toFixed(2)}px`;
-    this.window.style.height = `${before.height.toFixed(2)}px`;
+    this.window.style.width = `${flightFrom.width.toFixed(2)}px`;
+    this.window.style.height = `${flightFrom.height.toFixed(2)}px`;
     this.window.style.translate = `${dx.toFixed(2)}px ${dy.toFixed(2)}px`;
 
     const px = new SpringScalar(dx, positionDuration, 0.16);
     const py = new SpringScalar(dy, positionDuration, 0.16);
-    const w = new SpringScalar(before.width, sizeDuration, 0.08);
-    const h = new SpringScalar(before.height, sizeDuration, 0.08);
+    const w = new SpringScalar(flightFrom.width, sizeDuration, 0.08);
+    const h = new SpringScalar(flightFrom.height, sizeDuration, 0.08);
     const arc = new SpringScalar(0, positionDuration * 0.92, 0);
     px.setTarget(0);
     py.setTarget(0);
@@ -390,61 +482,26 @@ export class WindowDirector {
     h.setTarget(after.height);
     arc.setTarget(1);
 
-    // A new claim replaces this flight wholesale (see moveTo entry), so the
-    // previous job must never keep writing geometry.
-    this.cancelFlight?.();
     this.flying = true;
     this.window.dataset.flying = "";
-
-    // The afterimage: on real flights, two accent outlines trail the window,
-    // each chasing the same geometry on slower springs. Pure decoration —
-    // the screen-record bait — removed the moment the flight ends.
-    const ghosts: HTMLElement[] = [];
-    if (distance > 260) {
-      for (let index = 0; index < 2; index++) {
-        const ghost = document.createElement("div");
-        ghost.className = "window-ghost";
-        ghost.style.setProperty("--ghost-opacity", (0.24 - index * 0.09).toFixed(2));
-        document.body.append(ghost);
-        ghosts.push(ghost);
-      }
-    }
-    const ghostSprings = ghosts.map((_, index) => {
-      const duration = positionDuration * (1.45 + index * 0.45);
-      const gx = new SpringScalar(dx, duration, 0.16);
-      const gy = new SpringScalar(dy, duration, 0.16);
-      const gw = new SpringScalar(before.width, duration, 0.08);
-      const gh = new SpringScalar(before.height, duration, 0.08);
-      gx.setTarget(0);
-      gy.setTarget(0);
-      gw.setTarget(after.width);
-      gh.setTarget(after.height);
-      return { gx, gy, gw, gh };
-    });
-    const scrollAtLaunch = window.scrollY;
-    const releaseGhosts = (): void => {
-      for (const ghost of ghosts) {
-        ghost.style.opacity = "0";
-        window.setTimeout(() => ghost.remove(), 240);
-      }
-      ghosts.length = 0;
-    };
+    const heroFlight = previous === "hero" || target === "hero";
+    if (heroFlight) document.documentElement.dataset.heroWindowFlying = "true";
 
     const settle = (): void => {
       this.cancelFlight = null;
       this.flying = false;
       delete this.window.dataset.flying;
+      if (heroFlight) delete document.documentElement.dataset.heroWindowFlying;
       this.window.style.translate = "";
       this.window.style.width = "";
       this.window.style.height = "";
       if (clipped) clipped.style.overflow = previousOverflow;
-      releaseGhosts();
     };
 
     const cancel = ticker.add((dt) => {
+      if (transitionSerial !== this.transitionSerial) return false;
       // Advance every spring before OR-ing: `a.advance(dt) || b.advance(dt)`
-      // short-circuits and freezes b for as long as a is still moving — the
-      // flight stalls on one axis (the y spring sat at its origin forever).
+      // short-circuits and freezes b for as long as a is still moving.
       const movingPx = px.advance(dt);
       const movingPy = py.advance(dt);
       const movingW = w.advance(dt);
@@ -454,26 +511,10 @@ export class WindowDirector {
       this.window.style.translate = `${px.value.toFixed(2)}px ${(py.value - lift).toFixed(2)}px`;
       this.window.style.width = `${w.value.toFixed(2)}px`;
       this.window.style.height = `${h.value.toFixed(2)}px`;
-      // Ghosts fly in viewport space; the window flies in document space, so
-      // any scroll during the flight is folded back in. They fade once they
-      // have caught up, while the window may still be settling.
-      const scrolled = window.scrollY - scrollAtLaunch;
-      let ghostsMoving = false;
-      for (let index = 0; index < ghosts.length; index++) {
-        const ghost = ghosts[index];
-        const springs = ghostSprings[index];
-        ghostsMoving = springs.gx.advance(dt) || ghostsMoving;
-        ghostsMoving = springs.gy.advance(dt) || ghostsMoving;
-        ghostsMoving = springs.gw.advance(dt) || ghostsMoving;
-        ghostsMoving = springs.gh.advance(dt) || ghostsMoving;
-        ghost.style.left = `${(after.left + springs.gx.value).toFixed(1)}px`;
-        ghost.style.top = `${(after.top + springs.gy.value - scrolled).toFixed(1)}px`;
-        ghost.style.width = `${springs.gw.value.toFixed(1)}px`;
-        ghost.style.height = `${springs.gh.value.toFixed(1)}px`;
-      }
-      if (!ghostsMoving && ghosts.length) releaseGhosts();
-      if (!(movingPx || movingPy || movingW || movingH || movingArc)) settle();
-      return movingPx || movingPy || movingW || movingH || movingArc;
+
+      const moving = movingPx || movingPy || movingW || movingH || movingArc;
+      if (!moving) settle();
+      return moving;
     });
     this.cancelFlight = () => {
       cancel();
@@ -487,9 +528,12 @@ export class WindowDirector {
   }
 
   start(): void {
+    if (this.destroyed || this.started) return;
+    this.started = true;
     // Claim the hero on load (the window already sits there statically).
     this.current = "hero";
     this.window.dataset.slot = "hero";
+    this.window.dataset.scrollOwner = "scene";
 
     // A scroll read shared by the rail, the agent arming, and the pinning
     // stages; throttle through rAF so we read geometry at most once a frame.
@@ -501,12 +545,30 @@ export class WindowDirector {
      *  band. When the claimed act's stage has left (the wall beat after the
      *  sweep, the dark bands between agent and themes), the window docks
      *  instead of parking somewhere invisible — the journey never breaks. */
-    const slotOnStage = (id: SlotId): boolean => {
+    const slotHasExited = (id: SlotId): boolean => {
       const slot = this.slots.find((candidate) => candidate.id === id);
       const host = slot?.host();
       if (!host) return false;
       const rect = host.getBoundingClientRect();
-      return rect.top < window.innerHeight * 0.78 && rect.bottom > window.innerHeight * 0.22;
+      // Do not dock merely because a newly claimed host is still below the
+      // fold. Dock only after the host has genuinely travelled above the
+      // viewport; this prevents an intro-heavy future act from doing a
+      // claim → dock → claim flicker on entry.
+      return rect.bottom <= window.innerHeight * 0.18;
+    };
+
+    /** A full-size arrival needs a meaningful frame, not just a section label.
+     * The section intro can cross the reading line while its actual window
+     * slot is still below the fold; claiming it there cancels a dock flight
+     * before the minimized window has had time to read. */
+    const slotIsReady = (id: SlotId): boolean => {
+      if (id === "dock") return true;
+      const slot = this.slots.find((candidate) => candidate.id === id);
+      const host = slot?.host();
+      if (!host) return false;
+      const rect = host.getBoundingClientRect();
+      return rect.top <= window.innerHeight * 0.75
+        && rect.bottom >= window.innerHeight * 0.2;
     };
 
     const jumpFromDock = (): void => {
@@ -519,51 +581,76 @@ export class WindowDirector {
       if (section) springScrollTo(section.offsetTop - 72, 480);
       else springScrollTo(0, 520);
     };
-    this.window.addEventListener("click", () => {
+    const onWindowClick = (): void => {
       // Zoomed, the dock is a reader — let them scroll the document in peace.
       if (this.current === "dock" && this.window.dataset.dockZoom !== "true") jumpFromDock();
-    });
-    this.window.addEventListener("keydown", (event) => {
+    };
+    const onWindowKeydown = (event: KeyboardEvent): void => {
       if (this.current !== "dock") return;
       if (event.key === "Enter" && this.window.dataset.dockZoom !== "true") jumpFromDock();
       if (event.key === "Escape") this.dockHost()?.classList.add("is-dismissed");
-    });
+    };
+    this.window.addEventListener("click", onWindowClick);
+    this.window.addEventListener("keydown", onWindowKeydown);
+    this.cleanups.push(() => this.window.removeEventListener("click", onWindowClick));
+    this.cleanups.push(() => this.window.removeEventListener("keydown", onWindowKeydown));
+
+    let settleFrame = 0;
+    let settleTimer: number | null = null;
 
     const settle = (): void => {
+      if (this.destroyed) return;
       if (!ticking) return;
       ticking = false;
+      settleFrame = 0;
+      settleTimer = null;
       const active = this.resolveActive();
-      if (active !== this.current) this.moveTo(active);
+      const targetReady = slotIsReady(active);
+      if (active !== this.current) {
+        // Keep the dock as the visible bridge until the next full-size slot
+        // has enough of its own surface in view to receive the window.
+        if (targetReady) this.moveTo(active);
+        else if (this.current !== "dock" && slotHasExited(this.current ?? "hero")) this.moveTo("dock");
+      }
       // Re-check AFTER the move: an instant jump can teleport into a slot
       // whose stage is already gone (hero → far below in one scroll), and
       // no further settle fires until the next scroll event. The dock must
       // engage in this same pass.
-      if (this.current === active && active !== "dock" && !slotOnStage(active)) this.moveTo("dock");
+      if (this.current === active && active !== "dock" && slotHasExited(active)) this.moveTo("dock");
       if (this.current === "dock") this.dressDockFace();
       // Over the close act the story ends: the docked window retires instead
       // of hovering over the footer.
       if (dockHost) {
-        dockHost.classList.toggle(
-          "is-retired",
-          this.current === "dock" && !!closeSection && closeSection.offsetTop <= window.scrollY + window.innerHeight * 0.9,
-        );
+        const retired = this.current === "dock" && !!closeSection && closeSection.offsetTop <= window.scrollY + window.innerHeight * 0.9;
+        dockHost.classList.toggle("is-retired", retired);
+        dockHost.setAttribute("aria-hidden", retired || this.current !== "dock" ? "true" : "false");
       }
     };
     const onScroll = (): void => {
+      if (this.destroyed) return;
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(settle);
+      settleFrame = requestAnimationFrame(settle);
       // rAF is throttled to zero in background tabs, in low-power mode, and in
       // several in-app webviews. Without this timer a single stalled frame
       // latches `ticking` forever and the window never travels again — the
       // page silently loses its connective tissue.
-      window.setTimeout(settle, 250);
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settle, 250);
     };
+    const onLoad = (): void => onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
     // Deep links and scroll restoration can land before any scroll event.
     requestAnimationFrame(onScroll);
-    window.addEventListener("load", onScroll);
+    window.addEventListener("load", onLoad);
+    this.cleanups.push(() => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("load", onLoad);
+      if (settleFrame) window.cancelAnimationFrame(settleFrame);
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+    });
 
     // Redundancy: an IntersectionObserver on each slot's host is not needed
     // for travel (scroll geometry owns it), but a late hash jump to an act
@@ -571,14 +658,21 @@ export class WindowDirector {
   }
 
   destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    this.transitionSerial += 1;
     this.cancelFlight?.();
     this.cancelFlight = null;
+    delete document.documentElement.dataset.heroWindowFlying;
+    this.cleanups.splice(0).reverse().forEach((cleanup) => cleanup());
   }
 }
 
 let director: WindowDirector | null = null;
 
 export function initTravel(): void {
+  director?.destroy();
+  director = null;
   if (document.documentElement.dataset.film === "true") return;
   const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
   if (!windowEl) return;

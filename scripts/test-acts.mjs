@@ -87,7 +87,11 @@ async function typeInHero(text) {
     src.dispatchEvent(new PointerEvent('pointerdown', {bubbles:true,cancelable:true,composed:true,pointerId:1,pointerType:'mouse',isPrimary:true,clientX:r.left+40,clientY:r.top+60,buttons:1}));
     return true;
   })()`);
-  await sleep(1800);
+  for (let i = 0; i < 40; i++) {
+    const mounted = await cdp.evaluate(`!!document.querySelector('.cm-content')`);
+    if (mounted) break;
+    await sleep(100);
+  }
   await cdp.evaluate(`document.querySelector('.cm-content')?.focus(), true`);
   await sleep(200);
   await cdp.send("Input.insertText", { text });

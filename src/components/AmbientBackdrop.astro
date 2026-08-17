@@ -1,0 +1,50 @@
+---
+const snippets = [
+  { kind: "bold", left: "8%", top: "18vh", raw: "**live**", value: "live" },
+  { kind: "heading", left: "34%", top: "12vh", raw: "## render", value: "render" },
+  { kind: "italic", left: "49%", top: "46vh", raw: "_source_", value: "source" },
+  { kind: "struck", left: "84%", top: "17vh", raw: "~~stale~~", value: "stale" },
+  { kind: "code", left: "91%", top: "62vh", raw: "`parse()`", value: "parse()" },
+  { kind: "link", left: "13%", top: "72vh", raw: "[open](url)", value: "open" },
+  { kind: "task", left: "21%", top: "53vh", raw: "- [ ] task", value: "task" },
+  { kind: "quote", left: "72%", top: "28vh", raw: "> quote", value: "quote" },
+  { kind: "bold", left: "61%", top: "82vh", raw: "**bold**", value: "bold" },
+  { kind: "heading", left: "78%", top: "91vh", raw: "# heading", value: "heading" },
+  { kind: "code", left: "31%", top: "88vh", raw: "`code`", value: "code" },
+  { kind: "italic", left: "96%", top: "37vh", raw: "_italic_", value: "italic" },
+  { kind: "task", left: "5%", top: "86vh", raw: "- [x] done", value: "done" },
+  { kind: "italic", left: "88%", top: "78vh", raw: "_draft_", value: "draft" },
+  { kind: "code", left: "43%", top: "95vh", raw: "`code`", value: "code" },
+  { kind: "divider", left: "97%", top: "52vh", raw: "---", value: "" },
+] as const;
+---
+
+<div class="ambient-backdrop" data-ambient-backdrop aria-hidden="true">
+  <div class="ambient-backdrop__parallax" data-ambient-parallax>
+    <div class="ambient-backdrop__field ambient-backdrop__field--warm"></div>
+    <div class="ambient-backdrop__field ambient-backdrop__field--cool"></div>
+    <canvas class="ambient-backdrop__grid" data-ambient-grid></canvas>
+    <div class="ambient-backdrop__snippets">
+      {snippets.map((snippet) => (
+        <span
+          class:list={["ambient-snippet", `ambient-snippet--${snippet.kind}`]}
+          data-ambient-snippet
+          data-kind={snippet.kind}
+          style={`--snippet-x: ${snippet.left}; --snippet-y: ${snippet.top};`}
+        >
+          <span class="ambient-snippet__raw">{snippet.raw}</span>
+          {snippet.kind === "bold" && <span class="ambient-snippet__rendered"><strong>{snippet.value}</strong></span>}
+          {snippet.kind === "heading" && <span class="ambient-snippet__rendered ambient-snippet__heading">{snippet.value}</span>}
+          {snippet.kind === "italic" && <span class="ambient-snippet__rendered"><em>{snippet.value}</em></span>}
+          {snippet.kind === "struck" && <span class="ambient-snippet__rendered"><s>{snippet.value}</s></span>}
+          {snippet.kind === "code" && <span class="ambient-snippet__rendered"><code>{snippet.value}</code></span>}
+          {snippet.kind === "link" && <span class="ambient-snippet__rendered ambient-snippet__link">{snippet.value}</span>}
+          {snippet.kind === "task" && <span class="ambient-snippet__rendered ambient-snippet__task"><i></i>{snippet.value}</span>}
+          {snippet.kind === "quote" && <span class="ambient-snippet__rendered ambient-snippet__quote"><q>{snippet.value}</q></span>}
+          {snippet.kind === "divider" && <span class="ambient-snippet__rendered ambient-snippet__divider"></span>}
+        </span>
+      ))}
+    </div>
+  </div>
+  <div class="ambient-backdrop__spotlight" data-ambient-spotlight></div>
+</div>

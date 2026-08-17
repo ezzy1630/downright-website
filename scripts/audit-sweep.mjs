@@ -154,7 +154,7 @@ const COLLECT = String.raw`(() => {
   };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node;
-  const CHROME_SEL = '[data-site-header], .site-footer, [data-density-rail], .toast-host, dialog, .drop-veil, [data-release-status], .command-palette, .shortcut-sheet, .review-panel, .quick-look';
+  const CHROME_SEL = '[data-site-header], .site-footer, [data-density-rail], .toast-host, dialog, .drop-veil, [data-release-status], .command-palette, .shortcut-sheet, .review-panel, .quick-look, [data-type-invite]';
   while ((node = walker.nextNode())) {
     const t = node.textContent;
     if (!t || !t.trim()) continue;
@@ -242,7 +242,7 @@ const COLLECT = String.raw`(() => {
       const r = el.getBoundingClientRect();
       if (!visible(r)) return null;
       if (typeof el.checkVisibility === 'function' && !el.checkVisibility()) return null;
-      return { tag: el.tagName, cls: el.className.split(' ')[0], x: +r.x.toFixed(1), y: +r.y.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1) };
+      return { tag: el.tagName, cls: el.className ? el.className.split(' ')[0] : '', txt: el.textContent ? el.textContent.trim().slice(0, 30) : '', x: +r.x.toFixed(1), y: +r.y.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1) };
     }).filter(Boolean),
   });
 })()`;
@@ -437,7 +437,7 @@ async function sweepViewport(cdp, vp, shotDir) {
     const strayAct = stray?.textRects.find((r) => r.op > 0.3 && banned.includes(r.act))?.act;
     const smallTaps = steps.flatMap((s) => s.tapTargets).filter((t) => t.w < 44 || t.h < 44);
     check("H · film: no desktop-act text", !stray, stray ? `act "${strayAct}" visible` : "", prefix);
-    check("H · film: taps ≥44px", smallTaps.length === 0, smallTaps.length ? `${smallTaps[0].cls} ${smallTaps[0].w}×${smallTaps[0].h} (+${smallTaps.length - 1})` : "", prefix);
+    check("H · film: taps ≥44px", smallTaps.length === 0, smallTaps.length ? `${smallTaps[0].tag}.${smallTaps[0].cls} "${smallTaps[0].txt}" ${smallTaps[0].w}×${smallTaps[0].h} (+${smallTaps.length - 1})` : "", prefix);
   }
 
   report.viewports[prefix] = { docH, steps: steps.length, restStates: restIds.length };
@@ -491,20 +491,20 @@ async function sweepFunnel(cdp) {
     const orig = HTMLAnchorElement.prototype.click;
     HTMLAnchorElement.prototype.click = function () { clicked.push({ href: this.getAttribute('href'), download: this.getAttribute('download') }); };
     try {
-      document.querySelector('[data-download]').click();
+      const button = document.querySelector('[data-download]');
+      button?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       await new Promise((r) => setTimeout(r, 180));
       const panel = document.querySelector('.glass-toast--download');
-      let flag = null; try { flag = sessionStorage.getItem('downright-download-panel-shown'); } catch {}
       const panelLinks = panel ? [...panel.querySelectorAll('a')].map((a) => a.getAttribute('href')) : [];
-      const first = { clicked: [...clicked], flag, panel: !!panel, panelLinks };
-      document.querySelector('[data-download]').click();
+      const first = { clicked: [...clicked], panel: !!panel, panelLinks };
+      button?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       await new Promise((r) => setTimeout(r, 80));
       first.panelCount = document.querySelectorAll('.glass-toast--download').length;
       return first;
     } finally { HTMLAnchorElement.prototype.click = orig; }
   })()`);
   check("G · click → DMG href + download attr", !!fired && fired.clicked.length === 1 && fired.clicked[0].href === EXPECTED_DMG && fired.clicked[0].download === "Downright.dmg", fired ? JSON.stringify(fired.clicked) : "", prefix);
-  check("G · panel appears once/session", !!fired && fired.flag === "1" && fired.panel === true && fired.panelCount === 1, fired ? `flag=${fired.flag} panel=${fired.panel} count=${fired.panelCount}` : "", prefix);
+  check("G · panel appears once/download", !!fired && fired.panel === true && fired.panelCount === 1, fired ? `panel=${fired.panel} count=${fired.panelCount}` : "", prefix);
   check("G · panel carries star + fund", !!fired && fired.panelLinks.length === 2 && fired.panelLinks.includes(EXPECTED_REPO) && fired.panelLinks.includes(EXPECTED_SPONSORS), fired ? JSON.stringify(fired.panelLinks) : "", prefix);
 
   const after = await sponsorCensus(cdp);

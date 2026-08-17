@@ -10,11 +10,16 @@
  */
 
 import { doc } from "../kernel/store";
-import { renderSampleMarkdown, renderSampleBlocks, themes, facts } from "../data/site";
+import { benchmarks, themes, facts } from "../data/site";
+import { renderSampleMarkdown, renderSampleBlocks } from "../kernel/renderer";
 import { reducedMotion } from "../kernel/switchboard";
 import { switchTheme, currentTheme } from "../shell/spill";
 
 const FILM_QUERY = "(max-width: 900px) and (pointer: coarse)";
+
+function benchmarkP50(measurement: string): string {
+  return benchmarks.rows.find((row) => row.measurement === measurement)?.p50 ?? "—";
+}
 
 export function isFilm(): boolean {
   if (new URLSearchParams(window.location.search).has("film")) return true;
@@ -22,6 +27,8 @@ export function isFilm(): boolean {
 }
 
 export function initFilm(): void {
+  const forcedFilm = new URLSearchParams(window.location.search).has("film");
+  if (!forcedFilm) initFilmBreakpointGuard();
   if (!isFilm()) return;
   document.documentElement.dataset.film = "true";
 
@@ -35,6 +42,14 @@ export function initFilm(): void {
   initInsertEditChip();
   initSweepThumb();
   initFilmSpill();
+}
+
+function initFilmBreakpointGuard(): void {
+  const query = window.matchMedia(FILM_QUERY);
+  const initialMatch = query.matches;
+  query.addEventListener("change", (event) => {
+    if (event.matches !== initialMatch) window.location.reload();
+  }, { once: true });
 }
 
 function initFilmActiveBeat(): void {
@@ -92,17 +107,21 @@ function buildFilmCtaBeat(): void {
   beat.id = "film-cta";
   beat.dataset.rest = "film-cta";
   beat.dataset.fingerprint = "film-cta";
-  beat.setAttribute("aria-label", "Download Downright");
+  beat.setAttribute("aria-label", "Send Downright to your Mac");
   beat.innerHTML = `
     <p class="film-beat__kicker">A small engine</p>
     <h2 class="film-beat__title">Fast enough to stay with the thought.</h2>
     <div class="film-compact-benchmark" aria-label="Compact local benchmark">
-      <div><span>Parse 100 KB</span><strong>12.078 ms</strong></div>
-      <div><span>Source edit</span><strong>0.146 ms</strong></div>
-      <div><span>Text diff</span><strong>2.099 ms</strong></div>
+      <div><span>Parse 100 KB</span><strong>${benchmarkP50("Parse 100 KB")}</strong></div>
+      <div><span>Source edit</span><strong>${benchmarkP50("Source edit and paragraph map")}</strong></div>
+      <div><span>Text diff</span><strong>${benchmarkP50("Text diff, external rewrite")}</strong></div>
     </div>
     <p class="film-beat__line">Native measurements, with the limit beside each number. The source stays yours while the page keeps up.</p>
-    <button type="button" class="button button--primary download-button" data-download data-download-url="${facts.downloadUrl}" data-artifact="${facts.artifactName}" data-magnet aria-label="Download for macOS">Download for macOS</button>`;
+    <div class="film-handoff film-cta__handoff" data-fingerprint="film-cta-handoff">
+      <p class="film-handoff__line">On iPhone? Send the page to your Mac, then download there.</p>
+      <button type="button" class="film-handoff__primary" data-share="share">Send it to your Mac</button>
+      <p class="film-handoff__note">The macOS download stays on the Mac where it belongs.</p>
+    </div>`;
   section.before(beat);
 }
 
@@ -181,16 +200,18 @@ function initFilmWindowTravel(): void {
     windowEl.dataset.slot = target.id;
     setWindowMode(target.id === "hero" ? "split" : "document");
     const after = windowEl.getBoundingClientRect();
-    const dx = before.left - after.left;
-    const dy = before.top - after.top;
-    if (reducedMotion() || !before.width || !after.width) {
-      windowEl.style.transform = "none";
-    } else {
-      windowEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${(before.width / after.width).toFixed(4)})`;
+    windowEl.style.removeProperty("transform");
+    if (!reducedMotion() && before.width && after.width) {
+      windowEl.dataset.filmFlying = "true";
+      windowEl.style.opacity = "0";
       requestAnimationFrame(() => {
-        windowEl.style.transition = "transform 320ms cubic-bezier(.2,.8,.2,1)";
-        windowEl.style.transform = "none";
-        window.setTimeout(() => windowEl.style.removeProperty("transition"), 360);
+        windowEl.style.transition = "opacity 180ms cubic-bezier(.22,.82,.28,1)";
+        windowEl.style.opacity = "1";
+        window.setTimeout(() => {
+          delete windowEl.dataset.filmFlying;
+          windowEl.style.removeProperty("transition");
+          windowEl.style.removeProperty("opacity");
+        }, 220);
       });
     }
     current = target.id;
@@ -327,8 +348,7 @@ function initSweepThumb(): void {
     if (event.key === "ArrowRight" || event.key === "ArrowUp") { event.preventDefault(); paint(Math.min(1, current + 0.05)); }
     if (event.key === "ArrowLeft" || event.key === "ArrowDown") { event.preventDefault(); paint(Math.max(0, current - 0.05)); }
   });
-  if (document.documentElement.dataset.film === "true") paint(0);
-  else if (reducedMotion()) paint(1);
+  if (reducedMotion()) paint(1);
   else {
     let played = false;
     const observer = new IntersectionObserver((entries) => {

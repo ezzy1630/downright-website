@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { changelog, facts } from "../data/site";
+import changelog from "../data/app/changelog.json";
+import { facts } from "../data/site";
 import { pageMeta, reviewedOn } from "../data/seo";
 
 type ChangelogEntry = (typeof changelog.entries)[number];

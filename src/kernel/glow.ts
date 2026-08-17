@@ -36,6 +36,16 @@ export function initPointerPresence(): void {
       // Normalized cursor position (-1..1) — the titlebar's filename leans a
       // few pixels toward the pointer off this; the wash above uses the px.
       (glow as HTMLElement).style.setProperty("--cursor-nx", (rect.width > 0 ? ((lastX - rect.left) / rect.width) * 2 - 1 : 0).toFixed(3));
+
+      // The hero has a second, quieter layer behind the window. Reuse the
+      // same pointer sample so the static halo and cursor wash feel like one
+      // restrained surface rather than two unrelated effects.
+      const heroWindow = glow.closest<HTMLElement>(".hero__window");
+      if (heroWindow) {
+        const heroRect = heroWindow.getBoundingClientRect();
+        heroWindow.style.setProperty("--hero-px", `${(lastX - heroRect.left).toFixed(1)}px`);
+        heroWindow.style.setProperty("--hero-py", `${(lastY - heroRect.top).toFixed(1)}px`);
+      }
     }
 
     if (!reduced()) {

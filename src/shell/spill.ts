@@ -13,6 +13,7 @@ import type { AppTheme } from "../data/site";
 import { MOTION, SpringColor } from "../kernel/springs";
 import { ticker } from "../kernel/ticker";
 import { reducedMotion } from "../kernel/switchboard";
+import { sound } from "../kernel/sound";
 
 const STORAGE_KEY = "downright-theme";
 const WAVE_SPAN = 0.12;
@@ -38,6 +39,55 @@ let currentId = DEFAULT_THEME;
 let detachWave: (() => void) | null = null;
 let tokenNames: string[] = [];
 
+// CSSStyleDeclaration custom-property enumeration is not consistent in Safari.
+// These are the source color tokens from tokens.css; aliases (band colors and
+// shadows) inherit from them and do not need a second animation channel.
+const COLOR_TOKENS = [
+  "--bg",
+  "--surface",
+  "--text",
+  "--text-secondary",
+  "--text-faint",
+  "--heading",
+  "--marker",
+  "--accent",
+  "--link",
+  "--rule",
+  "--selection",
+  "--code-bg",
+  "--inline-code-bg",
+  "--code-rule",
+  "--rail-tick",
+  "--rail-tick-current",
+  "--quote-rule",
+  "--change-added",
+  "--change-removed",
+  "--change-modified",
+  "--path-missing",
+  "--search-hit",
+  "--search-hit-current",
+  "--callout-note",
+  "--callout-warning",
+  "--callout-success",
+  "--callout-danger",
+  "--syntax-keyword",
+  "--syntax-string",
+  "--syntax-number",
+  "--syntax-comment",
+  "--syntax-type",
+  "--syntax-function",
+  "--syntax-variable",
+  "--syntax-constant",
+  "--syntax-operator",
+  "--syntax-punctuation",
+  "--syntax-attribute",
+  "--syntax-diff-added",
+  "--syntax-diff-removed",
+  "--syntax-diff-header",
+  "--cta-fill",
+  "--cta-ink",
+] as const;
+
 export function currentTheme(): string {
   return currentId;
 }
@@ -54,10 +104,10 @@ function effectiveTheme(id: string): AppTheme {
 }
 
 /** Generated theme colors are already present as CSS custom properties. Read
- * the live stylesheet so JS ships no duplicate palette table. */
+ * the live values so JS ships no duplicate palette table. */
 function refreshTokenNames(): void {
   const styles = getComputedStyle(document.documentElement);
-  tokenNames = Array.from(styles).filter((name) => name.startsWith("--") && styles.getPropertyValue(name).trim().startsWith("#"));
+  tokenNames = COLOR_TOKENS.filter((name) => styles.getPropertyValue(name).trim()).map((name) => name);
 }
 
 function clearInline(zone: HTMLElement): void {
@@ -169,6 +219,7 @@ function startWave(target: AppTheme, originX: number, originY: number): void {
 
 export function switchTheme(id: string, origin?: { x: number; y: number }): void {
   currentId = id;
+  sound.tick();
   try {
     localStorage.setItem(STORAGE_KEY, id);
   } catch {

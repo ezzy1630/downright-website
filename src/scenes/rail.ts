@@ -1,9 +1,10 @@
 /**
  * The density rail: a native-style stack of quiet horizontal marks. It is a
  * document map, not a second scrollbar: the stack stays centred, the current
- * section is one brighter mark, and proximity makes neighbouring marks breathe
- * and gently move around the pointer. Hover raises the section preview; click
- * jumps and drag scrubs. Below 900px it stands down for the mobile film.
+ * section is one brighter mark, and proximity makes neighbouring marks breathe,
+ * shrink and grow, and dynamically interact with pointer movement and clicks.
+ * Hover raises the section preview HUD; click jumps and drag scrubs. Below 900px
+ * it stands down for the mobile film.
  */
 
 import { MOTION, SpringScalar } from "../kernel/springs";
@@ -11,21 +12,25 @@ import { ticker } from "../kernel/ticker";
 import { PointerTracker } from "../kernel/pointer";
 import { springScrollTo } from "../motion/scroll";
 
-const CHASE_RADIUS = 36;
-const FIELD_RADIUS = 72;
-const BREATHE = 1.14;
-const NEIGHBOR_DIM = 0.82;
-const NEIGHBOR_LIFT = 0.95;
-const NEIGHBOR_LIFT_RADIUS = 2;
-const NEIGHBOR_REPEL = 3.2;
-const VELOCITY_SCALE = 1200;
+const CHASE_RADIUS = 40;
+const FIELD_RADIUS = 90;
+const FOCUS_RADIUS = 30;
+const BASE_LENGTH = 14;
+const ACTIVE_LENGTH = 22;
+const HOVER_PEAK_LENGTH = 30;
+const COMPRESSED_LENGTH = 7.5;
+const BASE_WIDTH = 2;
+const ACTIVE_WIDTH = 2.5;
+const HOVER_WIDTH = 3;
+const NEIGHBOR_REPEL = 3.4;
+const VELOCITY_SCALE = 1100;
 const HUD_EDGE_INSET = 52;
 const JUMP_KICK = 480;
 const TRACK_INSET = 28;
 const MAX_STACK_FRACTION = 0.5;
 const MIN_PITCH = 7;
 const MAX_PITCH = 11;
-const MAGNETIC_PULL = 1.5;
+const MAGNETIC_PULL = 1.2;
 
 interface Tick {
   id: string;
@@ -37,7 +42,9 @@ interface Tick {
   offset: SpringScalar;
   lean: SpringScalar;
   scale: SpringScalar;
+  thickness: SpringScalar;
   alpha: SpringScalar;
+  glow: SpringScalar;
   changed: boolean;
 }
 
@@ -111,10 +118,12 @@ export function initRail(): RailController | null {
         ?? "",
       element: section,
       y: 0,
-      offset: new SpringScalar(0, MOTION.durations.quick),
-      lean: new SpringScalar(0, MOTION.durations.quick),
-      scale: new SpringScalar(1, MOTION.durations.quick),
-      alpha: new SpringScalar(1, MOTION.durations.quick),
+      offset: new SpringScalar(0, MOTION.durations.quick, 0.12),
+      lean: new SpringScalar(0, MOTION.durations.quick, 0.15),
+      scale: new SpringScalar(1, MOTION.durations.quick, 0.2),
+      thickness: new SpringScalar(BASE_WIDTH, MOTION.durations.quick, 0.1),
+      alpha: new SpringScalar(0.58, MOTION.durations.quick),
+      glow: new SpringScalar(0, MOTION.durations.standard, 0.1),
       changed: false,
     });
   }
@@ -154,32 +163,58 @@ export function initRail(): RailController | null {
     if (hudIndex >= 0) {
       hud.style.setProperty("--hud-offset", `${(hudY.value - height / 2).toFixed(2)}px`);
     }
+
     ticks.forEach((tick, index) => {
       const scale = tick.scale.value;
       const isCurrent = index === nearest;
       const isHovered = index === hudIndex;
-      const alpha = tick.alpha.value * (isCurrent ? 1 : 0.72);
-      const length = (isHovered ? 30 : isCurrent ? 28 : 22) * scale;
+      const alpha = clamp(tick.alpha.value, 0, 1);
+      const glow = clamp(tick.glow.value, 0, 2);
+      const thickness = clamp(tick.thickness.value, 1, 4);
+
+      // Dynamic length calculation based on state and spring scale
+      const baseLen = isHovered ? HOVER_PEAK_LENGTH : isCurrent ? ACTIVE_LENGTH : BASE_LENGTH;
+      const length = Math.max(4, baseLen * scale);
       const y = tick.y + tick.offset.value;
       const lean = tick.lean.value;
-      ctx.globalAlpha = Math.min(1, alpha);
-      ctx.strokeStyle = isHovered ? accent : isCurrent ? current : ink;
-      ctx.lineWidth = isHovered ? 2.75 : isCurrent ? 2.5 : 2;
-      ctx.lineCap = "round";
+
+      const x1 = centre - length / 2 + lean * 0.35;
+      const x2 = centre + length / 2 + lean;
+      const y1 = y + lean * 0.12;
+      const y2 = y - lean * 0.12;
+
+      // Soft luminous glow pass on hovered, active, or pulsed ticks
+      if (glow > 0.04 || isHovered) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = thickness + 3.5;
+        ctx.lineCap = "round";
+        ctx.globalAlpha = Math.min(0.55, alpha * (isHovered ? 0.45 : glow * 0.35));
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Foreground crisp stroke
       ctx.beginPath();
-      ctx.moveTo(centre - length / 2 + lean * 0.35, y + lean * 0.13);
-      ctx.lineTo(centre + length / 2 + lean, y - lean * 0.13);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.globalAlpha = isHovered ? 1 : isCurrent ? Math.max(0.9, alpha) : alpha;
+      ctx.strokeStyle = (isHovered || glow > 0.35) ? accent : isCurrent ? current : ink;
+      ctx.lineWidth = thickness;
+      ctx.lineCap = "round";
       ctx.stroke();
 
       if (tick.changed) {
-        // A change mark hangs off the tick's leading edge after the agent
-        // visit — the app marks a changed region the same way.
+        // A change mark hangs off the tick's leading edge after the agent visit
+        ctx.beginPath();
+        ctx.moveTo(centre + length / 2 + lean + 3.5, y - lean * 0.12);
+        ctx.lineTo(centre + length / 2 + lean + 7.5, y - lean * 0.12);
         ctx.globalAlpha = Math.min(1, alpha);
         ctx.strokeStyle = accent;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(centre + length / 2 + lean + 4, y - lean * 0.13);
-        ctx.lineTo(centre + length / 2 + lean + 9, y - lean * 0.13);
+        ctx.lineWidth = Math.max(1.5, thickness * 0.85);
         ctx.stroke();
       }
     });
@@ -194,7 +229,9 @@ export function initRail(): RailController | null {
       if (tick.offset.advance(dt)) moving = true;
       if (tick.lean.advance(dt)) moving = true;
       if (tick.scale.advance(dt)) moving = true;
+      if (tick.thickness.advance(dt)) moving = true;
       if (tick.alpha.advance(dt)) moving = true;
+      if (tick.glow.advance(dt)) moving = true;
     }
     const progress = currentProgress();
     if (Math.abs(progress - lastProgress) > 0.0004) {
@@ -206,7 +243,7 @@ export function initRail(): RailController | null {
   };
   ticker.add(job);
 
-  // Pointer chase: proximity springs breathe the tick and dim neighbors.
+  // Pointer chase: proximity springs breathe the tick, dynamic shrink/grow fisheye wave
   const onPointerMove = (event: PointerEvent): void => {
     const rect = rail.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -215,50 +252,92 @@ export function initRail(): RailController | null {
     pointerVelocityX = velocity.x;
     pointerVelocityY = velocity.y;
     pointerInside = x >= -CHASE_RADIUS && x <= rect.width + CHASE_RADIUS && pointerY >= 0 && pointerY <= rect.height;
+
     if (!pointerInside) {
       hideHud();
       releaseTicks();
       return;
     }
+
     const distances = ticks.map((tick) => Math.hypot(x - width / 2, pointerY - tick.y));
     const closestIndex = distances.reduce((best, distance, index) => distance < distances[best] ? index : best, 0);
     const hoverIndex = distances[closestIndex] < CHASE_RADIUS ? closestIndex : -1;
     const velocityX = clamp(pointerVelocityX / VELOCITY_SCALE, -1, 1);
     const velocityY = clamp(pointerVelocityY / VELOCITY_SCALE, -1, 1);
     const activeY = hoverIndex >= 0 ? ticks[hoverIndex].y : pointerY;
+
     ticks.forEach((tick, index) => {
+      const dy = pointerY - tick.y;
       const distance = distances[index];
-      const influence = Math.pow(Math.max(0, 1 - distance / FIELD_RADIUS), 1.35);
-      const indexDistance = hoverIndex >= 0 ? Math.abs(index - hoverIndex) : Infinity;
-      const neighbor = indexDistance <= NEIGHBOR_LIFT_RADIUS;
-      const neighborInfluence = neighbor ? Math.max(0, 1 - indexDistance / (NEIGHBOR_LIFT_RADIUS + 1)) : 0;
-      const side = hoverIndex >= 0 ? Math.sign(tick.y - activeY) : 0;
-      const magnetic = clamp((pointerY - tick.y) * influence * 0.08, -MAGNETIC_PULL, MAGNETIC_PULL);
-      const repel = side * neighborInfluence * influence * NEIGHBOR_REPEL;
-      const velocityPush = velocityY * influence * (index === hoverIndex ? 0.9 : neighborInfluence * 1.8);
-      const horizontalPull = (x - width / 2) * influence * 0.12 + velocityX * influence * 1.4;
-      setTarget(tick.scale, index === hoverIndex ? BREATHE : 1 + influence * 0.06 + neighborInfluence * 0.035);
-      setTarget(tick.alpha, index === hoverIndex ? 1 : neighbor ? NEIGHBOR_LIFT : NEIGHBOR_DIM);
+      const focus = Math.exp(-Math.pow(dy / FOCUS_RADIUS, 2));
+      const field = Math.max(0, 1 - distance / FIELD_RADIUS);
+      const isHovered = index === hoverIndex;
+      const side = Math.sign(tick.y - activeY);
+
+      // Micro-interactions: Fisheye shrink & grow dynamics
+      if (focus > 0.55 || isHovered) {
+        // Core focus: grows gracefully with elastic spring
+        const growRatio = 1.0 + focus * 0.35;
+        setTarget(tick.scale, growRatio);
+        setTarget(tick.thickness, HOVER_WIDTH);
+        setTarget(tick.alpha, 1.0);
+        setTarget(tick.glow, isHovered ? 1.0 : focus * 0.6);
+      } else if (focus > 0.12) {
+        // Immediate neighbors: smooth transition and lift
+        const neighborScale = 0.88 + focus * 0.38;
+        setTarget(tick.scale, neighborScale);
+        setTarget(tick.thickness, BASE_WIDTH + (HOVER_WIDTH - BASE_WIDTH) * focus);
+        setTarget(tick.alpha, 0.78 + focus * 0.22);
+        setTarget(tick.glow, focus * 0.3);
+      } else {
+        // Non-focused lines: gently shrink to amplify the magnetic focus contrast
+        const shrinkScale = COMPRESSED_LENGTH / BASE_LENGTH;
+        setTarget(tick.scale, shrinkScale);
+        setTarget(tick.thickness, BASE_WIDTH * 0.88);
+        setTarget(tick.alpha, 0.36);
+        setTarget(tick.glow, 0);
+      }
+
+      // Magnetic offset, vertical repel, horizontal pull, and velocity swish
+      const magnetic = clamp(dy * field * 0.08, -MAGNETIC_PULL, MAGNETIC_PULL);
+      const repel = side * focus * NEIGHBOR_REPEL;
+      const velocityPush = velocityY * field * (isHovered ? 0.75 : 1.5);
+      const horizontalPull = (x - width / 2) * field * 0.14 + velocityX * field * 1.5;
+
       setTarget(tick.offset, magnetic + repel + velocityPush);
-      setTarget(tick.lean, horizontalPull + side * neighborInfluence * 0.65);
-      if (index === hoverIndex && !dragScrubbing && hudIndex !== index) showHud(index);
+      setTarget(tick.lean, horizontalPull + side * focus * 0.65);
+
+      if (isHovered && !dragScrubbing && hudIndex !== index) {
+        showHud(index);
+      }
     });
-    if (hoverIndex >= 0) setTarget(hudY, clamp(pointerY, HUD_EDGE_INSET, height - HUD_EDGE_INSET));
-    if (hoverIndex < 0) hideHud();
+
+    if (hoverIndex >= 0) {
+      setTarget(hudY, clamp(pointerY, HUD_EDGE_INSET, height - HUD_EDGE_INSET));
+    } else {
+      hideHud();
+    }
+
     active = true;
     ticker.add(job);
   };
 
   const releaseTicks = (): void => {
-    for (const tick of ticks) {
+    const nearest = nearestTick();
+    ticks.forEach((tick, index) => {
+      const isCurrent = index === nearest;
       setTarget(tick.scale, 1);
-      setTarget(tick.alpha, 1);
+      setTarget(tick.thickness, isCurrent ? ACTIVE_WIDTH : BASE_WIDTH);
+      setTarget(tick.alpha, isCurrent ? 1 : 0.58);
+      setTarget(tick.glow, 0);
       setTarget(tick.offset, 0);
       setTarget(tick.lean, 0);
-    }
+    });
     pointerVelocityX = 0;
     pointerVelocityY = 0;
     pointerTracker = new PointerTracker();
+    active = true;
+    ticker.add(job);
   };
 
   let hudStagger = 0;
@@ -287,6 +366,7 @@ export function initRail(): RailController | null {
     window.clearTimeout(hudStagger);
     hudStagger = window.setTimeout(() => hud.classList.add("is-detail"), MOTION.durations.stagger * 1000);
   };
+
   const hideHud = (): void => {
     if (hudIndex === -1) return;
     hudIndex = -1;
@@ -299,7 +379,27 @@ export function initRail(): RailController | null {
     if (!tick) return;
     const target = tick.element.offsetTop - 72;
     springScrollTo(target, JUMP_KICK);
-    tick.scale.kick(JUMP_KICK / 400);
+
+    // Dynamic tactile kick on clicked tick
+    tick.scale.kick(0.95);
+    tick.glow.snap(1.8);
+    tick.thickness.kick(0.6);
+
+    // Ripple wave propagation outward to adjacent ticks
+    ticks.forEach((t, i) => {
+      if (i === index) return;
+      const d = Math.abs(i - index);
+      const delay = d * 22;
+      window.setTimeout(() => {
+        const damp = Math.pow(0.62, d);
+        t.scale.kick(0.7 * damp);
+        t.offset.kick((i > index ? 2.5 : -2.5) * damp);
+        t.glow.kick(0.55 * damp);
+        active = true;
+        ticker.add(job);
+      }, delay);
+    });
+
     active = true;
     ticker.add(job);
   };
@@ -312,6 +412,7 @@ export function initRail(): RailController | null {
     hideHud();
     releaseTicks();
   });
+
   rail.addEventListener("click", (event) => {
     if (dragScrubbing) return;
     const rect = rail.getBoundingClientRect();
@@ -328,16 +429,35 @@ export function initRail(): RailController | null {
     jumpTo(best);
   });
 
-  // Drag scrubs the page; the compact stack settles under the hand.
+  // Drag scrubs the page; pointer down gives tactile press compression
   rail.addEventListener("pointerdown", (event) => {
     dragScrubbing = true;
     rail.setPointerCapture(event.pointerId);
+    const rect = rail.getBoundingClientRect();
+    const y = event.clientY - rect.top;
+    let best = 0;
+    let bestDistance = Infinity;
+    ticks.forEach((tick, index) => {
+      const distance = Math.abs(tick.y + tick.offset.value - y);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = index;
+      }
+    });
+    if (ticks[best]) {
+      ticks[best].scale.kick(-0.35);
+      ticks[best].glow.snap(1.3);
+      active = true;
+      ticker.add(job);
+    }
     scrubTo(event.clientY);
   });
+
   rail.addEventListener("pointermove", (event) => {
     if (!dragScrubbing) return;
     scrubTo(event.clientY);
   });
+
   const endScrub = (): void => {
     dragScrubbing = false;
   };

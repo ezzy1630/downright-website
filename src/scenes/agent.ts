@@ -14,11 +14,12 @@ import { doc } from "../kernel/store";
 import { flyPinnedRect, pinRect } from "../kernel/fly";
 import { reducedMotion } from "../kernel/switchboard";
 import { diffWords, summarizeDiff, type DiffToken } from "../kernel/worddiff";
-import { renderSampleMarkdown } from "../data/site";
+import { renderSampleMarkdown } from "../kernel/renderer";
 import type { RailController } from "./rail";
 import { toast } from "../shell/toast";
 import { MOTION, SpringScalar } from "../kernel/springs";
 import { ticker } from "../kernel/ticker";
+import { sound } from "../kernel/sound";
 
 const SESSION_KEY = "downright-agent-visited";
 const DWELL_MS = 1500;
@@ -214,6 +215,7 @@ export function initAgent(rail: RailController | null): void {
   const resolve = (action: "mine" | "theirs"): void => {
     const revision = doc.current.revision;
     if (!revision) return;
+    sound.tick();
     if (action === "mine") {
       doc.resolveMine();
       repaintHost(surface());
@@ -254,6 +256,26 @@ export function initAgent(rail: RailController | null): void {
       else if (action === "mine" || action === "theirs") resolve(action);
     });
   });
+
+  // While the conflict is open, every marked word is a door into its review:
+  // the diff opens landed on the clicked phrase.
+  const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
+  const paintReviewable = (on: boolean): void => {
+    if (!windowEl) return;
+    if (on) windowEl.dataset.reviewable = "";
+    else delete windowEl.dataset.reviewable;
+  };
+  const barOpened = (): boolean => !conflictBar.hidden;
+  windowEl?.addEventListener("click", (event) => {
+    const mark = (event.target as Element | null)?.closest("mark[data-change-kind]");
+    if (!mark || !barOpened()) return;
+    paintReviewable(true);
+    openReview(reviewPanel, resolve, mark.textContent ?? undefined);
+  });
+  // The cursor affordance tracks the bar's actual state.
+  const barObserver = new MutationObserver(() => paintReviewable(barOpened()));
+  barObserver.observe(conflictBar, { attributeFilter: ["hidden"] });
+  paintReviewable(barOpened());
 }
 
 function repaintHost(surface: HTMLElement | null): void {
@@ -300,7 +322,7 @@ function renderWithMarks(surface: HTMLElement | null, theirs: string, tokens: Di
   }
 }
 
-function openReview(panel: HTMLElement | null, resolve: (action: "mine" | "theirs") => void): void {
+function openReview(panel: HTMLElement | null, resolve: (action: "mine" | "theirs") => void, phrase?: string): void {
   if (!panel) return;
   const revision = doc.current.revision;
   if (!revision) return;
@@ -337,6 +359,17 @@ function openReview(panel: HTMLElement | null, resolve: (action: "mine" | "their
   panel.querySelector<HTMLButtonElement>("[data-review-close]")?.addEventListener("click", () => panel.classList.remove("is-open"));
   panel.querySelector<HTMLButtonElement>("[data-review-keep]")?.addEventListener("click", () => resolve("mine"));
   panel.querySelector<HTMLButtonElement>("[data-review-take]")?.addEventListener("click", () => resolve("theirs"));
+  // Arrived through a marked word: land the diff on that phrase.
+  if (phrase) {
+    const panes = panel.querySelector<HTMLElement>(".review-diff__panes");
+    const theirs = [...(panel.querySelectorAll<HTMLElement>(".review-diff__panes pre") ?? [])].find((pre) => (pre.textContent ?? "").includes(phrase));
+    const text = theirs?.textContent ?? "";
+    const index = text.indexOf(phrase);
+    if (panes && theirs && index >= 0) {
+      const fraction = index / Math.max(1, text.length);
+      panes.scrollTop = fraction * (panes.scrollHeight - panes.clientHeight);
+    }
+  }
   panel.querySelector<HTMLButtonElement>("[data-review-close]")?.focus();
 }
 
