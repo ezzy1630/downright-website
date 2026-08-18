@@ -13,7 +13,7 @@ This is the current launch record for the approved site plan. The site does not 
 
 ## Native evidence
 
-This website intentionally publishes no screenshots. Its interactive demonstrations use live HTML, CSS, and generated document payload data. Native app verification remains a separate local release gate; the current payload follows the 1.0.16 source commit 85964fb.
+The homepage uses live HTML, CSS, and generated document payload data rather than pretending a screenshot is interactive. The press kit also includes native stills captured from a fresh local build; native app verification remains a separate release gate, and the current payload follows the 1.0.16 source commit 85964fb.
 
 The approved Quick Look, Finder, conflict, density, structural zoom, theme, split view, terminal, and motion checks remain outside the website and are not represented as shipped evidence here.
 
