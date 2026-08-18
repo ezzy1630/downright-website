@@ -1,3 +1,5 @@
+import { sound } from "../kernel/sound";
+
 /** Small transient messages plus the post-download handoff state. */
 
 export function toast(html: string, options: { duration?: number } = {}): void {
@@ -24,7 +26,7 @@ function createHost(): HTMLElement {
   return host;
 }
 
-/** The quiet completion state shown after the browser accepts the DMG. */
+/** The quiet, beautifully crafted completion dialog shown after starting the download. */
 export function downloadPanel(artifactName: string, downloadUrl: string, sponsorsUrl: string): void {
   const host = document.querySelector<HTMLElement>("[data-toast-host]") ?? createHost();
   const existing = host.querySelector(".download-complete");
@@ -39,10 +41,12 @@ export function downloadPanel(artifactName: string, downloadUrl: string, sponsor
   element.setAttribute("aria-labelledby", titleId);
 
   element.innerHTML = `
-    <div class="download-complete__surface glass">
-      <button type="button" class="download-complete__dismiss" data-download-dismiss aria-label="Close download confirmation" title="Close download confirmation">
+    <div class="download-complete__backdrop" data-download-dismiss aria-hidden="true"></div>
+    <div class="download-complete__surface glass" tabindex="-1">
+      <button type="button" class="download-complete__dismiss" data-download-dismiss aria-label="Close download window" title="Close (Esc)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
+
       <img class="download-complete__icon" src="/assets/downright-app-icon.png" width="56" height="56" alt="Downright icon" />
       <span class="download-complete__eyebrow">Download started</span>
       <h1 id="${titleId}">Thank you for downloading Downright</h1>
@@ -52,7 +56,7 @@ export function downloadPanel(artifactName: string, downloadUrl: string, sponsor
         <a class="button button--primary download-complete__help" href="/download/#install">Installation help</a>
         ${sponsorsUrl ? `<a class="download-complete__support" href="${sponsorsUrl}" target="_blank" rel="noreferrer">Support Downright ↗</a>` : ""}
       </div>
-      <p class="download-complete__fallback">If the download does not start, <a href="${downloadUrl}" target="_blank" rel="noreferrer">download it directly from GitHub ↗</a>.</p>
+      <p class="download-complete__fallback">If the download does not start, <button type="button" class="download-complete__retry" data-download-retry>restart download</button> or <a href="${downloadUrl}" target="_blank" rel="noreferrer">download directly from GitHub ↗</a>.</p>
     </div>
   `;
 
@@ -61,9 +65,6 @@ export function downloadPanel(artifactName: string, downloadUrl: string, sponsor
   requestAnimationFrame(() => element.classList.add("is-open"));
 
   let dismissed = false;
-  const onKey = (event: KeyboardEvent): void => {
-    if (event.key === "Escape") dismiss();
-  };
   const dismiss = (): void => {
     if (dismissed) return;
     dismissed = true;
@@ -75,7 +76,38 @@ export function downloadPanel(artifactName: string, downloadUrl: string, sponsor
     }, 260);
   };
 
-  element.querySelector("[data-download-dismiss]")?.addEventListener("click", dismiss);
+  const onKey = (event: KeyboardEvent): void => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      dismiss();
+    }
+  };
+
+  element.querySelectorAll("[data-download-dismiss]").forEach((btn) => btn.addEventListener("click", dismiss));
   window.addEventListener("keydown", onKey);
+
+  // Retry download trigger
+  element.querySelector("[data-download-retry]")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    sound.whoosh();
+    const anchor = document.createElement("a");
+    anchor.href = downloadUrl;
+    anchor.download = artifactName;
+    anchor.rel = "noreferrer";
+    anchor.style.display = "none";
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+
+    const retryBtn = element.querySelector<HTMLElement>("[data-download-retry]");
+    if (retryBtn) {
+      const origText = retryBtn.textContent;
+      retryBtn.textContent = "restarting...";
+      window.setTimeout(() => {
+        retryBtn.textContent = origText;
+      }, 2000);
+    }
+  });
+
   element.querySelector<HTMLButtonElement>("[data-download-dismiss]")?.focus();
 }
