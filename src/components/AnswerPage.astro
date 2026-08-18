@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { reviewedLabel, reviewedOn } from "../data/seo";
+import { imagePathForMarkdown, reviewedLabel, reviewedOn } from "../data/seo";
 
 interface Props {
   title: string;
@@ -13,7 +13,7 @@ interface Props {
   schema?: Record<string, unknown>;
 }
 
-const { title, trail, updated, markdownPath, description, imagePath, modifiedDate = reviewedOn, schema } = Astro.props;
+const { title, trail, updated, markdownPath, description, imagePath = imagePathForMarkdown(markdownPath), modifiedDate = reviewedOn, schema } = Astro.props;
 const pageTitle = title + " | Downright";
 ---
 

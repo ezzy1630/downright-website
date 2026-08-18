@@ -15,6 +15,7 @@
     "audit:contrast": "node scripts/audit-contrast.mjs",
     "audit:budgets": "node scripts/audit-budgets.mjs",
     "audit:seo": "node scripts/audit-seo.mjs",
+    "submit:indexnow": "node scripts/indexnow-submit.mjs",
     "test:editor": "node scripts/test-editor.mjs",
     "test:theme": "node scripts/test-theme.mjs",
     "test:acts": "node scripts/test-acts.mjs",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "latest",
+    "@types/node": "^26.2.0",
     "typescript": "latest"
   }
 }
