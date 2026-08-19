@@ -27,7 +27,12 @@ function createHost(): HTMLElement {
 }
 
 /** The quiet, beautifully crafted completion dialog shown after starting the download. */
-export function downloadPanel(artifactName: string, downloadUrl: string, sponsorsUrl: string): void {
+export function downloadPanel(
+  artifactName: string,
+  downloadUrl: string,
+  repositoryUrl: string,
+  sponsorsUrl: string,
+): void {
   const host = document.querySelector<HTMLElement>("[data-toast-host]") ?? createHost();
   const existing = host.querySelector(".download-complete");
   if (existing) existing.remove();
@@ -54,6 +59,7 @@ export function downloadPanel(artifactName: string, downloadUrl: string, sponsor
       <p class="download-complete__next">When it finishes, open the DMG and move Downright to Applications.</p>
       <div class="download-complete__actions">
         <a class="button button--primary download-complete__help" href="/download/#install">Installation help</a>
+        ${repositoryUrl ? `<a class="download-complete__support" href="${repositoryUrl}" target="_blank" rel="noreferrer">Star on GitHub ↗</a>` : ""}
         ${sponsorsUrl ? `<a class="download-complete__support" href="${sponsorsUrl}" target="_blank" rel="noreferrer">Support Downright ↗</a>` : ""}
       </div>
       <p class="download-complete__fallback">If the download does not start, <button type="button" class="download-complete__retry" data-download-retry>restart download</button> or <a href="${downloadUrl}" target="_blank" rel="noreferrer">download directly from GitHub ↗</a>.</p>

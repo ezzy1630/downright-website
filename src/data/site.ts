@@ -14,7 +14,7 @@ export const benchmarks = benchmarksPayload as BenchmarkPayload;
 export const motion = motionPayload;
 export { sampleMarkdown };
 
-export const entityDescription = "Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.";
+export const entityDescription = "Downright is a beautiful, fast, free, open-source Markdown editor and reader for macOS. It opens ordinary files in place, renders them natively, preserves their exact source, works offline, and is MIT licensed.";
 export const brewCommand = "brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright";
 export const npmCommand = "npx --yes downright-installer";
 export const curlCommand = "curl -fsSL https://downright.cc/install | bash";
@@ -22,7 +22,7 @@ export const curlCommand = "curl -fsSL https://downright.cc/install | bash";
 export const sections = [
   { id: "hero", label: "Start", detail: "The native Markdown app" },
   { id: "gap", label: "The difference", detail: "What macOS shows you, and what Downright shows you" },
-  { id: "agent", label: "Agent writes", detail: "See what changed, then decide" },
+  { id: "agent", label: "Live changes", detail: "See what changed, then decide" },
   { id: "speed", label: "Speed", detail: "Every number has a limit beside it" },
   { id: "architecture", label: "How it works", detail: "Your text stays in charge" },
   { id: "reach", label: "Everywhere", detail: "Finder, Quick Look, the terminal" },
@@ -35,7 +35,7 @@ export const copy = {
   description: entityDescription,
   hero: {
     heading: "The native Markdown app for macOS.",
-    body: "Your agents write too much Markdown. Downright renders it exactly and lets you review rewrites live, without touching your bytes.",
+    body: "Open ordinary Markdown files as polished Mac documents, edit their exact source, and preview them throughout Finder.",
     micro: "Free · MIT · macOS 14+ · no WebView",
   },
   gap: {
@@ -44,8 +44,8 @@ export const copy = {
     capture: "The same bytes above are live DOM — no uploaded image, no detour.",
     closing: "Same file. Same bytes. Downright just renders them.",
     annotation: "same bytes ↑",
-    beatTwoHeading: "There is more of it every day.",
-    beatTwoLine: "Your agents wrote 3,000 words while you read this sentence. One of them matters. Good luck finding it.",
+    beatTwoHeading: "Markdown deserves to feel like a document.",
+    beatTwoLine: "Good typography, real selection, native shortcuts, and a source view when you need it. No vault or web view in the way.",
   },
   render: {
     heading: "Every part of the file renders.",
@@ -71,9 +71,9 @@ export const copy = {
     body: "This page uses the app's theme engine. Pick a theme and the whole page changes with it.",
   },
   agent: {
-    heading: "The file changes while you are reading it.",
-    body: "An agent writes to the file you have open. Downright marks every word that changed and waits for you to decide what to keep.",
-    contextual: "That is what reviewing agent work should feel like.",
+    heading: "See external edits without losing your place.",
+    body: "When another app or coding agent rewrites an open file, Downright marks what changed and protects any edits you have not saved.",
+    contextual: "Useful when you need it, invisible when you do not.",
   },
   close: {
     heading: "Free. Open source. MIT. No account.",
