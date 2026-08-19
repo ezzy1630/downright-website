@@ -1,27 +1,67 @@
 ---
 import AnswerPage from "../../components/AnswerPage.astro";
-import { pageMeta, reviewedLabel } from "../../data/seo";
+import { pageMeta } from "../../data/seo";
 ---
 
-<AnswerPage title="How to review Claude Code plans in Markdown" trail="Review Claude Code plans" updated={reviewedLabel} description={pageMeta.claudePlans.description} markdownPath={pageMeta.claudePlans.markdownPath ?? "/guides/review-claude-code-plans.md"}>
-  <p>Claude Code plans are easiest to review when they remain ordinary Markdown files in the repository. Open the plan in Downright, read the rendered structure, and keep the file visible while Claude Code or another process updates it.</p>
+<AnswerPage title="A practical way to review Claude Code plans" trail="Review Claude Code plans" updated="August 19, 2026" modifiedDate="2026-08-19" description={pageMeta.claudePlans.description} markdownPath={pageMeta.claudePlans.markdownPath ?? "/guides/review-claude-code-plans.md"}>
+  <p>A long plan can look convincing while leaving the risky decisions vague. Clean headings help, but the real review is whether another person could follow the plan, recognize a wrong turn, and prove the result.</p>
 
-  <h2>A simple review loop</h2>
-  <ol>
-    <li>Open the plan file in Downright before the agent starts changing it.</li>
-    <li>Use headings, tasks, links, and the outline to understand the intended work.</li>
-    <li>Let the agent update the same file when the plan evolves.</li>
-    <li>Inspect the highlighted external changes before choosing Keep Mine or Take Theirs.</li>
-    <li>Use Source Focus when the exact Markdown syntax or path matters.</li>
-  </ol>
+  <p>I keep agent plans as ordinary Markdown in the repository. They can be diffed, linked to code, read without the chat transcript, and corrected by either side. Downright is the reading surface I built for that file. The checklist below works in any editor.</p>
 
-  <h2>What to check before accepting a plan</h2>
+  <h2>Start with the contract</h2>
+  <p>Before reading the proposed steps, write down what the request actually promises. Separate five things:</p>
   <ul>
-    <li>Does the plan name the actual files and acceptance surface?</li>
-    <li>Are implementation, verification, and remaining blockers separate?</li>
-    <li>Did the agent change scope, assumptions, or destructive actions?</li>
-    <li>Are commands and test gates written precisely enough to rerun?</li>
+    <li><strong>Outcome:</strong> what changes for the user?</li>
+    <li><strong>Scope:</strong> which repositories, files, services, or accounts are included?</li>
+    <li><strong>Boundary:</strong> what must not be changed?</li>
+    <li><strong>Acceptance surface:</strong> where will a person experience the result?</li>
+    <li><strong>Proof:</strong> what evidence would make &quot;done&quot; credible?</li>
   </ul>
 
-  <p>Downright is not a chat panel or an agent controller. It is the native document surface for reviewing the file the agent is changing.</p>
+  <p>This catches a common failure early. A plan may propose a passing unit test when the request is for a working installed app. The test is useful evidence, but it is not the acceptance surface.</p>
+
+  <h2>Make the plan name real objects</h2>
+  <p>&quot;Update the UI&quot; is not a step. A reviewable step names the view, state owner, command, or route it expects to change. It explains why that layer owns the behavior. Precise names make mistakes cheaper to spot before code is written.</p>
+
+  <p>Commands deserve the same scrutiny. A plan that says &quot;run tests&quot; should identify the repository's actual gate. If a release depends on signing, an appcast, or a public artifact, those checks belong in the plan too.</p>
+
+  <h2>Look for state transitions</h2>
+  <p>Bugs hide between states more often than inside the happy path. For a document workflow, ask what happens when the file is clean, dirty, missing, renamed, restored, or rewritten twice. For a network feature, ask about loading, empty, error, retry, and stale data. For an account action, ask what happens before and after authentication.</p>
+
+  <p>A useful plan either covers the important transitions or states which ones are out of scope. Silence is not a decision.</p>
+
+  <h2>Separate reversible and consequential actions</h2>
+  <p>Reading a file, building locally, and inspecting a diff are easy to undo. Publishing a release, emailing a user, deleting data, and changing a production setting are not. The plan should place a visible boundary before consequential actions and identify the exact target.</p>
+
+  <p>This is especially important when the agent has access to several repositories or accounts with similar names. &quot;Deploy the site&quot; is unsafe if staging and production are both available. The plan should say which one and why.</p>
+
+  <h2>Demand proof at the right layer</h2>
+  <p>Match each claim to evidence:</p>
+  <ul>
+    <li>A parser change needs focused tests with exact inputs and outputs.</li>
+    <li>A visual fix needs inspection of the rendered state at representative sizes.</li>
+    <li>A macOS integration needs a fresh built or installed bundle, not only package tests.</li>
+    <li>A published release needs the public download, version, signature, and update feed checked.</li>
+    <li>An external submission needs a confirmation page, email, or public listing.</li>
+  </ul>
+
+  <p>If the evidence cannot be collected in the current environment, the plan should call that a blocker. It should not turn &quot;unverified&quot; into &quot;probably fine.&quot;</p>
+
+  <h2>Watch the plan while it changes</h2>
+  <p>Plans often evolve during implementation. New evidence invalidates an assumption, a test exposes another state, or the repository has changed since the prompt was written. That is healthy if the revision stays visible.</p>
+
+  <p>Open the plan before the agent starts. When the file changes, inspect the changed words in context. Ask whether the new step follows from evidence or quietly broadens the task. In Downright, external-write marks remain relative to the last reviewed version until you clear them. You can keep local edits or accept the version on disk without losing either by accident.</p>
+
+  <h2>The final pass</h2>
+  <ol>
+    <li>Read the original request again.</li>
+    <li>Match every requested outcome to a completed step and a piece of evidence.</li>
+    <li>Check later corrections and constraints, not only the first prompt.</li>
+    <li>Inspect the actual diff for unrelated changes, placeholders, and stale comments.</li>
+    <li>List anything still blocked or unverified in plain language.</li>
+  </ol>
+
+  <p>A good plan is not the longest plan. It is the smallest one that exposes the decisions, failure modes, and proof needed to finish safely.</p>
+
+  <p class="answer-sources">Related: <a href="/guides/markdown-external-changes/">reviewing external Markdown changes</a>, <a href="/markdown-for-agents/claude-code/">the Claude Code file workflow</a>, and Downright's <a href="https://github.com/ezzy1630/Downright/blob/main/Docs/ARCHITECTURE.md" target="_blank" rel="noreferrer">document architecture</a>.</p>
 </AnswerPage>
