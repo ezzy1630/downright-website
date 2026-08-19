@@ -1,36 +1,62 @@
 ---
 import AnswerPage from "../../components/AnswerPage.astro";
-import { pageMeta, reviewedLabel } from "../../data/seo";
+import { pageMeta } from "../../data/seo";
 ---
 
-<AnswerPage title="Review Markdown files changed by another process" trail="External Markdown changes" updated={reviewedLabel} description={pageMeta.externalChanges.description} markdownPath={pageMeta.externalChanges.markdownPath ?? "/guides/markdown-external-changes.md"}>
-  <p>When Claude Code, Codex, a script, an editor, or another process rewrites an open Markdown file, the safe behavior is to show the change and let the reader decide. Downright treats the external rewrite as a review event rather than silently discarding local work.</p>
+<AnswerPage title="How to review Markdown changed by another process" trail="External Markdown changes" updated="August 19, 2026" modifiedDate="2026-08-19" description={pageMeta.externalChanges.description} markdownPath={pageMeta.externalChanges.markdownPath ?? "/guides/markdown-external-changes.md"}>
+  <p>You have a plan open. A coding agent rewrites it. The window refreshes, the heading you were reading moves, and the paragraph you meant to question is gone. Nothing crashed, but the review failed.</p>
 
-  <h2>What happens in Downright</h2>
+  <p>A file watcher can tell you that bytes changed. A useful document app also has to preserve unsaved work, explain the difference, and keep the reader oriented. Downright treats an external write as a document event, not a command to reload blindly.</p>
+
+  <h2>Why watching one file is not enough</h2>
+  <p>Many editors, formatters, build tools, and coding agents save atomically. They write a complete temporary file, flush it, and rename it over the original path. Readers never see a half-written document, which is good. The tradeoff is that the original inode disappears.</p>
+
+  <p>A watcher attached only to that inode may fire once and then quietly stop. Downright watches the parent directory with FSEvents, filters events to the open filename, and stats the path again. It also keeps a slower polling fallback for networked and virtualized filesystems.</p>
+
+  <p>File events arrive in bursts. One request can produce a draft, a correction, and a formatter pass within seconds. Downright coalesces the low-level events, then waits for a short quiet period at the document layer before applying the settled version.</p>
+
+  <h2>Keep three versions straight</h2>
+  <p>An external-change workflow needs more than &quot;old&quot; and &quot;new.&quot; There may be three distinct texts:</p>
+  <ul>
+    <li>The last version the reader finished reviewing.</li>
+    <li>The current in-memory buffer, which may contain unsaved edits.</li>
+    <li>The newest bytes on disk.</li>
+  </ul>
+
+  <p>Downright keeps the review baseline separate from the live buffer. Every incoming write is compared with that baseline until the reader clears the marks or chooses a version. If an agent writes five times, the final marks describe everything changed since the last review, not only the fifth write.</p>
+
+  <p>Incoming text is also stored in a content-addressed local snapshot. Identical versions deduplicate, and retention rules limit the store. Restoring a snapshot becomes an ordinary text edit with undo. The app never performs a hidden file replacement behind the document.</p>
+
+  <h2>Clean and dirty buffers need different policies</h2>
+  <p>When the buffer is clean, Downright can apply the disk version. Before relayout it records the current selection, the source offset near the top of the viewport, and a nearby heading. After the change it restores the best available anchor and marks the changed words.</p>
+
+  <p>When the buffer is dirty, automatic replacement would destroy local work. Downright stores the incoming version as a pending conflict and blocks normal saves from overwriting it. Dismissing the conflict bar does not remove that protection. The conflict remains until the reader explicitly chooses Keep Mine or Take Theirs.</p>
+
+  <p>This policy has an awkward but honest consequence: a save can be refused. That is better than claiming success after silently erasing either the local edit or the external rewrite.</p>
+
+  <h2>Try the workflow</h2>
   <ol>
-    <li>The app notices that the file changed outside the current document session.</li>
-    <li>It compares the local and external versions and marks changed words in the rendered document.</li>
-    <li>The document stays available while you inspect the rewrite.</li>
-    <li>You choose whether to keep your version or take the external version.</li>
+    <li>Open a Markdown file in Downright and place the window beside Terminal.</li>
+    <li>Leave the document clean, then use a script or coding agent to rewrite one paragraph.</li>
+    <li>Confirm that the document updates in place and the changed words remain marked.</li>
+    <li>Edit a different paragraph in Downright without saving.</li>
+    <li>Rewrite the file from Terminal again. The app should show a conflict rather than replacing either version.</li>
+    <li>Inspect both choices, then resolve the conflict deliberately.</li>
   </ol>
 
-  <h2>Why the file can change without a simple edit</h2>
-  <p>Many tools do not write a document in place. They write a temporary file, flush it, and rename it over the original. That atomic replace changes the file identity even though the path is the same. A directory watcher is therefore more reliable than watching only one inode, and a timestamp alone is not enough to explain what happened.</p>
-  <p>A dirty local buffer makes the distinction important. Blindly reloading the path can erase text that has not been saved yet; ignoring the event can leave the reader looking at an obsolete plan. The safe sequence is to read the new bytes, preserve a local baseline, calculate a difference, and make the decision visible.</p>
+  <h2>A small atomic-write test</h2>
+  <p>This shell sequence models the save pattern that breaks inode-only watchers:</p>
 
-  <h2>Reproduce the workflow</h2>
-  <ol>
-    <li>Open a Markdown file in Downright and leave the document at a heading or task list.</li>
-    <li>In a terminal, edit the file with Claude Code, Codex, a script, or an atomic temp-file-and-rename operation.</li>
-    <li>Watch Downright keep the document available while the external changes are marked.</li>
-    <li>Use the review surface to keep local work, take the file on disk, or inspect the changed words before deciding.</li>
-  </ol>
+  <pre><code>cp PLAN.md PLAN.md.tmp
+printf '\n## New constraint\n\nKeep the export offline.\n' &gt;&gt; PLAN.md.tmp
+mv PLAN.md.tmp PLAN.md</code></pre>
 
-  <h2>Why this matters for coding agents</h2>
-  <p>Agents often rewrite plans, task lists, README files, and implementation notes while a person is reading them. A normal file watcher can refresh the screen, but a refresh is not a review. Word-level changes preserve the question that matters: what did the agent actually alter?</p>
+  <p>The path stays <code>PLAN.md</code>, but the file identity changes. A robust app notices the directory event, reopens the path, and compares the new bytes with a stable baseline.</p>
 
-  <h2>Keep the source in charge</h2>
-  <p>Downright decorates the original text storage. It does not normalize the document into a separate database or upload it to a server. The file path, bytes, and user decision remain part of the workflow.</p>
+  <h2>What the UI should answer</h2>
+  <p>A good review surface answers four questions without sending the reader hunting through history: Did the file change? Which words changed? Is my unsaved work safe? What will each choice do?</p>
 
-  <p class="answer-sources">Related: <a href="/markdown-for-agents/claude-code/">Claude Code workflow</a>, <a href="/markdown-for-agents/codex/">Codex workflow</a>, <a href="/engineering/">native rendering architecture</a>, and the local <a href="https://github.com/ezzy1630/Downright">source repository</a>.</p>
+  <p>That is the standard Downright aims for. The implementation is local and provider-independent. It works the same way whether the writer was Claude Code, Codex, a formatter, a shell script, Dropbox, or another editor.</p>
+
+  <p class="answer-sources">Read the <a href="https://github.com/ezzy1630/Downright/blob/main/Sources/DownrightApp/AI/FileWatcher.swift" target="_blank" rel="noreferrer">watcher implementation</a>, <a href="https://github.com/ezzy1630/Downright/blob/main/Sources/DownrightApp/AI/MarkdownDocument.swift" target="_blank" rel="noreferrer">document conflict policy</a>, and <a href="/guides/review-claude-code-plans/">the plan review checklist</a>.</p>
 </AnswerPage>
