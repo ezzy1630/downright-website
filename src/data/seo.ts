@@ -11,6 +11,33 @@ export interface PageMeta {
   type?: "website" | "article";
 }
 
+/**
+ * A page's Open Graph card is derived from its Markdown mirror path, so a route,
+ * its mirror and its card cannot drift apart — `scripts/generate-og.mjs` writes
+ * the files this resolves to. PNG, because no link-preview crawler renders SVG.
+ */
+export const ogImagePath = (markdownPath: string): string => {
+  const slug = markdownPath.replace(/^\/+/, "").replace(/\.md$/, "").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+  return `/og/${slug || "index"}.png`;
+};
+
+/**
+ * Page titles are written for search results: they carry a brand suffix after a
+ * pipe that reads as noise on a link card. These are the headlines the cards
+ * actually set, keyed by mirror path so `scripts/generate-og.mjs` and the meta
+ * tags resolve the same string.
+ */
+const ogHeadlines: Record<string, string> = {
+  "/index.md": "The native Markdown app for macOS.",
+  "/privacy.md": "Local use is the default.",
+  "/changelog.md": "Version truth, in public.",
+  "/themes.md": "Six palettes. One document.",
+  "/faq.md": "Questions, answered from source.",
+};
+
+export const ogHeadline = (markdownPath: string, title: string): string =>
+  ogHeadlines[markdownPath] ?? title.split("|")[0].trim();
+
 export const reviewedOn = "2026-08-16";
 export const reviewedLabel = "August 16, 2026";
 
@@ -18,7 +45,6 @@ export const pageMeta = {
   home: {
     title: "Downright | Native Markdown for macOS",
     description: "A free, open-source native Markdown editor and viewer for macOS. Render exact files, review agent rewrites live, and keep every byte local.",
-    imagePath: "/og/index.svg",
     markdownPath: "/index.md",
   },
   download: {
@@ -35,19 +61,16 @@ export const pageMeta = {
   themes: {
     title: "Markdown themes for macOS | Downright",
     description: "Explore Downright's six source-derived Markdown themes for macOS, including Paper Light, Warm Dark, Nord, Solarized Light, High Contrast, and System.",
-    imagePath: "/og/themes.svg",
     markdownPath: "/themes.md",
   },
   changelog: {
     title: "Downright changelog | Native Markdown app",
     description: "Read the source-grounded Downright changelog for the native macOS Markdown editor, viewer, Quick Look extensions, CLI, and agent-review workflow.",
-    imagePath: "/og/changelog.svg",
     markdownPath: "/changelog.md",
   },
   privacy: {
     title: "Downright privacy | Local Markdown for macOS",
     description: "Downright keeps Markdown files local. Learn how the native app, Quick Look extensions, optional Apple Intelligence, and website handle data.",
-    imagePath: "/og/privacy.svg",
     markdownPath: "/privacy.md",
   },
   knownGaps: {

@@ -19,15 +19,18 @@
     "test:theme": "node scripts/test-theme.mjs",
     "test:acts": "node scripts/test-acts.mjs",
     "test:a11y": "node scripts/test-a11y.mjs",
-    "audit:sweep": "node scripts/audit-sweep.mjs"
+    "audit:sweep": "node scripts/audit-sweep.mjs",
+    "audit:og": "node scripts/audit-og.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",
     "@codemirror/language": "^6.12.4",
     "@codemirror/state": "^6.7.1",
     "@codemirror/view": "^6.43.8",
+    "@resvg/resvg-js": "^2.6.2",
     "@vercel/analytics": "^2.0.1",
-    "astro": "latest"
+    "astro": "latest",
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@astrojs/check": "latest",

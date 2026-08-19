@@ -7,7 +7,7 @@ import BrandMark from "../components/BrandMark.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import ThemeControl from "../components/ThemeControl.astro";
 import { copy, facts } from "../data/site";
-import type { Breadcrumb } from "../data/seo";
+import { ogHeadline, ogImagePath, type Breadcrumb } from "../data/seo";
 
 interface Props {
   title?: string;
@@ -28,7 +28,7 @@ const {
   description = copy.description,
   pageClass = "",
   markdownPath = "/index.md",
-  imagePath = "/og/index.svg",
+  imagePath,
   pageType = "website",
   datePublished,
   dateModified,
@@ -42,7 +42,12 @@ const siteRoot = siteUrl.toString().replace(/\/$/, "");
 const normalizedPath = Astro.url.pathname === "/" ? "/" : `/${Astro.url.pathname.replace(/^\/+|\/+$/g, "")}/`;
 const canonical = new URL(normalizedPath, siteUrl).toString();
 const absolute = (path: string) => new URL(path, siteUrl).toString();
-const imageUrl = absolute(imagePath);
+// Cards are generated per page from the same mirror path, so a page only needs
+// to name an image when it wants to override the one built for it.
+const imageUrl = absolute(imagePath ?? ogImagePath(markdownPath));
+// Screen readers on X and Mastodon read this aloud, so it describes the card
+// itself — its headline and its artwork — rather than restating the page title.
+const imageAlt = `Downright card reading \u201C${ogHeadline(markdownPath, title)}\u201D, beside a Markdown file with one line added and one removed.`;
 const organization = {
   "@type": "Organization",
   "@id": `${siteRoot}#organization`,
@@ -153,14 +158,15 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={imageUrl} />
-    <meta property="og:image:alt" content={`${title} — Downright`} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content={imageAlt} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={imageUrl} />
-    <meta name="twitter:image:alt" content={`${title} — Downright`} />
+    <meta name="twitter:image:alt" content={imageAlt} />
     {datePublished && <meta property="article:published_time" content={datePublished} />}
     {dateModified && <meta property="article:modified_time" content={dateModified} />}
     {dateModified && <meta name="last-modified" content={dateModified} />}

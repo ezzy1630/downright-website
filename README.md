@@ -26,8 +26,19 @@ constants; every token traces to the theme JSONs; the budget gate
 npm run test:editor   # §18.1 editor contracts, headless
 npm run audit:budgets # §12 gate against dist/
 npm run audit:contrast
+npm run audit:og      # link previews: every page's card is PNG 1200x630
 npm run generate:data # payload from the app checkout
 ```
+
+## Link previews
+
+`npm run generate:og` (run automatically by `prebuild`) writes one 1200x630 PNG
+per page into `public/og/`, composed from `pageMeta` on the Warm Dark ground and
+rasterised by resvg against the pinned TrueType faces in `assets/og-fonts/`.
+System fonts are switched off so a Linux CI builder and a local Mac render the
+same card. Cards must be PNG — X, iMessage, Slack, Discord, Facebook and
+LinkedIn all reject `image/svg+xml`, and `npm run audit:og` fails the build if a
+page ever points at a non-raster, missing or mis-sized card again.
 
 ## Run
 
