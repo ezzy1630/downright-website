@@ -28,3 +28,5 @@ jobs:
         run: npm run build
       - name: Audit SEO and AEO output
         run: npm run audit:seo
+      - name: Audit link-preview cards
+        run: npm run audit:og
