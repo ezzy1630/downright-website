@@ -1,25 +1,68 @@
 #!/usr/bin/env node
 // Drives the dirty-buffer agent conflict end to end over CDP (§18.4).
 import { spawn } from "node:child_process";
+import { accessSync, constants } from "node:fs";
 
-const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9334;
-const SITE = "http://localhost:4321/";
+const SITE = process.env.SITE_URL ?? "http://localhost:4321/";
 
-// Without the dev server this drives a browser error page, and the first
-// assertion dies on `null.querySelector` several hundred lines from the cause.
-// Say so up front instead.
-async function ensureSite() {
+// Linux CI runners ship Chrome on PATH under a different name than macOS keeps
+// it in /Applications.
+const CHROME_CANDIDATES = [
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/usr/bin/google-chrome",
+  "/usr/bin/google-chrome-stable",
+  "/usr/bin/chromium-browser",
+  "/usr/bin/chromium",
+];
+
+const executable = (path) => {
   try {
-    const response = await fetch(SITE, { signal: AbortSignal.timeout(3000) });
-    if (response.ok) return;
-    throw new Error(`HTTP ${response.status}`);
-  } catch (error) {
-    console.error(`These are live-page contracts: they need the dev server at ${SITE}.`);
-    console.error(`Start it in another shell with \`npm run dev\`, then re-run.`);
-    console.error(`(${error.message})`);
+    accessSync(path, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// An explicit CHROME_PATH is honoured or refused — quietly testing a different
+// browser than the one asked for is how a green run stops meaning anything.
+let CHROME;
+if (process.env.CHROME_PATH) {
+  if (!executable(process.env.CHROME_PATH)) {
+    console.error(`CHROME_PATH is set to ${process.env.CHROME_PATH}, which is not executable.`);
     process.exit(1);
   }
+  CHROME = process.env.CHROME_PATH;
+} else {
+  CHROME = CHROME_CANDIDATES.find(executable);
+  if (!CHROME) {
+    console.error("No Chrome binary found. Set CHROME_PATH, or install Google Chrome.");
+    console.error(`Looked in:\n  ${CHROME_CANDIDATES.join("\n  ")}`);
+    process.exit(1);
+  }
+}
+
+// Without the server this drives a browser error page, and the first assertion
+// dies on `null.querySelector` several hundred lines from the cause. Say so up
+// front instead. Retries briefly to absorb a startup race; waiting on a server
+// that is genuinely coming up is the caller's job, so a missing one fails fast.
+async function ensureSite() {
+  let last = "";
+  for (let i = 0; i < 6; i += 1) {
+    try {
+      const response = await fetch(SITE, { signal: AbortSignal.timeout(2000) });
+      if (response.ok) return;
+      last = `HTTP ${response.status}`;
+    } catch (error) {
+      last = error.message;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  console.error(`These are live-page contracts: they need the site served at ${SITE}.`);
+  console.error("Start it in another shell with `npm run dev`, then re-run.");
+  console.error(`(${last})`);
+  process.exit(1);
 }
 await ensureSite();
 

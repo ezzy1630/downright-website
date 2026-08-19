@@ -30,3 +30,20 @@ jobs:
         run: npm run audit:seo
       - name: Audit link-preview cards
         run: npm run audit:og
+      - name: Audit performance budgets
+        run: npm run audit:budgets
+      # The act contracts drive a real page over CDP, so they need a server and a
+      # browser. Chrome is preinstalled on the GitHub Ubuntu image and the script
+      # locates it; if it ever is not there, the script says where it looked
+      # rather than testing some other binary.
+      - name: Start dev server
+        run: |
+          npm run dev &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:4321/ && exit 0
+            sleep 1
+          done
+          echo "dev server did not come up on :4321" >&2
+          exit 1
+      - name: Test act contracts
+        run: npm run test:acts
