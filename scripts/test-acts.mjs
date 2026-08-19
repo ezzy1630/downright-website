@@ -4,6 +4,24 @@ import { spawn } from "node:child_process";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9334;
+const SITE = "http://localhost:4321/";
+
+// Without the dev server this drives a browser error page, and the first
+// assertion dies on `null.querySelector` several hundred lines from the cause.
+// Say so up front instead.
+async function ensureSite() {
+  try {
+    const response = await fetch(SITE, { signal: AbortSignal.timeout(3000) });
+    if (response.ok) return;
+    throw new Error(`HTTP ${response.status}`);
+  } catch (error) {
+    console.error(`These are live-page contracts: they need the dev server at ${SITE}.`);
+    console.error(`Start it in another shell with \`npm run dev\`, then re-run.`);
+    console.error(`(${error.message})`);
+    process.exit(1);
+  }
+}
+await ensureSite();
 
 async function ensureChrome() {
   for (let i = 0; i < 60; i++) {

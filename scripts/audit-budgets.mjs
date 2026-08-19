@@ -61,7 +61,11 @@ const frameworkHits = ["gsap", "lenis", "three.js", "framer"].filter((name) =>
 // Funnel shape: exactly four download CTAs, and the absence list ships.
 // Match the bare attribute, not its metadata (`data-download-url`, etc.).
 const downloadCount = (html.match(/data-download(?![\w-])/g) ?? []).length;
-const absenceList = html.includes("No cookies, no analytics");
+// The footer's absence list is the privacy claim readers actually see. It said
+// "no analytics" until Vercel Web Analytics was enabled, at which point the copy
+// was correctly narrowed to name what the site does collect. Assert the current
+// claim, so this gate tracks the honest wording rather than the obsolete one.
+const absenceList = html.includes("No cookies, no account, no newsletter, no chat widget");
 const markdownMirror = files.some((file) => file.endsWith("index.md"));
 const humansTxt = files.some((file) => file.endsWith("humans.txt"));
 const llmsTxt = files.some((file) => file.endsWith("llms.txt"));

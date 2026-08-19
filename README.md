@@ -24,9 +24,10 @@ constants; every token traces to the theme JSONs; the budget gate
 
 ```bash
 npm run test:editor   # §18.1 editor contracts, headless
-npm run audit:budgets # §12 gate against dist/
 npm run audit:contrast
 npm run audit:og      # link previews: every page's card is PNG 1200x630
+npm run audit:budgets # §12 gate against dist/
+npm run test:acts     # live-page contracts over CDP; needs `npm run dev` running
 npm run generate:data # payload from the app checkout
 ```
 
