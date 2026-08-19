@@ -54,7 +54,7 @@ export function initDownloadFunnel(): void {
       anchor.click();
       anchor.remove();
 
-      downloadPanel(facts.artifactName, downloadUrl, facts.sponsorsUrl);
+      downloadPanel(facts.artifactName, downloadUrl, facts.repository, facts.sponsorsUrl);
     });
   }
 }
