@@ -5,10 +5,13 @@ import { pageMeta, reviewedLabel } from "../data/seo";
 ---
 
 <AnswerPage title="Downright press and product facts" trail="Press and facts" updated={reviewedLabel} description={pageMeta.press.description} markdownPath={pageMeta.press.markdownPath ?? "/press.md"}>
-  <p>Downright is a free, open-source native Markdown editor and viewer for macOS. It is designed for files people and coding agents change together.</p>
+  <p>Downright Markdown is a free, open-source native Markdown editor and viewer for macOS. It is designed for files people and coding agents change together.</p>
 
-  <h2>One-sentence description</h2>
-  <p>Downright renders local Markdown exactly, reviews external agent rewrites live, and keeps the source file in charge.</p>
+  <h2>50-word description</h2>
+  <p>Downright is a free, MIT-licensed native Markdown reader and editor for macOS. Open ordinary files, preview them from Finder with Quick Look, and review external rewrites with word-level changes. It uses AppKit and TextKit 2, keeps the source file in charge, and requires no account, vault, or cloud sync.</p>
+
+  <h2>150-word description</h2>
+  <p>Downright Markdown is a native macOS document surface for the Markdown files people and coding agents change together. It opens ordinary project files directly, renders the source without normalizing it into a database, and moves between reading, editing, and Source Focus on the same text surface. Finder and Quick Look make a README or plan easy to inspect; the <code>down</code> command makes it easy to hand a generated document back to a human. When Claude Code, Codex, a script, or another process rewrites an open file, Downright treats that as a review event: it preserves the local buffer, shows what changed, and asks whether to keep the local version or take the version on disk. Downright is free, MIT licensed, works on macOS {facts.minimumMacOS}+, and does not require an account or network connection for ordinary reading, editing, searching, diffing, and export.</p>
 
   <h2>Product facts</h2>
   <ul>
@@ -19,8 +22,18 @@ import { pageMeta, reviewedLabel } from "../data/seo";
     <li><strong>Integrations:</strong> Finder, Quick Look, Spotlight, Services, App Intents, and the <code>down</code> CLI.</li>
     <li><strong>Privacy:</strong> no account or telemetry required; files remain local during ordinary use.</li>
     <li><strong>Formats:</strong> {facts.supportedExtensions.map((extension) => `.${extension}`).join(", ")}.</li>
+    <li><strong>Current release:</strong> {facts.version} · <a href="/releases/1.0.16/">release evidence</a>.</li>
+  </ul>
+
+  <h2>Press assets</h2>
+  <ul>
+    <li><a href="/assets/downright-app-icon.png">App icon PNG</a> · <a href="/favicon.svg">vector mark</a>.</li>
+    <li><a href="/assets/downright-native-document-review.jpg">Native document/review still</a>, <a href="/assets/downright-native-start-window.jpg">start-window still</a>, and <a href="/assets/downright-renderer-showcase.png">renderer showcase</a>.</li>
+    <li><a href="/og/press.png">1200 × 630 press card</a> and <a href="/og/guides-markdown-external-changes.png">external-write workflow card</a>.</li>
+    <li><a href="/">Live product surface</a>: the site’s document demo is rendered HTML and can be inspected directly.</li>
+    <li>Demo brief: <a href="/guides/markdown-external-changes/">external-write review</a> → Finder/Quick Look → <code>down PLAN.md</code>.</li>
   </ul>
 
   <h2>Useful links</h2>
-  <p><a href="/download/">Download</a> · <a href="/releases/1.0.16/">release facts</a> · <a href="/engineering/">engineering</a> · <a href="/benchmarks/">benchmarks</a> · <a href="/privacy/">privacy</a></p>
+  <p><a href="/download/">Download</a> · <a href="/releases/1.0.16/">release facts</a> · <a href="/engineering/">engineering</a> · <a href="/benchmarks/">benchmarks</a> · <a href="/privacy/">privacy</a> · <a href={facts.repository ?? "/"}>source</a></p>
 </AnswerPage>

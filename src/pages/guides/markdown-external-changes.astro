@@ -14,11 +14,23 @@ import { pageMeta, reviewedLabel } from "../../data/seo";
     <li>You choose whether to keep your version or take the external version.</li>
   </ol>
 
+  <h2>Why the file can change without a simple edit</h2>
+  <p>Many tools do not write a document in place. They write a temporary file, flush it, and rename it over the original. That atomic replace changes the file identity even though the path is the same. A directory watcher is therefore more reliable than watching only one inode, and a timestamp alone is not enough to explain what happened.</p>
+  <p>A dirty local buffer makes the distinction important. Blindly reloading the path can erase text that has not been saved yet; ignoring the event can leave the reader looking at an obsolete plan. The safe sequence is to read the new bytes, preserve a local baseline, calculate a difference, and make the decision visible.</p>
+
+  <h2>Reproduce the workflow</h2>
+  <ol>
+    <li>Open a Markdown file in Downright and leave the document at a heading or task list.</li>
+    <li>In a terminal, edit the file with Claude Code, Codex, a script, or an atomic temp-file-and-rename operation.</li>
+    <li>Watch Downright keep the document available while the external changes are marked.</li>
+    <li>Use the review surface to keep local work, take the file on disk, or inspect the changed words before deciding.</li>
+  </ol>
+
   <h2>Why this matters for coding agents</h2>
   <p>Agents often rewrite plans, task lists, README files, and implementation notes while a person is reading them. A normal file watcher can refresh the screen, but a refresh is not a review. Word-level changes preserve the question that matters: what did the agent actually alter?</p>
 
   <h2>Keep the source in charge</h2>
   <p>Downright decorates the original text storage. It does not normalize the document into a separate database or upload it to a server. The file path, bytes, and user decision remain part of the workflow.</p>
 
-  <p class="answer-sources">Related: <a href="/markdown-for-agents/claude-code/">Claude Code workflow</a>, <a href="/markdown-for-agents/codex/">Codex workflow</a>, and <a href="/engineering/">native rendering architecture</a>.</p>
+  <p class="answer-sources">Related: <a href="/markdown-for-agents/claude-code/">Claude Code workflow</a>, <a href="/markdown-for-agents/codex/">Codex workflow</a>, <a href="/engineering/">native rendering architecture</a>, and the local <a href="https://github.com/ezzy1630/Downright">source repository</a>.</p>
 </AnswerPage>

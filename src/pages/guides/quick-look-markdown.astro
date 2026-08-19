@@ -14,6 +14,14 @@ import { pageMeta, reviewedLabel } from "../../data/seo";
   </ol>
   <p>Quick Look is ideal for checking a README, plan, or short note. It is not a full editing surface, and a narrow Finder preview can make long documents harder to read.</p>
 
+  <h2>If Quick Look shows raw text</h2>
+  <ol>
+    <li>Confirm the file has a Markdown extension such as <code>.md</code>, <code>.markdown</code>, <code>.mdx</code>, <code>.qmd</code>, or <code>.rmd</code>.</li>
+    <li>Close the preview and open it again after installing the signed Downright app in <code>/Applications</code>; extensions cannot register reliably from a temporary disk image or App Translocation.</li>
+    <li>Use <code>down doctor</code> to check the installed bundle, Quick Look extensions, file association, and CLI path. The command reports diagnostics locally and supports <code>--json</code> for support logs.</li>
+  </ol>
+  <p>Some Macs need Finder or Quick Look to reload its extension cache after an app installation. Reopening Finder is a lower-impact first step; reset system caches only when the diagnostic output points to registration rather than a missing bundle.</p>
+
   <h2>Use Downright for the document</h2>
   <p>Downright provides a native reading and editing surface for the same local file. Headings, tables, callouts, tasks, footnotes, math, Mermaid, and code stay together. The source remains the authority.</p>
   <p>When another process changes the open file, Downright marks the external rewrite and lets you keep your local version or take the other version instead of silently replacing dirty work.</p>
@@ -24,4 +32,6 @@ import { pageMeta, reviewedLabel } from "../../data/seo";
     <li><strong>Read or edit a long file:</strong> Downright.</li>
     <li><strong>Review an agent rewrite:</strong> Downright with the file open.</li>
   </ul>
+
+  <p class="answer-sources">This guide is published by Downright. Product behavior is described from the native app’s current bundle and source; Quick Look-only preview remains the lighter choice when you do not need editing or review.</p>
 </AnswerPage>

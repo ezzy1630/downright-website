@@ -14,7 +14,7 @@ import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";
-import { pageMeta, ogHeadline, ogImagePath } from "../src/data/seo.ts";
+import { pageMeta, ogCard, ogImagePath } from "../src/data/seo.ts";
 import { renderCard, FONT_FILES } from "./og/card.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
@@ -25,30 +25,6 @@ const { themes } = JSON.parse(await readFile(join(root, "src/data/app/themes.jso
 // palette so a shared link and the page it opens read as one surface.
 const palette = themes.find((theme) => theme.id === "warm-dark").palette;
 
-const EYEBROWS = [
-  [/^\/guides\//, "Guide"],
-  [/^\/markdown-for-agents\//, "For agents"],
-  [/^\/compare\//, "Comparison"],
-  [/^\/downright-vs-/, "Comparison"],
-  [/^\/releases\//, "Release"],
-  [/^\/markdown-editor-mac-free/, "Comparison"],
-  [/^\/markdown-viewer-mac/, "Guide"],
-  [/^\/known-gaps/, "Release evidence"],
-  [/^\/index\.md$/, "Native Markdown for macOS"],
-];
-
-const eyebrowFor = (markdownPath, key) => {
-  for (const [pattern, label] of EYEBROWS) if (pattern.test(markdownPath)) return label;
-  return key.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase());
-};
-
-// First sentence only — full descriptions are written for search results and
-// run far past what fits under a headline.
-const kickerFor = (description) => {
-  const [first] = description.split(/(?<=\.)\s+/);
-  return first ?? description;
-};
-
 await mkdir(outDir, { recursive: true });
 
 // Clear stale cards so a renamed or removed page cannot leave an orphan behind.
@@ -57,14 +33,9 @@ for (const file of await readdir(outDir).catch(() => [])) {
 }
 
 const written = [];
-for (const [key, meta] of Object.entries(pageMeta)) {
+for (const meta of Object.values(pageMeta)) {
   const markdownPath = meta.markdownPath ?? "/index.md";
-  const svg = renderCard({
-    eyebrow: eyebrowFor(markdownPath, key),
-    headline: ogHeadline(markdownPath, meta.title),
-    kicker: kickerFor(meta.description),
-    palette,
-  });
+  const svg = renderCard({ ...ogCard(markdownPath, meta), palette });
 
   const png = new Resvg(svg, {
     fitTo: { mode: "width", value: 1200 },

@@ -11,6 +11,45 @@ export interface PageMeta {
   type?: "website" | "article";
 }
 
+export interface OgCard {
+  headline: string;
+  kicker: string;
+  eyebrow: string;
+}
+
+/**
+ * Card copy, keyed by mirror path. Page titles and descriptions are written for
+ * search results — they carry a brand suffix and run long — so link cards get
+ * their own line, written to be read at a glance in a feed.
+ */
+const ogCards: Record<string, OgCard> = {
+  "/index.md": { headline: "The native Markdown app for macOS.", kicker: "Files people and coding agents change together.", eyebrow: "Product" },
+  "/download.md": { headline: "Download Downright for macOS.", kicker: "A signed native app for macOS 14 and newer.", eyebrow: "Install" },
+  "/releases/1.0.16.md": { headline: "Downright 1.0.16 release facts.", kicker: "Quick Look, Finder, Sparkle, and the down CLI.", eyebrow: "Release" },
+  "/themes.md": { headline: "Six palettes. One document.", kicker: "Source-derived themes from the native app.", eyebrow: "Themes" },
+  "/changelog.md": { headline: "Version truth, in public.", kicker: "A changelog generated from the app payload.", eyebrow: "Changelog" },
+  "/privacy.md": { headline: "Local use is the default.", kicker: "No account. No cloud sync. No core-app telemetry.", eyebrow: "Privacy" },
+  "/known-gaps.md": { headline: "Evidence, not promises.", kicker: "Release facts, provenance, and known verification gaps.", eyebrow: "Evidence" },
+  "/faq.md": { headline: "Markdown questions, answered.", kicker: "Rendering, external edits, Quick Look, and privacy.", eyebrow: "Faq" },
+  "/markdown-viewer-mac.md": { headline: "Preview Markdown on a Mac.", kicker: "Finder for the glance. Downright for the document.", eyebrow: "Guide" },
+  "/markdown-editor-mac-free.md": { headline: "Free Markdown editors for Mac.", kicker: "Compare files, native behavior, and review workflows.", eyebrow: "Compare" },
+  "/downright-vs-typora.md": { headline: "Downright vs Typora.", kicker: "Native file review versus a focused writing surface.", eyebrow: "Compare" },
+  "/downright-vs-obsidian.md": { headline: "Downright vs Obsidian.", kicker: "Ordinary files versus a connected vault.", eyebrow: "Compare" },
+  "/guides/quick-look-markdown.md": { headline: "Quick Look your Markdown.", kicker: "Select a file in Finder. Press Space. Keep going.", eyebrow: "Guide" },
+  "/guides/open-md-file-mac.md": { headline: "Open a .md file on Mac.", kicker: "Finder, Quick Look, the down CLI, or Downright.", eyebrow: "Guide" },
+  "/guides/markdown-external-changes.md": { headline: "The file changed under you.", kicker: "See the rewrite. Keep your work. Take theirs when ready.", eyebrow: "Workflow" },
+  "/guides/review-claude-code-plans.md": { headline: "Review a Claude plan.", kicker: "Keep the plan open while the agent writes.", eyebrow: "Agents" },
+  "/markdown-for-agents/claude-code.md": { headline: "Claude writes the Markdown.", kicker: "Downright keeps the document visible and reviewable.", eyebrow: "Agents" },
+  "/markdown-for-agents/codex.md": { headline: "Codex writes the Markdown.", kicker: "Read plans and review external changes safely.", eyebrow: "Agents" },
+  "/markdown-for-agents/agents-md.md": { headline: "Read AGENTS.md.", kicker: "Repository instructions deserve a real document surface.", eyebrow: "Agents" },
+  "/compare/macdown.md": { headline: "Downright vs MacDown.", kicker: "A native adaptive surface versus a compact editor-preview pair.", eyebrow: "Compare" },
+  "/compare/marked.md": { headline: "Downright vs Marked.", kicker: "A file-aware editor versus a dedicated preview companion.", eyebrow: "Compare" },
+  "/formats.md": { headline: "Markdown formats.", kicker: "CommonMark, GFM, math, Mermaid, tables, and tasks.", eyebrow: "Reference" },
+  "/engineering.md": { headline: "AppKit + TextKit 2.", kicker: "Source-preserving Markdown rendering without a WebView.", eyebrow: "Engineering" },
+  "/benchmarks.md": { headline: "Measure the document.", kicker: "Published parsing, editing, diff, and convergence baselines.", eyebrow: "Benchmarks" },
+  "/press.md": { headline: "Downright press kit.", kicker: "Canonical product facts, assets, architecture, and contact.", eyebrow: "Press" },
+};
+
 /**
  * A page's Open Graph card is derived from its Markdown mirror path, so a route,
  * its mirror and its card cannot drift apart — `scripts/generate-og.mjs` writes
@@ -22,21 +61,18 @@ export const ogImagePath = (markdownPath: string): string => {
 };
 
 /**
- * Page titles are written for search results: they carry a brand suffix after a
- * pipe that reads as noise on a link card. These are the headlines the cards
- * actually set, keyed by mirror path so `scripts/generate-og.mjs` and the meta
- * tags resolve the same string.
+ * Falls back to the page's own title and the first sentence of its description,
+ * so a page added without card copy still gets a correct card rather than none.
  */
-const ogHeadlines: Record<string, string> = {
-  "/index.md": "The native Markdown app for macOS.",
-  "/privacy.md": "Local use is the default.",
-  "/changelog.md": "Version truth, in public.",
-  "/themes.md": "Six palettes. One document.",
-  "/faq.md": "Questions, answered from source.",
-};
+export const ogCard = (markdownPath: string, meta: Pick<PageMeta, "title" | "description">): OgCard =>
+  ogCards[markdownPath] ?? {
+    headline: meta.title.split("|")[0].trim(),
+    kicker: meta.description.split(/(?<=\.)\s+/)[0] ?? meta.description,
+    eyebrow: "Downright",
+  };
 
 export const ogHeadline = (markdownPath: string, title: string): string =>
-  ogHeadlines[markdownPath] ?? title.split("|")[0].trim();
+  ogCards[markdownPath]?.headline ?? title.split("|")[0].trim();
 
 export const reviewedOn = "2026-08-16";
 export const reviewedLabel = "August 16, 2026";
@@ -187,30 +223,42 @@ export const pageMeta = {
   },
 } satisfies Record<string, PageMeta>;
 
-export const siteRouteDates: Record<string, string> = {
-  "/": reviewedOn,
-  "/download/": reviewedOn,
-  "/releases/1.0.16/": reviewedOn,
-  "/themes/": reviewedOn,
-  "/changelog/": reviewedOn,
-  "/privacy/": reviewedOn,
-  "/known-gaps/": reviewedOn,
-  "/faq/": reviewedOn,
-  "/markdown-viewer-mac/": reviewedOn,
-  "/markdown-editor-mac-free/": reviewedOn,
-  "/downright-vs-typora/": reviewedOn,
-  "/downright-vs-obsidian/": reviewedOn,
-  "/guides/quick-look-markdown/": reviewedOn,
-  "/guides/open-md-file-mac/": reviewedOn,
-  "/guides/markdown-external-changes/": reviewedOn,
-  "/guides/review-claude-code-plans/": reviewedOn,
-  "/markdown-for-agents/claude-code/": reviewedOn,
-  "/markdown-for-agents/codex/": reviewedOn,
-  "/markdown-for-agents/agents-md/": reviewedOn,
-  "/compare/macdown/": reviewedOn,
-  "/compare/marked/": reviewedOn,
-  "/formats/": reviewedOn,
-  "/engineering/": reviewedOn,
-  "/benchmarks/": reviewedOn,
-  "/press/": reviewedOn,
-};
+export interface SiteRoute {
+  path: string;
+  sourceFiles: string[];
+}
+
+/**
+ * The sitemap owns a small, explicit route manifest. Keeping the dependencies
+ * beside each route lets the build derive `lastmod` from the content that can
+ * actually change that page instead of stamping every URL with one review date.
+ */
+export const siteRoutes: SiteRoute[] = [
+  { path: "/", sourceFiles: ["src/pages/index.astro", "src/data/site.ts", "src/data/seo.ts"] },
+  { path: "/download/", sourceFiles: ["src/pages/download.astro", "src/data/site.ts", "public/download.md"] },
+  { path: "/releases/1.0.16/", sourceFiles: ["src/pages/releases/1.0.16.astro", "public/releases/1.0.16.md"] },
+  { path: "/themes/", sourceFiles: ["src/pages/themes.astro", "src/data/app/themes.json"] },
+  { path: "/changelog/", sourceFiles: ["src/pages/changelog.astro", "src/data/app/changelog.json", "public/changelog.md"] },
+  { path: "/privacy/", sourceFiles: ["src/pages/privacy.astro", "public/privacy.md"] },
+  { path: "/known-gaps/", sourceFiles: ["src/pages/known-gaps.astro", "public/known-gaps.md"] },
+  { path: "/faq/", sourceFiles: ["src/pages/faq.astro", "public/faq.md"] },
+  { path: "/markdown-viewer-mac/", sourceFiles: ["src/pages/markdown-viewer-mac.astro", "public/markdown-viewer-mac.md"] },
+  { path: "/markdown-editor-mac-free/", sourceFiles: ["src/pages/markdown-editor-mac-free.astro", "public/markdown-editor-mac-free.md"] },
+  { path: "/downright-vs-typora/", sourceFiles: ["src/pages/downright-vs-typora.astro", "public/downright-vs-typora.md"] },
+  { path: "/downright-vs-obsidian/", sourceFiles: ["src/pages/downright-vs-obsidian.astro", "public/downright-vs-obsidian.md"] },
+  { path: "/guides/quick-look-markdown/", sourceFiles: ["src/pages/guides/quick-look-markdown.astro", "public/guides/quick-look-markdown.md"] },
+  { path: "/guides/open-md-file-mac/", sourceFiles: ["src/pages/guides/open-md-file-mac.astro", "public/guides/open-md-file-mac.md"] },
+  { path: "/guides/markdown-external-changes/", sourceFiles: ["src/pages/guides/markdown-external-changes.astro", "public/guides/markdown-external-changes.md"] },
+  { path: "/guides/review-claude-code-plans/", sourceFiles: ["src/pages/guides/review-claude-code-plans.astro", "public/guides/review-claude-code-plans.md"] },
+  { path: "/markdown-for-agents/claude-code/", sourceFiles: ["src/pages/markdown-for-agents/claude-code.astro", "public/markdown-for-agents/claude-code.md"] },
+  { path: "/markdown-for-agents/codex/", sourceFiles: ["src/pages/markdown-for-agents/codex.astro", "public/markdown-for-agents/codex.md"] },
+  { path: "/markdown-for-agents/agents-md/", sourceFiles: ["src/pages/markdown-for-agents/agents-md.astro", "public/markdown-for-agents/agents-md.md"] },
+  { path: "/compare/macdown/", sourceFiles: ["src/pages/compare/macdown.astro", "public/compare/macdown.md"] },
+  { path: "/compare/marked/", sourceFiles: ["src/pages/compare/marked.astro", "public/compare/marked.md"] },
+  { path: "/formats/", sourceFiles: ["src/pages/formats.astro", "public/formats.md"] },
+  { path: "/engineering/", sourceFiles: ["src/pages/engineering.astro", "public/engineering.md"] },
+  { path: "/benchmarks/", sourceFiles: ["src/pages/benchmarks.astro", "public/benchmarks.md"] },
+  { path: "/press/", sourceFiles: ["src/pages/press.astro", "public/press.md"] },
+];
+
+
