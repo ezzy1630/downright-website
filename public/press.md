@@ -6,6 +6,14 @@ Downright Markdown is a free, open-source native Markdown editor and viewer for 
 
 Downright is a free, MIT-licensed native Markdown reader and editor for macOS. Open ordinary files, preview them from Finder with Quick Look, and review external rewrites with word-level changes. It uses AppKit and TextKit 2, keeps the source file in charge, and requires no account, vault, or cloud sync.
 
+## Product film
+
+One Markdown file, from Finder to native reading, exact source, and external-change review.
+
+- [23-second master](/assets/downright-one-journey-master.mp4)
+- [15-second social cut](/assets/downright-social-15s.mp4)
+- [10-second demo](/assets/downright-readme-10s.mp4)
+
 ## 150-word description
 
 Downright Markdown is a native macOS document surface for the Markdown files people and coding agents change together. It opens ordinary project files directly, renders the source without normalizing it into a database, and moves between reading, editing, and Source Focus on the same text surface. Finder and Quick Look make a README or plan easy to inspect; the `down` command makes it easy to hand a generated document back to a human. When Claude Code, Codex, a script, or another process rewrites an open file, Downright treats that as a review event: it preserves the local buffer, shows what changed, and asks whether to keep the local version or take the version on disk. Downright is free, MIT licensed, works on macOS 14+, and does not require an account or network connection for ordinary reading, editing, searching, diffing, and export.
@@ -18,6 +26,9 @@ Downright Markdown is a native macOS document surface for the Markdown files peo
 
 ## Press assets
 
+- Product film: [/assets/downright-one-journey-master.mp4](/assets/downright-one-journey-master.mp4)
+- Social cut: [/assets/downright-social-15s.mp4](/assets/downright-social-15s.mp4)
+- README demo: [/assets/downright-readme-10s.mp4](/assets/downright-readme-10s.mp4)
 - App icon: [/assets/downright-app-icon.png](/assets/downright-app-icon.png)
 - Vector mark: [/favicon.svg](/favicon.svg)
 - Native document/review still: [/assets/downright-native-document-review.jpg](/assets/downright-native-document-review.jpg)

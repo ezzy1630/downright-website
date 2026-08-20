@@ -1886,6 +1886,10 @@ ol {
 .answer-table thead th { color: var(--heading); font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
 .answer-table tbody th { width: 130px; color: var(--heading); font-weight: 600; }
 .answer-table a { color: var(--link); }
+.press-film { width: min(100%, 960px); margin: 22px 0 0; }
+.press-film video { display: block; width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--rule); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-window); }
+.press-film figcaption { max-width: 700px; margin-top: 14px; color: var(--text-faint); font-family: var(--font-mono); font-size: 11px; line-height: 1.6; }
+.press-film a { color: var(--link); }
 .answer-faq + .answer-faq { margin-top: 34px; padding-top: 34px; border-top: 1px solid var(--rule); }
 .answer-faq h2 { margin-top: 0; }
 .answer-sources { margin-top: 58px !important; color: var(--text-faint) !important; font-family: var(--font-mono); font-size: 11px; line-height: 1.6; }
