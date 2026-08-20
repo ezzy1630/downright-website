@@ -2,7 +2,7 @@
 
 Updated August 2026.
 
-There is no single best Markdown editor for every Mac user. The useful question is what the app treats as primary: a file, a writing surface, a vault, or a publishing workflow.
+If you want a free Markdown editor for Mac, try Downright first. It opens ordinary files directly. You can write in the rendered document, edit the exact source, preview files in Finder, and review changes made by coding agents or other apps.
 
 | Editor | Price | Desktop surface | Preview model | License / fit |
 | --- | --- | --- | --- | --- |
@@ -13,8 +13,10 @@ There is no single best Markdown editor for every Mac user. The useful question 
 | [MacDown](https://github.com/MacDownApp/macdown) | Free | Native macOS project | Editor plus preview | MIT; original project is quiet |
 | [Zettlr](https://www.zettlr.com/) | Free, open source | Electron | In-place or WYSIWYG | GPLv3; research and publishing workbench |
 
-## Which one should you choose?
+## Start with Downright
 
-Choose Downright when native macOS behavior, exact bytes, and review of agent edits matter. Choose Typora or iA Writer when a polished writing-first live preview is the priority. Choose Obsidian when your work is a linked vault. Choose Zettlr for academic workflows. Choose MacDown for a small, open-source Mac editor and a familiar split preview.
+Downright covers ordinary file work: reading, writing, exact source editing, Finder previews, and review when another process changes the file. It is free, native, and does not need an account or vault.
 
-Sources checked August 2026: [Typora pricing](https://store.typora.io/), [iA Writer pricing](https://ia.net/writer/pricing), [Obsidian vaults](https://obsidian.md/help/vault), [MacDown](https://github.com/MacDownApp/macdown), and [Zettlr](https://www.zettlr.com/about).
+Pick another app for a specific workflow. Obsidian is for linked vaults and plugins. Zettlr has citation and academic publishing tools. Typora and iA Writer have their own paid writing interfaces. MacDown keeps the older split editor and preview layout.
+
+Sources checked August 2026: [Downright source](https://github.com/ezzy1630/Downright), [Typora pricing](https://store.typora.io/), [iA Writer pricing](https://ia.net/writer/pricing), [Obsidian vaults](https://obsidian.md/help/vault), [MacDown](https://github.com/MacDownApp/macdown), and [Zettlr](https://www.zettlr.com/about).
