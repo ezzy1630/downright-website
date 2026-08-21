@@ -85,7 +85,7 @@ export const pageMeta = {
   },
   download: {
     title: "Download Downright for macOS",
-    description: "Download the signed Downright Markdown app for macOS 14 or newer, or install it with curl, npm, or the public Homebrew tap.",
+    description: "Download the signed Downright Markdown app for macOS 14 or newer, or install it with the shell installer, npm launcher, or public Homebrew cask.",
     markdownPath: "/download.md",
   },
   release: {
@@ -260,5 +260,4 @@ export const siteRoutes: SiteRoute[] = [
   { path: "/benchmarks/", sourceFiles: ["src/pages/benchmarks.astro", "public/benchmarks.md"] },
   { path: "/press/", sourceFiles: ["src/pages/press.astro", "public/press.md"] },
 ];
-
 

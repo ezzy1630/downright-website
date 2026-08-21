@@ -99,11 +99,11 @@ export function buildActions(): Action[] {
       run: (close) => {
         close();
         if (!navigator.clipboard) {
-          toast("<strong>Clipboard unavailable.</strong><span>Select the Homebrew command from Install via Terminal.</span>");
+          toast("<strong>Clipboard unavailable.</strong><span>Select the Homebrew command from Other install options.</span>");
           return;
         }
         void navigator.clipboard.writeText(brewCommand).catch(() => {
-          toast("<strong>Copy failed.</strong><span>Select the Homebrew command from Install via Terminal.</span>");
+          toast("<strong>Copy failed.</strong><span>Select the Homebrew command from Other install options.</span>");
         });
       },
     },

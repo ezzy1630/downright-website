@@ -109,8 +109,8 @@ This is the current launch record for the approved site plan. The site does not 
 
 - Domain: https://downright.cc is the verified production domain.
 - Artifact: ${facts.artifactName} is available at ${facts.downloadUrl || "no signed, notarized, stapled public URL is configured"}.
-- One-line install: curl -fsSL https://downright.cc/install | bash, or npx --yes downright-installer; both use the same first-party installer path and rolling DMG.
-- Homebrew: the public tap at https://github.com/ezzy1630/homebrew-downright resolves to the same rolling DMG with brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright; tap-free official Homebrew Cask review remains separate.
+- Command-line options: the shell installer curl -fsSL https://downright.cc/install | bash, or the npm launcher npx --yes downright-installer; both use the same first-party installer path and rolling DMG.
+- Homebrew cask: the public tap at https://github.com/ezzy1630/homebrew-downright resolves to the same rolling DMG with brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright; tap-free official Homebrew Cask review remains separate.
 - Repository: ${facts.repository ?? "not configured"} is the public source remote.
 - Brand: the app-derived vector mark is canonical; the tactile native raster remains product artwork.
 
@@ -172,11 +172,11 @@ ${answerRoutes.map(([path, title]) => `- https://downright.cc${path} - ${title}`
 - Supported extensions: ${facts.supportedExtensions.map((extension) => `.${extension}`).join(" ")}
 - Download artifact: ${facts.artifactName}
 - Download URL: ${facts.downloadUrl || "not configured until a signed and notarized artifact is verified"}
-- Curl install: curl -fsSL https://downright.cc/install | bash (same rolling DMG)
-- npm install: npx --yes downright-installer (same first-party installer and rolling DMG)
+- Shell installer: curl -fsSL https://downright.cc/install | bash (same rolling DMG)
+- npm launcher: npx --yes downright-installer (same first-party installer and rolling DMG)
 
-Homebrew tap: https://github.com/ezzy1630/homebrew-downright
-Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright (same rolling DMG)
+Homebrew cask tap: https://github.com/ezzy1630/homebrew-downright
+Homebrew cask install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright (same rolling DMG)
 The tap-free cask command remains pending official Homebrew Cask review. Its verified production domain is https://downright.cc.
 `;
 

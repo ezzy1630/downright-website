@@ -1166,7 +1166,7 @@ html[data-film="true"] .app-window__ql-action { min-height: 44px; padding: 0 14p
 
 .terminal-install__option {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) auto;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
   min-width: 0;

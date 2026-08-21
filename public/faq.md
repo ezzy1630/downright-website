@@ -20,13 +20,13 @@ No. Quick Look is useful for a fast Finder preview. Downright is the deeper read
 
 ## Is there a one-line installer?
 
-Yes. On macOS, run:
+Yes. The shell installer on macOS is:
 
 ```bash
 curl -fsSL https://downright.cc/install | bash
 ```
 
-If Node.js 18 or newer is already installed, run:
+If Node.js 18 or newer is already installed, use the npm launcher:
 
 ```bash
 npx --yes downright-installer
@@ -43,7 +43,7 @@ Yes. Install the production app from the public tap:
 brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright
 ```
 
-It resolves to the same rolling DMG as the website, curl, and npm paths, installs
+It resolves to the same rolling DMG as the website, shell installer, and npm launcher, installs
 Downright into `/Applications`, and keeps Sparkle updates. The
 tap-free `brew install --cask downright` form still depends on official
 Homebrew Cask review.

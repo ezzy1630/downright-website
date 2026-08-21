@@ -19,12 +19,12 @@ import { pageMeta, reviewedLabel, reviewedOn } from "../data/seo";
 
       <h2 id="install">Install with the method you already use</h2>
       <p><strong>Direct download:</strong> open the DMG, move Downright to Applications, and launch it once to finish system integration.</p>
-      <pre><code>{curlCommand}</code></pre>
-      <p><strong>curl:</strong> the first-party installer verifies the published checksum and app signature, installs into Applications, registers Quick Look and Finder integration, and links the <code>down</code> and <code>md</code> commands when possible.</p>
-      <pre><code>{npmCommand}</code></pre>
-      <p><strong>npm:</strong> the published <code>downright-installer</code> launcher requires Node.js 18 or newer and invokes the same first-party macOS installer.</p>
       <pre><code>{brewCommand}</code></pre>
-      <p><strong>Homebrew:</strong> the public tap installs the same rolling main-channel DMG as the direct, curl, and npm paths. The tap-qualified command is available now; the tap-free official Cask command remains a separate Homebrew review.</p>
+      <p><strong>Homebrew cask:</strong> the public tap installs the same rolling main-channel DMG as the direct download and command-line options. The tap-qualified command is available now; the tap-free official Cask command remains a separate Homebrew review.</p>
+      <pre><code>{curlCommand}</code></pre>
+      <p><strong>Shell installer:</strong> the first-party installer verifies the published checksum and app signature, installs into Applications, registers Quick Look and Finder integration, and links the <code>down</code> and <code>md</code> commands when possible.</p>
+      <pre><code>{npmCommand}</code></pre>
+      <p><strong>npm launcher:</strong> the published <code>downright-installer</code> requires Node.js 18 or newer and invokes the same first-party macOS installer.</p>
 
       <p>All four acquisition paths converge on the same <code>Downright.dmg</code>. After installation, the signed production app checks the Sparkle appcast; each verified push to the app's <code>main</code> branch publishes the next update.</p>
 

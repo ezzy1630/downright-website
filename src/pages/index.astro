@@ -59,27 +59,27 @@ const maxBudgetMs = Math.max(
           <div class="terminal-install" data-open="false">
             <button type="button" class="terminal-install__trigger" data-magnet data-pop aria-controls="terminal-install-menu" aria-expanded="false">
               <span class="terminal-install__prompt" aria-hidden="true">$</span>
-              <span class="terminal-install__label">Install via Terminal</span>
+              <span class="terminal-install__label">Other install options</span>
               <span class="terminal-install__toggle" aria-hidden="true"></span>
             </button>
-            <div id="terminal-install-menu" class="terminal-install__menu" role="group" aria-label="Terminal installation commands" aria-hidden="true" inert>
+            <div id="terminal-install-menu" class="terminal-install__menu" role="group" aria-label="Additional installation methods" aria-hidden="true" inert>
               <div class="terminal-install__menu-head" aria-hidden="true">
-                <span>Choose an install path</span>
+                <span>Choose an install method</span>
                 <span>Click a command to copy</span>
               </div>
-              <div class="terminal-install__option" data-pop data-install-command={brewCommand} role="group" aria-label="Copy Homebrew install command">
-                <span class="terminal-install__method">Homebrew</span>
-                <code><input class="terminal-install__command" data-install-value type="text" readonly value={brewCommand} aria-label="Homebrew install command" spellcheck="false" /></code>
+              <div class="terminal-install__option" data-pop data-install-command={brewCommand} role="group" aria-label="Copy Homebrew cask install command">
+                <span class="terminal-install__method">Homebrew cask</span>
+                <code><input class="terminal-install__command" data-install-value type="text" readonly value={brewCommand} aria-label="Homebrew cask install command" spellcheck="false" /></code>
                 <button type="button" class="terminal-install__copy" data-install-copy><span data-install-label aria-live="polite">Copy</span></button>
               </div>
-              <div class="terminal-install__option" data-pop data-install-command={npmCommand} role="group" aria-label="Copy npm install command">
-                <span class="terminal-install__method">npm</span>
-                <code><input class="terminal-install__command" data-install-value type="text" readonly value={npmCommand} aria-label="npm install command" spellcheck="false" /></code>
+              <div class="terminal-install__option" data-pop data-install-command={curlCommand} role="group" aria-label="Copy shell installer command">
+                <span class="terminal-install__method">Shell installer</span>
+                <code><input class="terminal-install__command" data-install-value type="text" readonly value={curlCommand} aria-label="Shell installer command" spellcheck="false" /></code>
                 <button type="button" class="terminal-install__copy" data-install-copy><span data-install-label aria-live="polite">Copy</span></button>
               </div>
-              <div class="terminal-install__option" data-pop data-install-command={curlCommand} role="group" aria-label="Copy curl install command">
-                <span class="terminal-install__method">curl</span>
-                <code><input class="terminal-install__command" data-install-value type="text" readonly value={curlCommand} aria-label="curl install command" spellcheck="false" /></code>
+              <div class="terminal-install__option" data-pop data-install-command={npmCommand} role="group" aria-label="Copy npm launcher command">
+                <span class="terminal-install__method">npm launcher</span>
+                <code><input class="terminal-install__command" data-install-value type="text" readonly value={npmCommand} aria-label="npm launcher command" spellcheck="false" /></code>
                 <button type="button" class="terminal-install__copy" data-install-copy><span data-install-label aria-live="polite">Copy</span></button>
               </div>
             </div>
@@ -91,8 +91,8 @@ const maxBudgetMs = Math.max(
         <AppWindow editable view="split" />
         <p class="hero__annotation">
           <svg class="hero__annotation-arrow" viewBox="0 0 60 40" aria-hidden="true" focusable="false">
-            <path d="M4 34C18 38 38 31 50 8" />
-            <path d="M50 8l-13 2M50 8l-3 13" />
+            <path d="M56 34C42 38 22 31 10 8" />
+            <path d="M10 8l13 2M10 8l3 13" />
           </svg>
           <span>This window is real. Type in it.</span>
         </p>

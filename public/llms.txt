@@ -53,9 +53,9 @@ Downright is a free, open-source, native Markdown editor and viewer for macOS. I
 - Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
 - Download artifact: Downright.dmg
 - Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
-- Curl install: curl -fsSL https://downright.cc/install | bash (same rolling DMG)
-- npm install: npx --yes downright-installer (same first-party installer and rolling DMG)
+- Shell installer: curl -fsSL https://downright.cc/install | bash (same rolling DMG)
+- npm launcher: npx --yes downright-installer (same first-party installer and rolling DMG)
 
-Homebrew tap: https://github.com/ezzy1630/homebrew-downright
-Homebrew install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright (same rolling DMG)
+Homebrew cask tap: https://github.com/ezzy1630/homebrew-downright
+Homebrew cask install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright (same rolling DMG)
 The tap-free cask command remains pending official Homebrew Cask review. Its verified production domain is https://downright.cc.
