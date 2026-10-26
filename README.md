@@ -73,6 +73,27 @@ available when a deployment needs to pin a specific immutable asset.
 - `/known-gaps/` — current release and native-evidence gaps
 - `/index.md`, `/changelog.md`, `/themes.md`, `/llms.txt` — machine-readable content
 
+## Agent access and GitHub discovery
+
+Every page progressively enhances with five read-only WebMCP tools: product
+facts, installation instructions, documentation search, Markdown document
+reading, and GitHub repository information. The tool catalog loads only when
+`document.modelContext.registerTool` is available, with a fallback for older
+`navigator.modelContext` implementations. Unsupported browsers keep the ordinary
+site and Markdown mirrors. Tools reuse the site's product payload and page
+metadata, and document reads are limited to the published Markdown paths.
+
+WebMCP is experimental; browser availability and origin-trial requirements are
+described in the [Chrome WebMCP documentation](https://developer.chrome.com/docs/ai/webmcp).
+The tools help agents already visiting the site; they are not a search ranking
+or GitHub star mechanism. Visible GitHub calls to action on the homepage and
+download page let visitors choose to star the repository themselves.
+
+`npm run test:webmcp` drives an isolated Chrome with WebMCP enabled against the
+site at `SITE_URL` (default `http://localhost:4321/`). It checks native tool
+discovery and execution, validation, fetch failures and cancellation, and the
+unsupported-browser fallback. `CHROME_PATH` can select a browser executable.
+
 ## Guide routes
 
 The answer pages cover Markdown viewing, opening `.md` files, Quick Look,

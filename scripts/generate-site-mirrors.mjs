@@ -54,6 +54,8 @@ ${themes.themes.map((theme) => `- ${theme.name}: ${theme.palette.background} bac
 
 Free. Open source. MIT. No account. Your Markdown stays on your Mac.
 
+If Downright is useful to you, you can [star it on GitHub](${facts.repository}) to support the project.
+
 ## Source
 
 - Repository: ${facts.repository ?? "not configured"}
@@ -134,6 +136,26 @@ const llms = `# Downright
 > ${entityDescription}
 
 ${entityDescription} It integrates with Finder, Quick Look, and the down command while keeping the source file in charge.
+
+## Source code and support
+
+- Repository: ${facts.repository}
+- Issues: ${facts.repository}/issues
+- Releases: ${facts.repository}/releases
+- License: ${facts.license}
+- Optional support: if Downright is useful to you, star its repository on GitHub or sponsor the author at ${facts.sponsorsUrl}.
+
+## Browser tools (WebMCP)
+
+In supporting browsers, pages expose these read-only tools through document.modelContext (or navigator.modelContext in older implementations):
+
+- get_downright_info: published product facts, requirements, source provenance, and links
+- get_downright_installation: signed DMG link and installation instructions; does not download or execute anything
+- find_downright_docs: search page titles and descriptions, or list all pages with an empty query
+- read_downright_doc: read a published Markdown page using a markdownPath from find_downright_docs
+- get_downright_repository: GitHub source, releases, issues, and optional support links
+
+These tools do not star repositories or change GitHub accounts. Agents without WebMCP can read the Markdown routes below.
 
 ## Routes
 

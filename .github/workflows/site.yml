@@ -47,3 +47,5 @@ jobs:
           exit 1
       - name: Test act contracts
         run: npm run test:acts
+      - name: Test native WebMCP tools
+        run: npm run test:webmcp

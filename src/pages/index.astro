@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import DensityRail from "../components/DensityRail.astro";
 import DownloadButton from "../components/DownloadButton.astro";
+import GitHubStar from "../components/GitHubStar.astro";
 import AppWindow from "../components/AppWindow.astro";
 import AmbientBackdrop from "../components/AmbientBackdrop.astro";
 import { benchmarks, brewCommand, copy, curlCommand, facts, npmCommand, themes } from "../data/site";
@@ -86,6 +87,7 @@ const maxBudgetMs = Math.max(
           </div>
         </div>
         <p class="hero__micro">{copy.hero.micro}</p>
+        <GitHubStar placement="hero" />
       </div>
       <div class="hero__window" data-crop-ok>
         <AppWindow editable view="split" />
@@ -300,7 +302,10 @@ const maxBudgetMs = Math.max(
       <div class="close-section__inner act-reveal">
         <h2>{copy.close.heading}</h2>
         <p>{copy.close.body}</p>
-        <DownloadButton />
+        <div class="close-section__actions">
+          <DownloadButton />
+          <GitHubStar placement="close" />
+        </div>
         <small>macOS {facts.minimumMacOS}+ · signed {facts.artifactName} · {facts.version} · or <code>{brewCommand}</code></small>
         <p class="close-sponsor" data-fingerprint="sponsor">Built by one person, funded by people, not telemetry. If Downright earns its place in your dock — <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">sponsor it</a>.</p>
         <div class="film-handoff" data-fingerprint="handoff" aria-label="Send this page to your Mac">

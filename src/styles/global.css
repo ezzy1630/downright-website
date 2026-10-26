@@ -1135,6 +1135,9 @@ ol {
   letter-spacing: 0.025em;
 }
 
+.github-star { gap: 8px; min-height: 44px; white-space: nowrap; }
+.hero__copy > .github-star { margin-top: 8px; }
+
 /* The left column is intentionally two-up only while it can give both
    controls a real measure. Before that point, equal-width stacked controls
    preserve the hierarchy without spilling into the live window. */
@@ -1777,6 +1780,7 @@ ol {
 .close-section h2 { font-size: clamp(60px, 8.5vw, 122px); }
 .close-section p { margin: 22px auto 0; color: var(--text-secondary); font-size: 19px; }
 .close-section .button { margin-top: 30px; }
+.close-section__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 .close-section small { display: block; margin-top: 15px; color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
 
 /* The sponsor ask (§8.2): a quiet serif line, same scale as the body, no

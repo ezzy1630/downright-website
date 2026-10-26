@@ -10,7 +10,7 @@
 
 import { gzipSync } from "node:zlib";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 const root = new URL("../dist", import.meta.url).pathname;
 const ENTRY_BUDGET = 32768;
@@ -39,15 +39,28 @@ const files = await filesIn(root);
 const js = files.filter((file) => file.endsWith(".js"));
 const gz = async (file) => gzipSync(await readFile(file)).length;
 const sizes = await Promise.all(js.map(gz));
+const html = await readFile(join(root, "index.html"), "utf8");
+// Chunk splitting can move eagerly imported code out of BaseLayout. Count the
+// entry scripts and their static import graph; lazy tool/editor chunks stay out.
+const eagerFiles = new Set();
+async function visitEager(file) {
+  if (eagerFiles.has(file)) return;
+  eagerFiles.add(file);
+  const source = await readFile(file, "utf8");
+  // Vite emits static imports after semicolons or its map-dependency preamble.
+  const imports = [...source.matchAll(/(?:^|[;\n])import(?!\s*\()[^;]*?["'](\.[^"']+)["']/g)];
+  await Promise.all(imports.map((match) => visitEager(resolve(dirname(file), match[1]))));
+}
+await Promise.all([...html.matchAll(/<script\b[^>]*\bsrc="(\/_astro\/[^"\s]+\.js)"/g)]
+  .map((match) => visitEager(join(root, match[1]))));
 const entry = sizes
   .map((size, index) => ({ file: js[index], size }))
-  .filter(({ file }) => /BaseLayout|entry/.test(file));
+  .filter(({ file }) => eagerFiles.has(file));
 const sessionTotal = sizes.reduce((sum, size) => sum + size, 0);
 const entryTotal = entry.reduce((sum, { size }) => sum + size, 0);
 
 const preloadFont = join(root, "fonts/newsreader-latin.woff2");
 const fontSize = (await stat(preloadFont)).size;
-const html = await readFile(join(root, "index.html"), "utf8");
 const fontPreloaded = html.includes('rel="preload"') && html.includes("/fonts/newsreader-latin.woff2");
 const allText = (
   await Promise.all(files.filter((file) => /\.(html|css|js|md|txt|svg)$/.test(file)).map((file) => readFile(file, "utf8")))

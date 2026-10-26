@@ -130,7 +130,7 @@ async function freshLoad() {
   // has to be cleared from inside the page before the run that depends on the
   // agent being unarmed. (The visit firing only once per session is the
   // product behaving correctly — §8.5.)
-  await cdp.send("Page.navigate", { url: "http://localhost:4321/" });
+  await cdp.send("Page.navigate", { url: SITE });
   await sleep(900);
   // Page.navigate can preserve the previous test's scroll restoration point;
   // return to the hero before the agent observer gets a chance to arm.

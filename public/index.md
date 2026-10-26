@@ -33,6 +33,8 @@ Open a file from Finder, preview it with Quick Look, or send it through the down
 
 Free. Open source. MIT. No account. Your Markdown stays on your Mac.
 
+If Downright is useful to you, you can [star it on GitHub](https://github.com/ezzy1630/Downright) to support the project.
+
 ## Source
 
 - Repository: https://github.com/ezzy1630/Downright

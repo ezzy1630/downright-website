@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import DownloadButton from "../components/DownloadButton.astro";
+import GitHubStar from "../components/GitHubStar.astro";
 import { brewCommand, curlCommand, facts, npmCommand } from "../data/site";
 import { pageMeta, reviewedLabel, reviewedOn } from "../data/seo";
 ---
@@ -15,7 +16,7 @@ import { pageMeta, reviewedLabel, reviewedOn } from "../data/seo";
     </section>
 
     <article class="legal-copy answer-copy">
-      <div class="hero__actions"><DownloadButton label="Download signed DMG" /></div>
+      <div class="hero__actions"><DownloadButton label="Download signed DMG" /><GitHubStar placement="download" /></div>
 
       <h2 id="install">Install with the method you already use</h2>
       <p><strong>Direct download:</strong> open the DMG, move Downright to Applications, and launch it once to finish system integration.</p>
