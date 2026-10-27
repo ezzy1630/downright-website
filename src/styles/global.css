@@ -1138,6 +1138,17 @@ ol {
 .github-star { gap: 8px; min-height: 44px; white-space: nowrap; }
 .hero__copy > .github-star { margin-top: 8px; }
 
+.benchmark-comparison th small { display: block; margin-top: 6px; color: var(--text-secondary); font-size: 11px; font-weight: 400; }
+.benchmark-comparison td { white-space: nowrap; }
+.benchmark-comparison .answer-table { min-width: 680px; }
+.benchmark-comparison .answer-table tbody th { width: 38%; }
+.benchmark-comparison__context { max-width: 75ch; margin-top: 16px; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.benchmark-comparison__context a { color: var(--link); }
+.benchmark-history { margin-top: 28px; }
+.benchmark-history summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 4px; }
+.benchmark-history summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.benchmark-history .benchmark-table-wrap { margin-top: 20px; }
+
 /* The left column is intentionally two-up only while it can give both
    controls a real measure. Before that point, equal-width stacked controls
    preserve the hierarchy without spilling into the live window. */

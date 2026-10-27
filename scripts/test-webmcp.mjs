@@ -112,6 +112,8 @@ try {
   check("a search with no matches returns an empty list", value(await call("find_downright_docs", { query: "zzzz-no-matching-guide" })).pages.length === 0);
   const document = value(await call("read_downright_doc", { markdownPath: "/guides/quick-look-markdown.md" }));
   check("document reading fetches the actual Markdown", document.markdown.includes("Quick Look") && document.markdown.startsWith("#"));
+  const benchmarks = value(await call("read_downright_doc", { markdownPath: "/benchmarks.md" }));
+  check("agents can read qualified benchmark improvements", benchmarks.markdown.includes("44–55%") && benchmarks.markdown.includes("single invocation, not a percentile") && benchmarks.markdown.includes("roughly 48 KB"));
   const repository = value(await call("get_downright_repository"));
   check("GitHub support links point to the source repository", repository.support.star.url === info.repository && repository.issues === `${info.repository}/issues`);
   check("read-only tool calls keep the visitor on the same page", await evaluate(`location.href === ${JSON.stringify(site.href)}`));
@@ -152,6 +154,14 @@ try {
   await waitFor("document.documentElement.dataset.webmcp === 'ready'");
   check("tools and star link are available on subpages", await evaluate("document.querySelector('[data-github-star=download]') !== null"));
   await screenshot("desktop-download");
+  await navigate("/benchmarks/");
+  check("benchmark page separates sample types from historical timings", await evaluate("document.querySelector('[data-benchmark-comparison]').textContent.includes('Single invocation') && document.body.textContent.includes('Small-document parse (~48 KB)')"));
+  await evaluate("document.querySelector('h2').scrollIntoView(); window.scrollBy(0, -90)");
+  await screenshot("desktop-benchmarks");
+  await navigate("/");
+  await waitFor("document.documentElement.dataset.enhanced === 'true'");
+  await evaluate("document.querySelector('#speed').scrollIntoView(); window.scrollBy(0, -80)");
+  await screenshot("desktop-home-benchmarks");
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "no-preference" }] });
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
@@ -162,6 +172,13 @@ try {
   check("mobile star link has a touch target and no horizontal overflow", await evaluate("document.querySelector('[data-github-star=hero]').getBoundingClientRect().height >= 44 && document.documentElement.scrollWidth <= innerWidth"));
   await evaluate("document.querySelector('#close').scrollIntoView()");
   await screenshot("mobile-close");
+  check("mobile film exposes qualified improvements", await evaluate("document.querySelector('.film-compact-benchmark').textContent.includes('44–55% lower') && document.querySelector('.film-compact-benchmark').textContent.includes('single invocation')"));
+  await evaluate("document.querySelector('#film-cta').scrollIntoView(); window.scrollBy(0, -80)");
+  await screenshot("mobile-home-benchmarks");
+  await navigate("/benchmarks/");
+  check("mobile benchmark tables scroll inside the page", await evaluate("document.documentElement.scrollWidth <= innerWidth && document.querySelector('.benchmark-comparison').scrollWidth > document.querySelector('.benchmark-comparison').clientWidth"));
+  await evaluate("document.querySelector('h2').scrollIntoView(); window.scrollBy(0, -90)");
+  await screenshot("mobile-benchmarks");
   const legacy = await send("Page.addScriptToEvaluateOnNewDocument", { source: `
     Object.defineProperty(navigator, 'modelContext', {value: document.modelContext, configurable: true});
     Object.defineProperty(document, 'modelContext', {value: undefined, configurable: true});

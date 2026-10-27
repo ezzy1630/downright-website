@@ -29,6 +29,8 @@ npm run audit:og      # link previews: every page's card is PNG 1200x630
 npm run audit:budgets # §12 gate against dist/
 npm run test:acts     # live-page contracts over CDP; needs `npm run dev` running
 npm run generate:data # payload from the app checkout
+npm run generate:benchmarks # refresh only benchmark data from the app performance record
+npm run test:benchmarks # retain historical measurements and qualify improvement comparisons
 ```
 
 ## Link previews

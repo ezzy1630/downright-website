@@ -1,13 +1,26 @@
 ---
 import AnswerPage from "../components/AnswerPage.astro";
+import BenchmarkComparison from "../components/BenchmarkComparison.astro";
 import { benchmarks } from "../data/site";
-import { pageMeta, reviewedLabel } from "../data/seo";
+import { pageMeta } from "../data/seo";
+const updated = new Date(benchmarks.generatedAt).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
 ---
 
-<AnswerPage title="Downright Markdown rendering benchmarks" trail="Benchmarks" updated={reviewedLabel} description={pageMeta.benchmarks.description} markdownPath={pageMeta.benchmarks.markdownPath ?? "/benchmarks.md"}>
-  <p>Downright publishes a baseline benchmark rather than a universal speed promise. The corpus, date, target, and missing measurements stay beside every number.</p>
+<AnswerPage title="Downright Markdown rendering benchmarks" trail="Benchmarks" updated={updated} modifiedDate={benchmarks.generatedAt.slice(0, 10)} description={pageMeta.benchmarks.description} markdownPath={pageMeta.benchmarks.markdownPath ?? "/benchmarks.md"}>
+  <p>The recorded optimization checks show less time spent parsing and searching, and a lower peak physical footprint. Each before-and-after comparison uses the same Mac and workload within that row. The older pipeline baseline remains below with its original timings.</p>
 
-  <h2>Corpus and qualification</h2>
+  <h2>Measured improvements</h2>
+  <BenchmarkComparison reference />
+
+  <h2 id="methodology">Test conditions and limits</h2>
+  <ul>
+    {benchmarks.optimizations.rows.map((row) => <li><strong>{row.measurement}:</strong> {row.workload}. {row.statistic}.</li>)}
+  </ul>
+  <p>The Unicode result is a p95 latency. The search result is a single measured invocation, so it does not establish a latency percentile. The memory result is an observed range across two fresh processes, measured with the kernel's lifetime maximum physical-footprint counter.</p>
+  <p>{benchmarks.optimizations.memoryLimit} Physical footprint and live heap allocations measure different things. These checks do not establish a cold-launch first-pixel time, 120 Hz scrolling, or a universal memory ceiling.</p>
+  <p>The memory workload uses a document with 57,043 lines and 16,298 tasks. Each run opens a fresh isolated native host, enters Source, inserts seven characters, saves, undoes and saves again, scrolls down and up, and performs three further Source/Document cycles. The document's original bytes were restored exactly.</p>
+
+  <h2>Historical pipeline baseline</h2>
   <ul>
     <li><strong>Corpus:</strong> {benchmarks.corpus}</li>
     <li><strong>Date:</strong> {benchmarks.date}</li>
@@ -15,10 +28,10 @@ import { pageMeta, reviewedLabel } from "../data/seo";
     <li><strong>Not measured:</strong> {benchmarks.limitations.join(", ")}</li>
   </ul>
 
-  <h2>Current baseline</h2>
+  <p>{benchmarks.corpusCorrection} The existing timings are preserved; the workload correction prevents comparing that row with a genuine 100 KB test.</p>
   <div class="answer-table-wrap">
     <table class="answer-table">
-      <caption>Native app baseline; not a cross-machine guarantee.</caption>
+      <caption>Historical native app baseline · {benchmarks.date}; not a cross-machine guarantee.</caption>
       <thead><tr><th scope="col">Measurement</th><th scope="col">p50</th><th scope="col">p95</th><th scope="col">Target</th></tr></thead>
       <tbody>
         {benchmarks.rows.map((row) => <tr><th scope="row">{row.measurement}</th><td>{row.p50}</td><td>{row.p95}</td><td>{row.target}</td></tr>)}

@@ -61,10 +61,24 @@ These tools do not star repositories or change GitHub accounts. Agents without W
 
 - App payload commit: 85964fb05a9b2a43191da667370801c78a841411
 - Payload generated: 2026-08-16T17:44:32.772Z
-- Benchmark corpus: 120,825 characters / 4,885 lines
-- Benchmark date: 2026-08-06
-- Benchmark qualification: Baseline only. Not a cross-machine claim.
+- Historical benchmark corpus: 120,825 characters / 4,885 lines
+- Historical benchmark date: 2026-08-06
+- Historical benchmark qualification: Historical baseline only. Not a cross-machine claim.
 - Missing benchmark measurements: TextKit layout, scroll frames, IME input, live window frame time
+
+## Recorded optimization comparisons
+
+2026-10-25. Apple M4, macOS 27.0 (26A5406e). Recorded development release builds on the same Mac. These results describe the measured builds, not every release or Mac. Performance for the current download is not established by these comparisons.
+
+| Measurement | Sample type | Before | After | Reduction |
+|---|---|---:|---:|---:|
+| Unicode inline-heavy parse | p95 | 48.811 ms | 11.212 ms | 77% |
+| Fuzzy heading search | Single invocation | 11.036 ms | 0.912 ms | 92% |
+| Peak physical footprint | Two fresh-process runs | 449.2 MiB | 204.1–252.2 MiB | 44–55% |
+
+The stress test still exceeds the 150 MB peak-memory target. The two-run range is not a percentile or a guaranteed ceiling.
+The search result is a single invocation, not p95. Full workloads, source provenance, and the corrected historical small-document label are at https://downright.cc/benchmarks.md.
+Native performance source: https://github.com/ezzy1630/Downright/blob/ce2cad6deb287fa34d3561615c6655e3eb29a17e/Docs/PERFORMANCE.md
 
 ## Claims
 

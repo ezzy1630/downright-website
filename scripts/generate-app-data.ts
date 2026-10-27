@@ -39,13 +39,16 @@ function sectionBetween(markdown, start, end) {
   return endIndex < 0 ? remainder : remainder.slice(0, endIndex);
 }
 
-function parseBenchmarkPayload(markdown) {
-  const budgets = parsePipeTable(sectionBetween(markdown, "## Budgets", "## Current local benchmark"));
-  const benchmarkRows = parsePipeTable(sectionBetween(markdown, "## Current local benchmark", "## Measurement procedure"));
+export function parseBenchmarkPayload(markdown) {
+  const budgets = parsePipeTable(sectionBetween(markdown, "## Budgets", "\n## "));
+  const heading = markdown.includes("## Historical pipeline baseline") ? "## Historical pipeline baseline" : "## Current local benchmark";
+  const benchmarkRows = parsePipeTable(sectionBetween(markdown, heading, "\n## "));
+  if (!benchmarkRows.length || benchmarkRows.some((row) => !row.Measurement || !row.p50 || !row.p95)) {
+    throw new Error("The native performance document must contain a non-empty baseline table.");
+  }
   const budgetFor = (measurement) => {
     const aliases = {
       "cmark parse": "Cold launch to first rendered pixel, 100 KB",
-      "Parse 100 KB": "Cold launch to first rendered pixel, 100 KB",
       "Source edit and paragraph map": "Keystroke response, 5,000-line file",
       "Incremental decoration": "Keystroke response, 5,000-line file",
       "End-to-end semantic convergence": "End-to-end convergence",
@@ -61,12 +64,55 @@ function parseBenchmarkPayload(markdown) {
     date: "2026-08-06",
     corpus: "120,825 characters / 4,885 lines",
     machine: "single unrecorded machine",
-    qualification: "Baseline only. Not a cross-machine claim.",
+    qualification: "Historical baseline only. Not a cross-machine claim.",
+    corpusCorrection: "The historical small-document parse used roughly 48 KB, despite its original 100 KB label. It is not a 100 KB measurement or a first-pixel timing.",
     limitations: ["TextKit layout", "scroll frames", "IME input", "live window frame time"],
     rows: benchmarkRows.map((row) => {
-      const measurement = row.Measurement;
+      const measurement = row.Measurement === "Parse 100 KB" ? "Small-document parse (~48 KB)" : row.Measurement;
       return { measurement, p50: row["p50"], p95: row["p95"], ...budgetFor(measurement) };
     }),
+    optimizations: parseOptimizationComparisons(markdown),
+  };
+}
+
+function parseOptimizationComparisons(markdown) {
+  const heading = markdown.match(/## Local optimization check \((\d{4}-\d{2}-\d{2})\)/);
+  if (!heading) return null;
+  const section = sectionBetween(markdown, heading[0], "\n## ");
+  // Include the header in the parser input; sectionBetween normally removes it.
+  const initialRows = parsePipeTable(`| Measurement | Before | After |\n${sectionBetween(section, "| Measurement | Before | After |", "\nThe native stress document")}`);
+  const sessionRows = parsePipeTable(`| Native session measurement | Before | After |\n${sectionBetween(section, "| Native session measurement | Before | After |", "\nThe workload starts")}`);
+  const comparison = ({ rows, prefix, measurement, mobileLabel, statistic, workload }) => {
+    const row = rows.find((candidate) => (candidate.Measurement ?? candidate["Native session measurement"] ?? "").startsWith(prefix));
+    if (!row) throw new Error(`Missing optimization comparison: ${prefix}`);
+    const beforeMeasurement = row.Before.match(/^(\d+(?:\.\d+)?) (ms|MiB)$/);
+    const afterMeasurement = row.After.match(/^(\d+(?:\.\d+)?)(?:-(\d+(?:\.\d+)?))? (ms|MiB)$/);
+    if (!beforeMeasurement || !afterMeasurement || beforeMeasurement[2] !== afterMeasurement[3]) {
+      throw new Error(`Optimization comparison requires matching measurement units: ${prefix}`);
+    }
+    const before = Number(beforeMeasurement[1]);
+    const after = afterMeasurement[2] ? [Number(afterMeasurement[1]), Number(afterMeasurement[2])] : [Number(afterMeasurement[1])];
+    if (!(before > 0) || !after.length || after.some((value) => !(value < before))) {
+      throw new Error(`Optimization comparison is not an improvement: ${prefix}`);
+    }
+    const reductions = after.map((value) => Math.round((1 - value / before) * 100)).sort((a, b) => a - b);
+    const reduction = reductions.length === 1 ? `${reductions[0]}%` : `${reductions[0]}–${reductions.at(-1)}%`;
+    return { measurement, mobileLabel, statistic, workload, before: row.Before, after: row.After.replace(/(\d)-(\d)/g, "$1–$2"), reduction };
+  };
+  const machine = section.match(/Release builds on (.+?), based on checkout/)?.[1];
+  const baselineCommit = section.match(/based on checkout\s+`([a-f0-9]{40})`/)?.[1];
+  if (!machine || !baselineCommit) throw new Error("Optimization comparisons require recorded machine and source provenance.");
+  return {
+    date: heading[1],
+    machine,
+    baselineCommit,
+    qualification: "Recorded development release builds on the same Mac. These results describe the measured builds, not every release or Mac.",
+    memoryLimit: "The stress test still exceeds the 150 MB peak-memory target. The two-run range is not a percentile or a guaranteed ceiling.",
+    rows: [
+      comparison({ rows: initialRows, prefix: "Unicode inline-heavy parse", measurement: "Unicode inline-heavy parse", mobileLabel: "Unicode parse (p95)", statistic: "p95", workload: "16,800-byte Unicode line with repeated formatting and links" }),
+      comparison({ rows: initialRows, prefix: "Fuzzy match", measurement: "Fuzzy heading search", mobileLabel: "Search (single invocation)", statistic: "Single invocation", workload: "12-character query against a 1,500-character heading" }),
+      comparison({ rows: sessionRows, prefix: "Lifetime peak physical footprint", measurement: "Peak physical footprint", mobileLabel: "Peak footprint (2 runs)", statistic: "Two fresh-process runs", workload: "1,032,709-byte document; edit, save, undo, scroll, and presentation switches" }),
+    ],
   };
 }
 
@@ -186,6 +232,15 @@ function tokenCss(themes, motion) {
 
 async function main() {
   await mkdir(outputRoot, { recursive: true });
+  const sourceCommit = command(["git", "rev-parse", "HEAD"], "unknown");
+  const dirty = Boolean(command(["git", "status", "--porcelain"]));
+  const generatedAt = new Date().toISOString();
+  if (process.argv.includes("--benchmarks-only")) {
+    const performance = await read(join(appRoot, "Docs/PERFORMANCE.md"));
+    await writeJson("benchmarks.json", { ...parseBenchmarkPayload(performance), sourceCommit, generatedAt, sourceWorkingTreeDirty: dirty });
+    console.log(`Generated benchmark payload from ${sourceCommit}${dirty ? " (working tree dirty)" : ""}`);
+    return;
+  }
   const themeFiles = ["paper-light.json", "warm-dark.json", "nord.json", "solarized-light.json", "high-contrast.json", "system.json"];
   const themes = await Promise.all(themeFiles.map(async (file) => ({
     id: file.replace(/\.json$/, ""),
@@ -208,9 +263,6 @@ const downloadUrl = process.env.PUBLIC_DOWNLOAD_URL?.trim()
 // Sponsorship is an invitation, never a gate: the owner's GitHub Sponsors.
 const owner = repository?.split("/").at(-2) ?? "ezzy1630";
 const sponsorsUrl = `https://github.com/sponsors/${owner}`;
-  const sourceCommit = command(["git", "rev-parse", "HEAD"], "unknown");
-  const dirty = Boolean(command(["git", "status", "--porcelain"]));
-  const generatedAt = new Date().toISOString();
   const motion = parseMotion(motionSource);
   await writeJson("themes.json", { source: "Sources/MarkdownRender/Themes", sourceCommit, generatedAt, themes });
   await writeJson("benchmarks.json", { ...parseBenchmarkPayload(performance), sourceCommit, generatedAt });
@@ -225,4 +277,6 @@ const sponsorsUrl = `https://github.com/sponsors/${owner}`;
   console.log(`Generated Downright payload from ${sourceCommit}${dirty ? " (working tree dirty)" : ""}`);
 }
 
-main().catch((error) => { console.error(error); process.exitCode = 1; });
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => { console.error(error); process.exitCode = 1; });
+}

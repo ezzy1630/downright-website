@@ -17,10 +17,6 @@ import { switchTheme, currentTheme } from "../shell/spill";
 
 const FILM_QUERY = "(max-width: 900px) and (pointer: coarse)";
 
-function benchmarkP50(measurement: string): string {
-  return benchmarks.rows.find((row) => row.measurement === measurement)?.p50 ?? "—";
-}
-
 export function isFilm(): boolean {
   if (new URLSearchParams(window.location.search).has("film")) return true;
   return window.matchMedia(FILM_QUERY).matches;
@@ -110,13 +106,11 @@ function buildFilmCtaBeat(): void {
   beat.setAttribute("aria-label", "Send Downright to your Mac");
   beat.innerHTML = `
     <p class="film-beat__kicker">A small engine</p>
-    <h2 class="film-beat__title">Fast enough to stay with the thought.</h2>
-    <div class="film-compact-benchmark" aria-label="Compact local benchmark">
-      <div><span>Parse 100 KB</span><strong>${benchmarkP50("Parse 100 KB")}</strong></div>
-      <div><span>Source edit</span><strong>${benchmarkP50("Source edit and paragraph map")}</strong></div>
-      <div><span>Text diff</span><strong>${benchmarkP50("Text diff, external rewrite")}</strong></div>
+    <h2 class="film-beat__title">Less time. Less memory.</h2>
+    <div class="film-compact-benchmark" aria-label="Recorded development-build improvements">
+      ${benchmarks.optimizations.rows.map((row) => `<div><span>${row.mobileLabel}</span><strong>${row.reduction} lower</strong></div>`).join("")}
     </div>
-    <p class="film-beat__line">Native measurements, with the limit beside each number. The source stays yours while the page keeps up.</p>
+    <p class="film-beat__line">Development builds on Apple M4, ${benchmarks.optimizations.date}. <a href="/benchmarks/">Before, after, and test conditions</a>. These comparisons do not establish performance for the current download.</p>
     <div class="film-handoff film-cta__handoff" data-fingerprint="film-cta-handoff">
       <p class="film-handoff__line">On iPhone? Send the page to your Mac, then download there.</p>
       <button type="button" class="film-handoff__primary" data-share="share">Send it to your Mac</button>

@@ -35,6 +35,18 @@ Free. Open source. MIT. No account. Your Markdown stays on your Mac.
 
 If Downright is useful to you, you can [star it on GitHub](https://github.com/ezzy1630/Downright) to support the project.
 
+## Measured improvements
+
+2026-10-25. Apple M4, macOS 27.0 (26A5406e). Recorded development release builds on the same Mac. These results describe the measured builds, not every release or Mac.
+
+| Measurement | Sample type | Before | After | Reduction |
+|---|---|---:|---:|---:|
+| Unicode inline-heavy parse | p95 | 48.811 ms | 11.212 ms | 77% |
+| Fuzzy heading search | Single invocation | 11.036 ms | 0.912 ms | 92% |
+| Peak physical footprint | Two fresh-process runs | 449.2 MiB | 204.1–252.2 MiB | 44–55% |
+
+Performance for the current download is not established by these comparisons. [Test conditions and historical baseline](https://downright.cc/benchmarks/). The stress test still exceeds the 150 MB peak-memory target. The two-run range is not a percentile or a guaranteed ceiling.
+
 ## Source
 
 - Repository: https://github.com/ezzy1630/Downright

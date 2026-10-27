@@ -8,6 +8,9 @@ const readJson = (name) => readFile(join(dataRoot, name), "utf8").then(JSON.pars
 const plain = (value) => value.replace(/[—–]/g, "-").replace(/\s+/g, " ").trim();
 const entityDescription = "Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.";
 const [themes, benchmarks, facts, changelog] = await Promise.all(["themes.json", "benchmarks.json", "facts.json", "changelog.json"].map(readJson));
+const improvements = benchmarks.optimizations;
+const performanceSource = `${facts.repository}/blob/${benchmarks.sourceCommit}/${benchmarks.source}`;
+const comparisonTable = `| Measurement | Sample type | Before | After | Reduction |\n|---|---|---:|---:|---:|\n${improvements.rows.map((row) => `| ${row.measurement} | ${row.statistic} | ${row.before} | ${row.after} | ${row.reduction} |`).join("\n")}`;
 const answerRoutes = [
   ["/guides/quick-look-markdown/", "How to preview Markdown with Quick Look on a Mac"],
   ["/guides/open-md-file-mac/", "How to open a .md file on a Mac"],
@@ -56,6 +59,14 @@ Free. Open source. MIT. No account. Your Markdown stays on your Mac.
 
 If Downright is useful to you, you can [star it on GitHub](${facts.repository}) to support the project.
 
+## Measured improvements
+
+${improvements.date}. ${improvements.machine}. ${improvements.qualification}
+
+${comparisonTable}
+
+Performance for the current download is not established by these comparisons. [Test conditions and historical baseline](https://downright.cc/benchmarks/). ${improvements.memoryLimit}
+
 ## Source
 
 - Repository: ${facts.repository ?? "not configured"}
@@ -64,6 +75,43 @@ If Downright is useful to you, you can [star it on GitHub](${facts.repository}) 
 - Supported extensions: ${facts.supportedExtensions.map((extension) => `.${extension}`).join(" ")}
 
 Download: ${facts.downloadUrl || "pending a verified signed and notarized artifact"}
+`;
+
+const benchmarksMirror = `# Downright Markdown rendering benchmarks
+
+## Measured improvements
+
+Development-build comparisons recorded ${improvements.date} on ${improvements.machine}. The same Mac and workload are used within each row. ${improvements.qualification} Performance for the current download is not established by these comparisons.
+
+${comparisonTable}
+
+## Test conditions and limits
+
+${improvements.rows.map((row) => `- ${row.measurement}: ${row.workload}. ${row.statistic}.`).join("\n")}
+
+The search result is a single invocation, not a percentile. Memory is the kernel's lifetime maximum physical footprint across two fresh isolated native processes, not live heap or resident memory. ${improvements.memoryLimit}
+
+The 1,032,709-byte stress document contains 57,043 lines and 16,298 tasks. Each run opens a fresh isolated release host, enters Source, inserts seven characters, saves, undoes seven times and saves again, scrolls down and up two pages, then performs three further Source/Document cycles. The original bytes were restored exactly. These checks do not establish first-pixel launch time or 120 Hz frame delivery.
+
+## Historical pipeline baseline
+
+- Corpus: ${benchmarks.corpus}
+- Date: ${benchmarks.date}
+- Machine: ${benchmarks.machine}
+- Qualification: ${benchmarks.qualification}
+- Not measured: ${benchmarks.limitations.join(", ")}
+
+${benchmarks.corpusCorrection}
+
+| Measurement | p50 | p95 | Target |
+|---|---:|---:|---|
+${benchmarks.rows.map((row) => `| ${row.measurement} | ${row.p50} | ${row.p95} | ${row.target} |`).join("\n")}
+
+## Source
+
+- [Native performance record](${performanceSource})
+- Source commit: ${benchmarks.sourceCommit}
+- Site payload generated: ${benchmarks.generatedAt}
 `;
 
 const themesMirror = `# Downright themes
@@ -182,10 +230,20 @@ ${answerRoutes.map(([path, title]) => `- https://downright.cc${path} - ${title}`
 
 - App payload commit: ${facts.sourceCommit}
 - Payload generated: ${facts.generatedAt}
-- Benchmark corpus: ${benchmarks.corpus}
-- Benchmark date: ${benchmarks.date}
-- Benchmark qualification: ${benchmarks.qualification}
+- Historical benchmark corpus: ${benchmarks.corpus}
+- Historical benchmark date: ${benchmarks.date}
+- Historical benchmark qualification: ${benchmarks.qualification}
 - Missing benchmark measurements: ${benchmarks.limitations.join(", ")}
+
+## Recorded optimization comparisons
+
+${improvements.date}. ${improvements.machine}. ${improvements.qualification} Performance for the current download is not established by these comparisons.
+
+${comparisonTable}
+
+${improvements.memoryLimit}
+The search result is a single invocation, not p95. Full workloads, source provenance, and the corrected historical small-document label are at https://downright.cc/benchmarks.md.
+Native performance source: ${performanceSource}
 
 ## Claims
 
@@ -205,6 +263,7 @@ The tap-free cask command remains pending official Homebrew Cask review. Its ver
 await mkdir(publicRoot, { recursive: true });
 await Promise.all([
   writeFile(join(publicRoot, "index.md"), index),
+  writeFile(join(publicRoot, "benchmarks.md"), benchmarksMirror),
   writeFile(join(publicRoot, "themes.md"), themesMirror),
   writeFile(join(publicRoot, "changelog.md"), changelogMirror),
   writeFile(join(publicRoot, "privacy.md"), privacy),

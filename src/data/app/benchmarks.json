@@ -3,7 +3,8 @@
   "date": "2026-08-06",
   "corpus": "120,825 characters / 4,885 lines",
   "machine": "single unrecorded machine",
-  "qualification": "Baseline only. Not a cross-machine claim.",
+  "qualification": "Historical baseline only. Not a cross-machine claim.",
+  "corpusCorrection": "The historical small-document parse used roughly 48 KB, despite its original 100 KB label. It is not a 100 KB measurement or a first-pixel timing.",
   "limitations": [
     "TextKit layout",
     "scroll frames",
@@ -16,7 +17,7 @@
       "p50": "12.827 ms",
       "p95": "13.309 ms",
       "target": "<250 ms",
-      "passCondition": "p95 below target"
+      "passCondition": "p95 below target · *manual release gate*"
     },
     {
       "measurement": "Full MarkdownParser.parse",
@@ -68,11 +69,11 @@
       "passCondition": "p95 below target"
     },
     {
-      "measurement": "Parse 100 KB",
+      "measurement": "Small-document parse (~48 KB)",
       "p50": "12.078 ms",
       "p95": "12.395 ms",
-      "target": "<250 ms",
-      "passCondition": "p95 below target"
+      "target": "Informational",
+      "passCondition": "Baseline only"
     },
     {
       "measurement": "Syntax highlight, 10 KB Swift",
@@ -82,6 +83,43 @@
       "passCondition": "Baseline only"
     }
   ],
-  "sourceCommit": "85964fb05a9b2a43191da667370801c78a841411",
-  "generatedAt": "2026-08-16T17:44:32.772Z"
+  "optimizations": {
+    "date": "2026-10-25",
+    "machine": "Apple M4, macOS 27.0 (26A5406e)",
+    "baselineCommit": "9be0680ec7131dffb8af9a64b6cdbcdb274d3292",
+    "qualification": "Recorded development release builds on the same Mac. These results describe the measured builds, not every release or Mac.",
+    "memoryLimit": "The stress test still exceeds the 150 MB peak-memory target. The two-run range is not a percentile or a guaranteed ceiling.",
+    "rows": [
+      {
+        "measurement": "Unicode inline-heavy parse",
+        "mobileLabel": "Unicode parse (p95)",
+        "statistic": "p95",
+        "workload": "16,800-byte Unicode line with repeated formatting and links",
+        "before": "48.811 ms",
+        "after": "11.212 ms",
+        "reduction": "77%"
+      },
+      {
+        "measurement": "Fuzzy heading search",
+        "mobileLabel": "Search (single invocation)",
+        "statistic": "Single invocation",
+        "workload": "12-character query against a 1,500-character heading",
+        "before": "11.036 ms",
+        "after": "0.912 ms",
+        "reduction": "92%"
+      },
+      {
+        "measurement": "Peak physical footprint",
+        "mobileLabel": "Peak footprint (2 runs)",
+        "statistic": "Two fresh-process runs",
+        "workload": "1,032,709-byte document; edit, save, undo, scroll, and presentation switches",
+        "before": "449.2 MiB",
+        "after": "204.1–252.2 MiB",
+        "reduction": "44–55%"
+      }
+    ]
+  },
+  "sourceCommit": "ce2cad6deb287fa34d3561615c6655e3eb29a17e",
+  "generatedAt": "2026-10-27T05:24:00.167Z",
+  "sourceWorkingTreeDirty": false
 }

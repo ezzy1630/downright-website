@@ -46,7 +46,7 @@ const ogCards: Record<string, OgCard> = {
   "/compare/marked.md": { headline: "Downright vs Marked.", kicker: "A file-aware editor versus a dedicated preview companion.", eyebrow: "Compare" },
   "/formats.md": { headline: "Markdown formats.", kicker: "CommonMark, GFM, math, Mermaid, tables, and tasks.", eyebrow: "Reference" },
   "/engineering.md": { headline: "AppKit + TextKit 2.", kicker: "Source-preserving Markdown rendering without a WebView.", eyebrow: "Engineering" },
-  "/benchmarks.md": { headline: "Measure the document.", kicker: "Published parsing, editing, diff, and convergence baselines.", eyebrow: "Benchmarks" },
+  "/benchmarks.md": { headline: "Less time. Less memory.", kicker: "Recorded parsing, search, and memory improvements.", eyebrow: "Benchmarks" },
   "/press.md": { headline: "Downright press kit.", kicker: "Canonical product facts, assets, architecture, and contact.", eyebrow: "Press" },
 };
 
@@ -211,7 +211,7 @@ export const pageMeta = {
   },
   benchmarks: {
     title: "Downright Markdown rendering benchmarks",
-    description: "Read Downright's published baseline measurements, corpus, targets, and limitations for Markdown parsing, editing, diffing, and convergence.",
+    description: "See Downright's recorded improvements in Unicode parsing, heading search, and peak memory, with before-and-after results, test conditions, and the historical pipeline baseline.",
     markdownPath: "/benchmarks.md",
     type: "article" as const,
   },

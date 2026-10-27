@@ -54,8 +54,8 @@ export const copy = {
     aside: "Long file? Structural Zoom collapses it to headings, then to first sentences, and back — ⌃⌥⌘1–5, in the app.",
   },
   speed: {
-    heading: "Every number here has a limit beside it.",
-    body: "These are the app's own measurements. The corpus, the date, and the things we did not measure are all listed below the table.",
+    heading: "Less time. Less memory.",
+    body: "Measured before and after on the same Mac. Each comparison keeps its workload, sample type, and limits visible.",
   },
   architecture: {
     heading: "Your text stays in charge.",

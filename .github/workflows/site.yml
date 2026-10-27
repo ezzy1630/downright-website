@@ -24,6 +24,8 @@ jobs:
         run: npm ci
       - name: Type-check Astro
         run: npm run check
+      - name: Check benchmark data contracts
+        run: npm run test:benchmarks
       - name: Build static site
         run: npm run build
       - name: Audit SEO and AEO output

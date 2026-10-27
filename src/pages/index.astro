@@ -5,13 +5,14 @@ import DownloadButton from "../components/DownloadButton.astro";
 import GitHubStar from "../components/GitHubStar.astro";
 import AppWindow from "../components/AppWindow.astro";
 import AmbientBackdrop from "../components/AmbientBackdrop.astro";
+import BenchmarkComparison from "../components/BenchmarkComparison.astro";
 import { benchmarks, brewCommand, copy, curlCommand, facts, npmCommand, themes } from "../data/site";
 import { renderSampleMarkdown } from "../kernel/renderer";
 import agentDump from "../data/agent-dump.md?raw";
-import { pageMeta, reviewedOn } from "../data/seo";
+import { pageMeta } from "../data/seo";
 
 const agentWallHtml = renderSampleMarkdown(agentDump);
-const benchmarkNames = ["Parse 100 KB", "Source edit and paragraph map", "Text diff, external rewrite", "End-to-end semantic convergence", "Syntax highlight, 10 KB Swift"];
+const benchmarkNames = ["Small-document parse (~48 KB)", "Source edit and paragraph map", "Text diff, external rewrite", "End-to-end semantic convergence", "Syntax highlight, 10 KB Swift"];
 const benchmarkRows = benchmarkNames
   .map((name) => benchmarks.rows.find((row) => row.measurement === name))
   .filter((row): row is NonNullable<typeof row> => Boolean(row));
@@ -41,7 +42,7 @@ const maxBudgetMs = Math.max(
 );
 ---
 
-<BaseLayout {...pageMeta.home} dateModified={reviewedOn}>
+<BaseLayout {...pageMeta.home} dateModified={benchmarks.generatedAt.slice(0, 10)}>
   <AmbientBackdrop />
   <main class="home-page" data-theme-zone>
     <DensityRail />
@@ -189,9 +190,12 @@ const maxBudgetMs = Math.max(
           <h2>{copy.speed.heading}</h2>
           <p>{copy.speed.body}</p>
         </div>
-        <div class="benchmark-table-wrap act-reveal">
+        <div class="act-reveal"><BenchmarkComparison /></div>
+        <details class="benchmark-history">
+          <summary>Historical pipeline baseline · {benchmarks.date}</summary>
+        <div class="benchmark-table-wrap">
           <table class="benchmark-table" data-fingerprint="benchmark">
-            <caption>Current local benchmark · every row has its limit beside it</caption>
+            <caption>Historical baseline · original timings preserved</caption>
             <thead><tr><th scope="col">Measurement</th><th scope="col">p50</th><th scope="col">p95</th><th scope="col">Budget</th><th scope="col" aria-hidden="true"></th></tr></thead>
             <tbody>
               {benchmarkRows.map((row) => (
@@ -217,7 +221,9 @@ const maxBudgetMs = Math.max(
         <div class="benchmark-notes act-reveal">
           <p><strong>Corpus</strong> {benchmarks.corpus}. <strong>Date</strong> {benchmarks.date}. <strong>Machine</strong> {benchmarks.machine}.</p>
           <p>{benchmarks.qualification} Missing: {benchmarks.limitations.join(", ")}.</p>
+          <p>{benchmarks.corpusCorrection}</p>
         </div>
+        </details>
       </div>
     </section>
 
