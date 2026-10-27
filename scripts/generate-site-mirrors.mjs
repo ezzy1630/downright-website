@@ -9,8 +9,12 @@ const plain = (value) => value.replace(/[—–]/g, "-").replace(/\s+/g, " ").tr
 const entityDescription = "Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.";
 const [themes, benchmarks, facts, changelog] = await Promise.all(["themes.json", "benchmarks.json", "facts.json", "changelog.json"].map(readJson));
 const improvements = benchmarks.optimizations;
+const pipeline = benchmarks.pipeline;
 const performanceSource = `${facts.repository}/blob/${benchmarks.sourceCommit}/${benchmarks.source}`;
 const comparisonTable = `| Measurement | Sample type | Before | After | Reduction |\n|---|---|---:|---:|---:|\n${improvements.rows.map((row) => `| ${row.measurement} | ${row.statistic} | ${row.before} | ${row.after} | ${row.reduction} |`).join("\n")}`;
+const pipelineTable = `| Measurement | Before (p95) | After (p95) | Less time |\n|---|---:|---:|---:|\n${pipeline.rows.map((row) => `| ${row.measurement} | ${row.before} | ${row.after} | ${row.reduction} |`).join("\n")}`;
+const pipelineConditions = `${pipeline.machine}, ${pipeline.date}. ${pipeline.qualification} Corpus: ${pipeline.corpus}.`;
+const pipelineSource = `${facts.repository}/blob/${benchmarks.sourceCommit}/${pipeline.evidencePath}`;
 const answerRoutes = [
   ["/guides/quick-look-markdown/", "How to preview Markdown with Quick Look on a Mac"],
   ["/guides/open-md-file-mac/", "How to open a .md file on a Mac"],
@@ -61,11 +65,11 @@ If Downright is useful to you, you can [star it on GitHub](${facts.repository}) 
 
 ## Measured improvements
 
-${improvements.date}. ${improvements.machine}. ${improvements.qualification}
+Downright 1.0.18 spends less time parsing, diffing, and updating your document.
 
-${comparisonTable}
+${pipelineTable}
 
-Performance for the current download is not established by these comparisons. [Test conditions and historical baseline](https://downright.cc/benchmarks/). ${improvements.memoryLimit}
+${pipelineConditions} [All benchmarks and test conditions](https://downright.cc/benchmarks/).
 
 ## Source
 
@@ -81,7 +85,19 @@ const benchmarksMirror = `# Downright Markdown rendering benchmarks
 
 ## Measured improvements
 
-Development-build comparisons recorded ${improvements.date} on ${improvements.machine}. The same Mac and workload are used within each row. ${improvements.qualification} Performance for the current download is not established by these comparisons.
+Downright 1.0.18 benchmarks.
+
+${pipelineTable}
+
+## Test conditions
+
+${pipelineConditions}
+
+The measured code is included in [Downright 1.0.18 (build 356)](${facts.repository}/releases/tag/auto-${benchmarks.sourceCommit}). [Raw runs and source identity](${pipelineSource}). These timings cover parsing, diffing, storage, and decoration; they do not measure first-pixel launch time, visible scrolling, or complete window transitions.
+
+## Parsing, search, and memory
+
+${improvements.date}. ${improvements.machine}. ${improvements.qualification}
 
 ${comparisonTable}
 
@@ -89,7 +105,7 @@ ${comparisonTable}
 
 ${improvements.rows.map((row) => `- ${row.measurement}: ${row.workload}. ${row.statistic}.`).join("\n")}
 
-The search result is a single invocation, not a percentile. Memory is the kernel's lifetime maximum physical footprint across two fresh isolated native processes, not live heap or resident memory. ${improvements.memoryLimit}
+The search result is a single invocation, not a percentile. Memory is the kernel's lifetime maximum physical footprint across two fresh isolated native processes, not live heap or resident memory. ${improvements.memoryLimit} A later 126.2 MB observation measured opening the stress document only; it does not replace these interactive-session measurements.
 
 The 1,032,709-byte stress document contains 57,043 lines and 16,298 tasks. Each run opens a fresh isolated release host, enters Source, inserts seven characters, saves, undoes seven times and saves again, scrolls down and up two pages, then performs three further Source/Document cycles. The original bytes were restored exactly. These checks do not establish first-pixel launch time or 120 Hz frame delivery.
 
@@ -127,7 +143,7 @@ Generated from the native app CHANGELOG.md payload.
 
 ${changelog.entries.map((entry) => `## ${entry.version} · ${entry.kind}\n\n${plain(entry.summary)}`).join("\n\n")}
 
-Source commit: ${facts.sourceCommit}
+Source commit: ${changelog.sourceCommit}
 `;
 
 const privacy = `# Downright privacy
@@ -209,7 +225,8 @@ These tools do not star repositories or change GitHub accounts. Agents without W
 
 - https://downright.cc/ - product argument and interactive document demos
 - https://downright.cc/download/ - signed macOS download and install choices
-- https://downright.cc/releases/1.0.16/ - current release record
+- ${facts.repository}/releases/tag/auto-${facts.sourceCommit} - current release notes
+- https://downright.cc/releases/1.0.16/ - historical 1.0.16 release record
 - https://downright.cc/themes/ - six source-derived themes
 - https://downright.cc/changelog/ - generated native-app changelog
 - https://downright.cc/privacy/ - privacy promises
@@ -235,14 +252,13 @@ ${answerRoutes.map(([path, title]) => `- https://downright.cc${path} - ${title}`
 - Historical benchmark qualification: ${benchmarks.qualification}
 - Missing benchmark measurements: ${benchmarks.limitations.join(", ")}
 
-## Recorded optimization comparisons
+## Performance benchmarks
 
-${improvements.date}. ${improvements.machine}. ${improvements.qualification} Performance for the current download is not established by these comparisons.
+Downright 1.0.18. ${pipelineConditions}
 
-${comparisonTable}
+${pipelineTable}
 
-${improvements.memoryLimit}
-The search result is a single invocation, not p95. Full workloads, source provenance, and the corrected historical small-document label are at https://downright.cc/benchmarks.md.
+${improvements.memoryLimit} Full workloads, search and memory measurements, source provenance, and the corrected historical small-document label are at https://downright.cc/benchmarks.md.
 Native performance source: ${performanceSource}
 
 ## Claims

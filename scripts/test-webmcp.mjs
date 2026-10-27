@@ -114,6 +114,7 @@ try {
   check("document reading fetches the actual Markdown", document.markdown.includes("Quick Look") && document.markdown.startsWith("#"));
   const benchmarks = value(await call("read_downright_doc", { markdownPath: "/benchmarks.md" }));
   check("agents can read qualified benchmark improvements", benchmarks.markdown.includes("44–55%") && benchmarks.markdown.includes("single invocation, not a percentile") && benchmarks.markdown.includes("roughly 48 KB"));
+  check("agents receive the latest pipeline timings", benchmarks.markdown.includes("20.807 ms") && benchmarks.markdown.includes("0.099 ms") && benchmarks.markdown.includes("three interleaved pairs"));
   const repository = value(await call("get_downright_repository"));
   check("GitHub support links point to the source repository", repository.support.star.url === info.repository && repository.issues === `${info.repository}/issues`);
   check("read-only tool calls keep the visitor on the same page", await evaluate(`location.href === ${JSON.stringify(site.href)}`));
@@ -155,7 +156,8 @@ try {
   check("tools and star link are available on subpages", await evaluate("document.querySelector('[data-github-star=download]') !== null"));
   await screenshot("desktop-download");
   await navigate("/benchmarks/");
-  check("benchmark page separates sample types from historical timings", await evaluate("document.querySelector('[data-benchmark-comparison]').textContent.includes('Single invocation') && document.body.textContent.includes('Small-document parse (~48 KB)')"));
+  check("benchmark page separates sample types from historical timings", await evaluate("Array.from(document.querySelectorAll('[data-benchmark-comparison]')).some(table => table.textContent.includes('Single invocation')) && document.body.textContent.includes('Small-document parse (~48 KB)')"));
+  check("the primary table shows all ten current pipeline timings with plain labels", await evaluate("document.querySelector('[data-benchmark-comparison] tbody').rows.length === 10 && document.querySelector('[data-benchmark-comparison]').textContent.includes('20.807 ms') && !/development.build|current download is not established/i.test(document.body.textContent)"));
   await evaluate("document.querySelector('h2').scrollIntoView(); window.scrollBy(0, -90)");
   await screenshot("desktop-benchmarks");
   await navigate("/");
@@ -172,7 +174,7 @@ try {
   check("mobile star link has a touch target and no horizontal overflow", await evaluate("document.querySelector('[data-github-star=hero]').getBoundingClientRect().height >= 44 && document.documentElement.scrollWidth <= innerWidth"));
   await evaluate("document.querySelector('#close').scrollIntoView()");
   await screenshot("mobile-close");
-  check("mobile film exposes qualified improvements", await evaluate("document.querySelector('.film-compact-benchmark').textContent.includes('44–55% lower') && document.querySelector('.film-compact-benchmark').textContent.includes('single invocation')"));
+  check("mobile film exposes the current parsing, diffing, and typing timings", await evaluate("document.querySelector('.film-compact-benchmark').textContent.includes('20.807 ms') && document.querySelector('.film-compact-benchmark').textContent.includes('0.099 ms') && document.querySelector('.film-compact-benchmark').textContent.includes('0.503 ms')"));
   await evaluate("document.querySelector('#film-cta').scrollIntoView(); window.scrollBy(0, -80)");
   await screenshot("mobile-home-benchmarks");
   await navigate("/benchmarks/");

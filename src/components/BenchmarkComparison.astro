@@ -1,22 +1,24 @@
 ---
 import { benchmarks, facts } from "../data/site";
 
-interface Props { reference?: boolean }
-const { reference = false } = Astro.props;
-const comparison = benchmarks.optimizations;
+interface Props { reference?: boolean; earlier?: boolean }
+const { reference = false, earlier = false } = Astro.props;
+const comparison = earlier ? benchmarks.optimizations : benchmarks.pipeline;
+const featured = ["Full parse", "Text diff", "Typing/storage", "Semantic convergence"];
+const rows = reference || earlier ? comparison.rows : comparison.rows.filter((row) => featured.includes(row.measurement));
 const sourceUrl = `${facts.repository}/blob/${benchmarks.sourceCommit}/${benchmarks.source}`;
 ---
 
 <div class:list={[reference ? "answer-table-wrap" : "benchmark-table-wrap", "benchmark-comparison"]} tabindex="0" role="region" aria-label="Before-and-after benchmark comparisons; scroll horizontally for all columns">
   <table class={reference ? "answer-table" : "benchmark-table"} data-benchmark-comparison>
-    <caption>Development-build comparisons · {comparison.date} · same Mac, same workload within each row</caption>
-    <thead><tr><th scope="col">Measurement</th><th scope="col">Before</th><th scope="col">After</th><th scope="col">Reduction</th></tr></thead>
+    <caption>Performance benchmarks · {comparison.date}{!earlier && " · p95 latency"}</caption>
+    <thead><tr><th scope="col">Measurement</th><th scope="col">Before</th><th scope="col">After</th><th scope="col">Less {earlier ? "time / memory" : "time"}</th></tr></thead>
     <tbody>
-      {comparison.rows.map((row) => <tr>
-        <th scope="row">{row.measurement}<small>{row.statistic}</small></th>
+      {rows.map((row) => <tr>
+        <th scope="row">{row.measurement}{"statistic" in row && <small>{row.statistic}</small>}</th>
         <td>{row.before}</td><td>{row.after}</td><td>{row.reduction}</td>
       </tr>)}
     </tbody>
   </table>
 </div>
-<p class="benchmark-comparison__context">{comparison.machine}. Recorded development builds; performance for the current download is not established by these comparisons. <a href={reference ? sourceUrl : "/benchmarks/#methodology"}>Test conditions and source</a>.</p>
+<p class="benchmark-comparison__context">{comparison.machine}. <a href={reference ? sourceUrl : "/benchmarks/#methodology"}>Test conditions and source</a>.</p>

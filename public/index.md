@@ -37,21 +37,28 @@ If Downright is useful to you, you can [star it on GitHub](https://github.com/ez
 
 ## Measured improvements
 
-2026-10-25. Apple M4, macOS 27.0 (26A5406e). Recorded development release builds on the same Mac. These results describe the measured builds, not every release or Mac.
+Downright 1.0.18 spends less time parsing, diffing, and updating your document.
 
-| Measurement | Sample type | Before | After | Reduction |
-|---|---|---:|---:|---:|
-| Unicode inline-heavy parse | p95 | 48.811 ms | 11.212 ms | 77% |
-| Fuzzy heading search | Single invocation | 11.036 ms | 0.912 ms | 92% |
-| Peak physical footprint | Two fresh-process runs | 449.2 MiB | 204.1–252.2 MiB | 44–55% |
+| Measurement | Before (p95) | After (p95) | Less time |
+|---|---:|---:|---:|
+| cmark conversion | 13.076 ms | 10.605 ms | 18.9% |
+| Full parse | 27.477 ms | 20.807 ms | 24.3% |
+| AST diff | 0.030 ms | 0.018 ms | 40.0% |
+| Text diff | 1.605 ms | 0.503 ms | 68.7% |
+| Incremental decoration | 0.104 ms | 0.102 ms | 1.9% |
+| Wholesale decoration | 157.616 ms | 73.180 ms | 53.6% |
+| Typing/storage | 0.149 ms | 0.099 ms | 33.6% |
+| Semantic convergence | 28.090 ms | 20.483 ms | 27.1% |
+| Parse 100 KB | 23.020 ms | 16.489 ms | 28.4% |
+| Syntax highlighting | 0.090 ms | 0.065 ms | 27.8% |
 
-Performance for the current download is not established by these comparisons. [Test conditions and historical baseline](https://downright.cc/benchmarks/). The stress test still exceeds the 150 MB peak-memory target. The two-run range is not a percentile or a guaranteed ceiling.
+Apple M4 / macOS 27.0, 2026-10-27. p95 latency, fastest baseline versus slowest result across three interleaved pairs on the same Mac. Corpus: 120,825 characters / 4,885 lines; the separate 100 KB parse uses exactly 100,000 characters. [All benchmarks and test conditions](https://downright.cc/benchmarks/).
 
 ## Source
 
 - Repository: https://github.com/ezzy1630/Downright
-- App payload commit: 85964fb05a9b2a43191da667370801c78a841411
-- App payload generated: 2026-08-16T17:44:32.772Z
+- App payload commit: 2cdc7962848f072506c11908f15caf768110af45
+- App payload generated: 2026-10-27T18:52:32.223Z
 - Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
 
 Download: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg

@@ -48,7 +48,6 @@ export function parseBenchmarkPayload(markdown) {
   }
   const budgetFor = (measurement) => {
     const aliases = {
-      "cmark parse": "Cold launch to first rendered pixel, 100 KB",
       "Source edit and paragraph map": "Keystroke response, 5,000-line file",
       "Incremental decoration": "Keystroke response, 5,000-line file",
       "End-to-end semantic convergence": "End-to-end convergence",
@@ -72,6 +71,38 @@ export function parseBenchmarkPayload(markdown) {
       return { measurement, p50: row["p50"], p95: row["p95"], ...budgetFor(measurement) };
     }),
     optimizations: parseOptimizationComparisons(markdown),
+    pipeline: parsePipelineComparison(markdown),
+  };
+}
+
+function parsePipelineComparison(markdown) {
+  const heading = markdown.match(/## Release pipeline comparison \((\d{4}-\d{2}-\d{2})\)/);
+  if (!heading) return null;
+  const section = sectionBetween(markdown, heading[0], "\n## ");
+  // Later interleaved repeats supersede the initial, faster observation.
+  const repeats = sectionBetween(section, "### Later input-fix validation and timing variability", "\n### ");
+  const rows = parsePipeTable(repeats);
+  const baselineCommit = section.match(/baseline at `([a-f0-9]{40})`/)?.[1];
+  const candidateCommit = repeats.match(/final input fix at `([a-f0-9]{40})`/)?.[1];
+  const machine = section.match(/are (.+?) release measurements/)?.[1]?.replace(/\s+/g, " ");
+  if (rows.length !== 10 || !baselineCommit || !candidateCommit || !machine) {
+    throw new Error("Pipeline comparisons require all ten final repeats and recorded source provenance.");
+  }
+  return {
+    date: heading[1], machine, baselineCommit, candidateCommit,
+    qualification: "p95 latency, fastest baseline versus slowest result across three interleaved pairs on the same Mac.",
+    corpus: "120,825 characters / 4,885 lines; the separate 100 KB parse uses exactly 100,000 characters",
+    evidencePath: "Docs/Benchmarks/2026-10-27/final-input-checks/snapshot.json",
+    rows: rows.map((row) => {
+      const before = row["Baseline p95 (fastest)"];
+      const after = row["Candidate p95 (worst)"];
+      if (!row.Measurement || !/^\d+(?:\.\d+)? ms$/.test(before ?? "") || !/^\d+(?:\.\d+)? ms$/.test(after ?? "")) {
+        throw new Error("Pipeline comparisons require matching millisecond measurements.");
+      }
+      const reduction = (1 - parseFloat(after) / parseFloat(before)) * 100;
+      if (!Number.isFinite(reduction) || reduction <= 0) throw new Error("Pipeline comparison is not an improvement.");
+      return { measurement: row.Measurement, before, after, reduction: `${reduction.toFixed(1)}%` };
+    }),
   };
 }
 
@@ -106,8 +137,8 @@ function parseOptimizationComparisons(markdown) {
     date: heading[1],
     machine,
     baselineCommit,
-    qualification: "Recorded development release builds on the same Mac. These results describe the measured builds, not every release or Mac.",
-    memoryLimit: "The stress test still exceeds the 150 MB peak-memory target. The two-run range is not a percentile or a guaranteed ceiling.",
+    qualification: "Measured on the same Mac with the same workload within each row.",
+    memoryLimit: "The below-150-MB interactive-session target remains unverified. The two-run range is not a percentile or a guaranteed ceiling.",
     rows: [
       comparison({ rows: initialRows, prefix: "Unicode inline-heavy parse", measurement: "Unicode inline-heavy parse", mobileLabel: "Unicode parse (p95)", statistic: "p95", workload: "16,800-byte Unicode line with repeated formatting and links" }),
       comparison({ rows: initialRows, prefix: "Fuzzy match", measurement: "Fuzzy heading search", mobileLabel: "Search (single invocation)", statistic: "Single invocation", workload: "12-character query against a 1,500-character heading" }),
@@ -236,9 +267,18 @@ async function main() {
   const dirty = Boolean(command(["git", "status", "--porcelain"]));
   const generatedAt = new Date().toISOString();
   if (process.argv.includes("--benchmarks-only")) {
-    const performance = await read(join(appRoot, "Docs/PERFORMANCE.md"));
-    await writeJson("benchmarks.json", { ...parseBenchmarkPayload(performance), sourceCommit, generatedAt, sourceWorkingTreeDirty: dirty });
-    console.log(`Generated benchmark payload from ${sourceCommit}${dirty ? " (working tree dirty)" : ""}`);
+    const ref = process.env.DOWNRIGHT_APP_REF;
+    const readSource = (path) => ref
+      ? execFileSync("git", ["show", `${ref}:${path}`], { cwd: appRoot, encoding: "utf8" })
+      : read(join(appRoot, path));
+    const performance = await readSource("Docs/PERFORMANCE.md");
+    const payload = parseBenchmarkPayload(performance);
+    const benchmarkCommit = ref ? execFileSync("git", ["rev-parse", "--verify", `${ref}^{commit}`], { cwd: appRoot, encoding: "utf8" }).trim() : sourceCommit;
+    if (payload.pipeline) {
+      execFileSync("git", ["merge-base", "--is-ancestor", payload.pipeline.candidateCommit, benchmarkCommit], { cwd: appRoot });
+    }
+    await writeJson("benchmarks.json", { ...payload, sourceCommit: benchmarkCommit, generatedAt, sourceWorkingTreeDirty: ref ? false : dirty });
+    console.log(`Generated benchmark payload from ${benchmarkCommit}`);
     return;
   }
   const themeFiles = ["paper-light.json", "warm-dark.json", "nord.json", "solarized-light.json", "high-contrast.json", "system.json"];

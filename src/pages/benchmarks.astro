@@ -1,23 +1,29 @@
 ---
 import AnswerPage from "../components/AnswerPage.astro";
 import BenchmarkComparison from "../components/BenchmarkComparison.astro";
-import { benchmarks } from "../data/site";
+import { benchmarks, facts } from "../data/site";
 import { pageMeta } from "../data/seo";
 const updated = new Date(benchmarks.generatedAt).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
 ---
 
 <AnswerPage title="Downright Markdown rendering benchmarks" trail="Benchmarks" updated={updated} modifiedDate={benchmarks.generatedAt.slice(0, 10)} description={pageMeta.benchmarks.description} markdownPath={pageMeta.benchmarks.markdownPath ?? "/benchmarks.md"}>
-  <p>The recorded optimization checks show less time spent parsing and searching, and a lower peak physical footprint. Each before-and-after comparison uses the same Mac and workload within that row. The older pipeline baseline remains below with its original timings.</p>
+  <p>Downright 1.0.18 spends less time parsing, diffing, and updating your document. These benchmarks compare the same workloads on the same Mac.</p>
 
   <h2>Measured improvements</h2>
   <BenchmarkComparison reference />
 
   <h2 id="methodology">Test conditions and limits</h2>
+  <p>{benchmarks.pipeline.machine}, measured {benchmarks.pipeline.date}. {benchmarks.pipeline.qualification} The corpus is {benchmarks.pipeline.corpus}.</p>
+  <p>The measured code is included in <a href={`${facts.repository}/releases/tag/auto-${benchmarks.sourceCommit}`}>Downright 1.0.18 (build 356)</a>. <a href={`${facts.repository}/blob/${benchmarks.sourceCommit}/${benchmarks.pipeline.evidencePath}`}>Raw runs and source identity</a> are available alongside the performance record.</p>
+  <p>These timings cover parsing, diffing, storage, and decoration. They do not measure first-pixel launch time, visible scrolling, or complete window transitions.</p>
+
+  <h2>Parsing, search, and memory</h2>
+  <BenchmarkComparison reference earlier />
   <ul>
     {benchmarks.optimizations.rows.map((row) => <li><strong>{row.measurement}:</strong> {row.workload}. {row.statistic}.</li>)}
   </ul>
   <p>The Unicode result is a p95 latency. The search result is a single measured invocation, so it does not establish a latency percentile. The memory result is an observed range across two fresh processes, measured with the kernel's lifetime maximum physical-footprint counter.</p>
-  <p>{benchmarks.optimizations.memoryLimit} Physical footprint and live heap allocations measure different things. These checks do not establish a cold-launch first-pixel time, 120 Hz scrolling, or a universal memory ceiling.</p>
+  <p>{benchmarks.optimizations.memoryLimit} A later 126.2 MB observation measured opening the stress document only; it does not replace the interactive-session measurements above. Physical footprint and live heap allocations measure different things.</p>
   <p>The memory workload uses a document with 57,043 lines and 16,298 tasks. Each run opens a fresh isolated native host, enters Source, inserts seven characters, saves, undoes and saves again, scrolls down and up, and performs three further Source/Document cycles. The document's original bytes were restored exactly.</p>
 
   <h2>Historical pipeline baseline</h2>

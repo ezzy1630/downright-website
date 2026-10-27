@@ -31,7 +31,7 @@ import { pageMeta, reviewedLabel } from "../data/seo";
     <li><strong>Integrations:</strong> Finder, Quick Look, Spotlight, Services, App Intents, and the <code>down</code> CLI.</li>
     <li><strong>Privacy:</strong> no account or telemetry required; files remain local during ordinary use.</li>
     <li><strong>Formats:</strong> {facts.supportedExtensions.map((extension) => `.${extension}`).join(", ")}.</li>
-    <li><strong>Current release:</strong> {facts.version} · <a href="/releases/1.0.16/">release evidence</a>.</li>
+    <li><strong>Current release:</strong> {facts.version} · <a href={`${facts.repository}/releases/tag/auto-${facts.sourceCommit}`}>release notes</a>.</li>
   </ul>
 
   <h2>Press assets</h2>
@@ -45,5 +45,5 @@ import { pageMeta, reviewedLabel } from "../data/seo";
   </ul>
 
   <h2>Useful links</h2>
-  <p><a href="/download/">Download</a> · <a href="/releases/1.0.16/">release facts</a> · <a href="/engineering/">engineering</a> · <a href="/benchmarks/">benchmarks</a> · <a href="/privacy/">privacy</a> · <a href={facts.repository ?? "/"}>source</a></p>
+  <p><a href="/download/">Download</a> · <a href={`${facts.repository}/releases/tag/auto-${facts.sourceCommit}`}>release notes</a> · <a href="/engineering/">engineering</a> · <a href="/benchmarks/">benchmarks</a> · <a href="/privacy/">privacy</a> · <a href={facts.repository ?? "/"}>source</a></p>
 </AnswerPage>

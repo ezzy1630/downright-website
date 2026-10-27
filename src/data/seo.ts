@@ -211,7 +211,7 @@ export const pageMeta = {
   },
   benchmarks: {
     title: "Downright Markdown rendering benchmarks",
-    description: "See Downright's recorded improvements in Unicode parsing, heading search, and peak memory, with before-and-after results, test conditions, and the historical pipeline baseline.",
+    description: "Downright 1.0.18 benchmarks for parsing, typing, diffing, and decoration, plus search and memory measurements. Timings, comparisons, and test conditions.",
     markdownPath: "/benchmarks.md",
     type: "article" as const,
   },

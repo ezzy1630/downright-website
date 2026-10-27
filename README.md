@@ -33,6 +33,12 @@ npm run generate:benchmarks # refresh only benchmark data from the app performan
 npm run test:benchmarks # retain historical measurements and qualify improvement comparisons
 ```
 
+To refresh benchmarks from a published release without reading unrelated local
+app changes, use `DOWNRIGHT_APP_REF=<release-commit> npm run generate:benchmarks`.
+The pipeline table uses the later interleaved repeats, with the fastest baseline
+and slowest candidate p95. Refresh `facts.json` from the same public release when
+the displayed release version changes.
+
 ## Link previews
 
 `npm run generate:og` (run automatically by `prebuild`) writes one 1200x630 PNG
@@ -69,7 +75,7 @@ available when a deployment needs to pin a specific immutable asset.
 
 - `/` — product homepage
 - `/download/` — signed release and installation methods
-- `/releases/1.0.16/` — current release record
+- `/releases/1.0.16/` — historical 1.0.16 release record
 - `/changelog/` — source-grounded product updates
 - `/themes/` — six semantic theme palettes
 - `/known-gaps/` — current release and native-evidence gaps

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import { parseBenchmarkPayload } from "./generate-app-data.ts";
 
 const baseline = `
@@ -76,4 +77,15 @@ test("non-improving results cannot silently become improvement claims", () => {
 
 test("incomparable units cannot become improvement claims", () => {
   assert.throws(() => parseBenchmarkPayload(comparisons.replace("0.912 ms", "0.912 MiB") + baseline), /matching measurement units/);
+});
+
+const published = JSON.parse(readFileSync(new URL("../src/data/app/benchmarks.json", import.meta.url), "utf8"));
+
+test("published speeds use the final conservative repeats, not the faster initial snapshot", () => {
+  assert.equal(published.pipeline.rows.length, 10);
+  const fullParse = published.pipeline.rows.find((row) => row.measurement === "Full parse");
+  assert.equal(fullParse.before, "27.477 ms");
+  assert.equal(fullParse.after, "20.807 ms");
+  assert.equal(fullParse.reduction, "24.3%");
+  assert.equal(published.pipeline.rows.find((row) => row.measurement === "Parse 100 KB").after, "16.489 ms");
 });

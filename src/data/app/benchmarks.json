@@ -16,8 +16,8 @@
       "measurement": "cmark parse",
       "p50": "12.827 ms",
       "p95": "13.309 ms",
-      "target": "<250 ms",
-      "passCondition": "p95 below target · *manual release gate*"
+      "target": "Informational",
+      "passCondition": "Baseline only"
     },
     {
       "measurement": "Full MarkdownParser.parse",
@@ -87,8 +87,8 @@
     "date": "2026-10-25",
     "machine": "Apple M4, macOS 27.0 (26A5406e)",
     "baselineCommit": "9be0680ec7131dffb8af9a64b6cdbcdb274d3292",
-    "qualification": "Recorded development release builds on the same Mac. These results describe the measured builds, not every release or Mac.",
-    "memoryLimit": "The stress test still exceeds the 150 MB peak-memory target. The two-run range is not a percentile or a guaranteed ceiling.",
+    "qualification": "Measured on the same Mac with the same workload within each row.",
+    "memoryLimit": "The below-150-MB interactive-session target remains unverified. The two-run range is not a percentile or a guaranteed ceiling.",
     "rows": [
       {
         "measurement": "Unicode inline-heavy parse",
@@ -119,7 +119,78 @@
       }
     ]
   },
-  "sourceCommit": "ce2cad6deb287fa34d3561615c6655e3eb29a17e",
-  "generatedAt": "2026-10-27T05:24:00.167Z",
+  "pipeline": {
+    "date": "2026-10-27",
+    "machine": "Apple M4 / macOS 27.0",
+    "baselineCommit": "ce2cad6deb287fa34d3561615c6655e3eb29a17e",
+    "candidateCommit": "cbef8ff2db62ea46b78425b03db6b62a319012bb",
+    "qualification": "p95 latency, fastest baseline versus slowest result across three interleaved pairs on the same Mac.",
+    "corpus": "120,825 characters / 4,885 lines; the separate 100 KB parse uses exactly 100,000 characters",
+    "evidencePath": "Docs/Benchmarks/2026-10-27/final-input-checks/snapshot.json",
+    "rows": [
+      {
+        "measurement": "cmark conversion",
+        "before": "13.076 ms",
+        "after": "10.605 ms",
+        "reduction": "18.9%"
+      },
+      {
+        "measurement": "Full parse",
+        "before": "27.477 ms",
+        "after": "20.807 ms",
+        "reduction": "24.3%"
+      },
+      {
+        "measurement": "AST diff",
+        "before": "0.030 ms",
+        "after": "0.018 ms",
+        "reduction": "40.0%"
+      },
+      {
+        "measurement": "Text diff",
+        "before": "1.605 ms",
+        "after": "0.503 ms",
+        "reduction": "68.7%"
+      },
+      {
+        "measurement": "Incremental decoration",
+        "before": "0.104 ms",
+        "after": "0.102 ms",
+        "reduction": "1.9%"
+      },
+      {
+        "measurement": "Wholesale decoration",
+        "before": "157.616 ms",
+        "after": "73.180 ms",
+        "reduction": "53.6%"
+      },
+      {
+        "measurement": "Typing/storage",
+        "before": "0.149 ms",
+        "after": "0.099 ms",
+        "reduction": "33.6%"
+      },
+      {
+        "measurement": "Semantic convergence",
+        "before": "28.090 ms",
+        "after": "20.483 ms",
+        "reduction": "27.1%"
+      },
+      {
+        "measurement": "Parse 100 KB",
+        "before": "23.020 ms",
+        "after": "16.489 ms",
+        "reduction": "28.4%"
+      },
+      {
+        "measurement": "Syntax highlighting",
+        "before": "0.090 ms",
+        "after": "0.065 ms",
+        "reduction": "27.8%"
+      }
+    ]
+  },
+  "sourceCommit": "2cdc7962848f072506c11908f15caf768110af45",
+  "generatedAt": "2026-10-27T18:50:43.237Z",
   "sourceWorkingTreeDirty": false
 }

@@ -107,10 +107,10 @@ function buildFilmCtaBeat(): void {
   beat.innerHTML = `
     <p class="film-beat__kicker">A small engine</p>
     <h2 class="film-beat__title">Less time. Less memory.</h2>
-    <div class="film-compact-benchmark" aria-label="Recorded development-build improvements">
-      ${benchmarks.optimizations.rows.map((row) => `<div><span>${row.mobileLabel}</span><strong>${row.reduction} lower</strong></div>`).join("")}
+    <div class="film-compact-benchmark" aria-label="Performance benchmarks">
+      ${benchmarks.pipeline.rows.filter((row) => ["Full parse", "Text diff", "Typing/storage"].includes(row.measurement)).map((row) => `<div><span>${row.measurement}</span><strong>${row.after}</strong></div>`).join("")}
     </div>
-    <p class="film-beat__line">Development builds on Apple M4, ${benchmarks.optimizations.date}. <a href="/benchmarks/">Before, after, and test conditions</a>. These comparisons do not establish performance for the current download.</p>
+    <p class="film-beat__line">p95 latency on Apple M4. <a href="/benchmarks/">All benchmarks and test conditions</a>.</p>
     <div class="film-handoff film-cta__handoff" data-fingerprint="film-cta-handoff">
       <p class="film-handoff__line">On iPhone? Send the page to your Mac, then download there.</p>
       <button type="button" class="film-handoff__primary" data-share="share">Send it to your Mac</button>

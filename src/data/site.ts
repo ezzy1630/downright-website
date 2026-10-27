@@ -55,7 +55,7 @@ export const copy = {
   },
   speed: {
     heading: "Less time. Less memory.",
-    body: "Measured before and after on the same Mac. Each comparison keeps its workload, sample type, and limits visible.",
+    body: "Parsing, diffing, and editing take less time in Downright 1.0.18. Here are the numbers.",
   },
   architecture: {
     heading: "Your text stays in charge.",
