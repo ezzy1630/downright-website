@@ -201,5 +201,6 @@ try {
   ws?.close();
   browser.kill("SIGTERM");
   await new Promise((resolve) => { if (browser.exitCode !== null || browser.signalCode !== null) resolve(); else browser.once("exit", resolve); });
-  await rm(profile, { recursive: true, force: true });
+  // Chrome helpers can finish writing the profile after the parent exits.
+  await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 }
