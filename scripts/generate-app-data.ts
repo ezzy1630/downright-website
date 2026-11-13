@@ -6,7 +6,6 @@ import { dirname, join, resolve } from "node:path";
 const siteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const appRoot = resolve(process.env.DOWNRIGHT_APP_ROOT ?? "/Volumes/Neural/Downright");
 const outputRoot = join(siteRoot, "src/data/app");
-const themesRoot = join(appRoot, "Sources/MarkdownRender/Themes");
 
 const read = (path) => readFile(path, "utf8");
 const writeJson = (name, value) => writeFile(join(outputRoot, name), `${JSON.stringify(value, null, 2)}\n`);
@@ -147,14 +146,19 @@ function parseOptimizationComparisons(markdown) {
   };
 }
 
-function parseChangelog(markdown) {
+export function parseChangelog(markdown) {
   const entries = [];
-  const versions = [...markdown.matchAll(/^## \[([^\]]+)\](?: - (.+))?\s*$/gm)];
-  for (let versionIndex = 0; versionIndex < versions.length; versionIndex += 1) {
-    const version = versions[versionIndex];
+  // Every level-two heading ends the previous section, so prose sections such
+  // as "Earlier main-channel notes" are never attributed to the version above
+  // them. Only released versions are published; [Unreleased] is not a release.
+  const sections = [...markdown.matchAll(/^## (.+?)\s*$/gm)];
+  for (let sectionIndex = 0; sectionIndex < sections.length; sectionIndex += 1) {
+    const section = sections[sectionIndex];
+    const version = section[1].match(/^\[([^\]]+)\](?: - (.+))?$/);
+    if (!version || version[1] === "Unreleased") continue;
     const [, label, date] = version;
-    const bodyStart = (version.index ?? 0) + version[0].length;
-    const bodyEnd = versions[versionIndex + 1]?.index ?? markdown.length;
+    const bodyStart = (section.index ?? 0) + section[0].length;
+    const bodyEnd = sections[sectionIndex + 1]?.index ?? markdown.length;
     const body = markdown.slice(bodyStart, bodyEnd);
     const categories = [...body.matchAll(/^### ([^\n]+)\s*$/gm)];
     for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex += 1) {
@@ -166,7 +170,7 @@ function parseChangelog(markdown) {
       const bullets = [...categoryBody.matchAll(/^- (.+(?:\n(?![-#]).+)*)/gm)];
       for (const bullet of bullets) {
         const summary = cleanText(bullet[1].replace(/\*\*/g, "").replace(/`([^`]+)`/g, "$1"));
-        if (summary) entries.push({ version: label, date: date ?? label, kind, summary });
+        if (summary) entries.push({ version: label, date: date ?? null, kind, summary });
       }
     }
   }
@@ -263,37 +267,45 @@ function tokenCss(themes, motion) {
 
 async function main() {
   await mkdir(outputRoot, { recursive: true });
-  const sourceCommit = command(["git", "rev-parse", "HEAD"], "unknown");
-  const dirty = Boolean(command(["git", "status", "--porcelain"]));
+  // DOWNRIGHT_APP_REF pins every input to one app commit — normally the
+  // released one — so unreleased work in the local checkout never reaches the
+  // public site. Without it the working tree is read and recorded as dirty.
+  const ref = process.env.DOWNRIGHT_APP_REF;
+  const readSource = (path) => ref
+    ? execFileSync("git", ["show", `${ref}:${path}`], { cwd: appRoot, encoding: "utf8" })
+    : read(join(appRoot, path));
+  const sourceCommit = ref
+    ? execFileSync("git", ["rev-parse", "--verify", `${ref}^{commit}`], { cwd: appRoot, encoding: "utf8" }).trim()
+    : command(["git", "rev-parse", "HEAD"], "unknown");
+  const dirty = ref ? false : Boolean(command(["git", "status", "--porcelain"]));
   const generatedAt = new Date().toISOString();
   if (process.argv.includes("--benchmarks-only")) {
-    const ref = process.env.DOWNRIGHT_APP_REF;
-    const readSource = (path) => ref
-      ? execFileSync("git", ["show", `${ref}:${path}`], { cwd: appRoot, encoding: "utf8" })
-      : read(join(appRoot, path));
     const performance = await readSource("Docs/PERFORMANCE.md");
     const payload = parseBenchmarkPayload(performance);
-    const benchmarkCommit = ref ? execFileSync("git", ["rev-parse", "--verify", `${ref}^{commit}`], { cwd: appRoot, encoding: "utf8" }).trim() : sourceCommit;
     if (payload.pipeline) {
-      execFileSync("git", ["merge-base", "--is-ancestor", payload.pipeline.candidateCommit, benchmarkCommit], { cwd: appRoot });
+      execFileSync("git", ["merge-base", "--is-ancestor", payload.pipeline.candidateCommit, sourceCommit], { cwd: appRoot });
     }
-    await writeJson("benchmarks.json", { ...payload, sourceCommit: benchmarkCommit, generatedAt, sourceWorkingTreeDirty: ref ? false : dirty });
-    console.log(`Generated benchmark payload from ${benchmarkCommit}`);
+    await writeJson("benchmarks.json", { ...payload, sourceCommit, generatedAt, sourceWorkingTreeDirty: dirty });
+    console.log(`Generated benchmark payload from ${sourceCommit}`);
     return;
   }
   const themeFiles = ["paper-light.json", "warm-dark.json", "nord.json", "solarized-light.json", "high-contrast.json", "system.json"];
   const themes = await Promise.all(themeFiles.map(async (file) => ({
     id: file.replace(/\.json$/, ""),
-    ...JSON.parse(await read(join(themesRoot, file))),
+    ...JSON.parse(await readSource(`Sources/MarkdownRender/Themes/${file}`)),
   })));
-  const performance = await read(join(appRoot, "Docs/PERFORMANCE.md"));
-  const changelog = await read(join(appRoot, "CHANGELOG.md"));
-  const sample = await read(join(appRoot, "Docs/sample.md"));
-  const motionSource = await read(join(appRoot, "Sources/MarkdownRender/Motion.swift"));
-  const plist = await read(join(appRoot, "Config/Downright-Info.plist"));
-  const versionSource = await read(join(appRoot, "Config/version.env"));
+  const performance = await readSource("Docs/PERFORMANCE.md");
+  const changelog = await readSource("CHANGELOG.md");
+  const sample = await readSource("Docs/sample.md");
+  const motionSource = await readSource("Sources/MarkdownRender/Motion.swift");
+  const plist = await readSource("Config/Downright-Info.plist");
+  const versionSource = await readSource("Config/version.env");
   const version = versionSource.match(/^MARKETING_VERSION=(.+)$/m)?.[1]?.trim() ?? "unknown";
-  const currentProjectVersion = versionSource.match(/^CURRENT_PROJECT_VERSION=(.+)$/m)?.[1]?.trim() ?? "unknown";
+  // A released build's CFBundleVersion is its commit count (the app's
+  // Scripts/build-number.sh); version.env only carries the nominal dev value.
+  const currentProjectVersion = ref
+    ? execFileSync("git", ["rev-list", "--count", sourceCommit], { cwd: appRoot, encoding: "utf8" }).trim()
+    : versionSource.match(/^CURRENT_PROJECT_VERSION=(.+)$/m)?.[1]?.trim() ?? "unknown";
   const repositoryRaw = command(["git", "config", "--get", "remote.origin.url"]);
   const repository = repositoryRaw.replace(/^git@github\.com:/, "https://github.com/").replace(/\.git$/, "") || null;
 // The signed, notarized DMG ships on the rolling latest GitHub release; the download
@@ -303,14 +315,21 @@ const downloadUrl = process.env.PUBLIC_DOWNLOAD_URL?.trim()
 // Sponsorship is an invitation, never a gate: the owner's GitHub Sponsors.
 const owner = repository?.split("/").at(-2) ?? "ezzy1630";
 const sponsorsUrl = `https://github.com/sponsors/${owner}`;
-  const motion = parseMotion(motionSource);
-  await writeJson("themes.json", { source: "Sources/MarkdownRender/Themes", sourceCommit, generatedAt, themes });
-  await writeJson("benchmarks.json", { ...parseBenchmarkPayload(performance), sourceCommit, generatedAt });
   await writeJson("changelog.json", { ...parseChangelog(changelog), sourceCommit, generatedAt });
   await writeJson("facts.json", {
     sourceCommit, generatedAt, sourceWorkingTreeDirty: dirty, version, currentProjectVersion, minimumMacOS: "14.0", license: "MIT", artifactName: "Downright.dmg",
     repository, sponsorsUrl, supportedExtensions: parseExtensions(plist), downloadUrl,
   });
+  // A release refresh updates only what a release changes: its notes and
+  // version facts. Themes, motion and tokens carry site-specific additions
+  // and are regenerated deliberately with the full command.
+  if (process.argv.includes("--release-only")) {
+    console.log(`Generated release changelog and facts from ${sourceCommit}`);
+    return;
+  }
+  const motion = parseMotion(motionSource);
+  await writeJson("themes.json", { source: "Sources/MarkdownRender/Themes", sourceCommit, generatedAt, themes });
+  await writeJson("benchmarks.json", { ...parseBenchmarkPayload(performance), sourceCommit, generatedAt });
   await writeJson("motion.json", motion);
   await writeFile(join(outputRoot, "sample.md"), sample);
   await writeFile(join(siteRoot, "src/styles/tokens.css"), tokenCss(themes, motion));

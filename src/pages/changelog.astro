@@ -25,11 +25,11 @@ for (const entry of changelog.entries) {
     <section class="changelog-list">
       {grouped.map((group, groupIndex) => (
         <article class="changelog-group">
-          <div class="changelog-group__meta"><strong>{group.version}</strong><span>{group.date}</span></div>
+          <div class="changelog-group__meta"><strong>{group.version}</strong>{group.date && <span>{group.date}</span>}</div>
           <div class="changelog-group__entries">
             {group.entries.slice(0, 12).map((entry, entryIndex) => (
               <article class="changelog-entry">
-                <div><span>{entry.kind}</span><time>{entry.date}</time></div>
+                <div><span>{entry.kind}</span>{entry.date && <time datetime={entry.date}>{entry.date}</time>}</div>
                 <h2>{entry.summary}</h2>
                 {groupIndex === 0 && entryIndex === 0 && <p class="changelog-entry__note">The current release is generated from the native app payload. The website publishes live document surfaces, not screenshots.</p>}
               </article>
