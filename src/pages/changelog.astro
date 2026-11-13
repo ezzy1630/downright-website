@@ -5,7 +5,7 @@ import { facts } from "../data/site";
 import { pageMeta, reviewedOn } from "../data/seo";
 
 type ChangelogEntry = (typeof changelog.entries)[number];
-type ChangelogGroup = { version: string; date: string; entries: ChangelogEntry[] };
+type ChangelogGroup = { version: string; date: ChangelogEntry["date"]; entries: ChangelogEntry[] };
 const grouped: ChangelogGroup[] = [];
 for (const entry of changelog.entries) {
   const existing = grouped.find((group) => group.version === entry.version);
