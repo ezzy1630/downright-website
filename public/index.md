@@ -57,8 +57,8 @@ Apple M4 / macOS 27.0, 2026-10-27. p95 latency, fastest baseline versus slowest 
 ## Source
 
 - Repository: https://github.com/ezzy1630/Downright
-- App payload commit: 2cdc7962848f072506c11908f15caf768110af45
-- App payload generated: 2026-10-27T18:52:32.223Z
+- App payload commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
+- App payload generated: 2026-11-13T23:41:58.551Z
 - Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
 
 Download: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg

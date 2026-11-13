@@ -28,7 +28,7 @@ These tools do not star repositories or change GitHub accounts. Agents without W
 
 - https://downright.cc/ - product argument and interactive document demos
 - https://downright.cc/download/ - signed macOS download and install choices
-- https://github.com/ezzy1630/Downright/releases/tag/auto-2cdc7962848f072506c11908f15caf768110af45 - current release notes
+- https://github.com/ezzy1630/Downright/releases/tag/auto-605c9280e13cf1790f0abfadc83a9f6a0f9b55ef - current release notes
 - https://downright.cc/releases/1.0.16/ - historical 1.0.16 release record
 - https://downright.cc/themes/ - six source-derived themes
 - https://downright.cc/changelog/ - generated native-app changelog
@@ -60,8 +60,8 @@ These tools do not star repositories or change GitHub accounts. Agents without W
 
 ## Source and evidence
 
-- App payload commit: 2cdc7962848f072506c11908f15caf768110af45
-- Payload generated: 2026-10-27T18:52:32.223Z
+- App payload commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
+- Payload generated: 2026-11-13T23:41:58.551Z
 - Historical benchmark corpus: 120,825 characters / 4,885 lines
 - Historical benchmark date: 2026-08-06
 - Historical benchmark qualification: Historical baseline only. Not a cross-machine claim.

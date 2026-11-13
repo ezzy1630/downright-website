@@ -2,161 +2,137 @@
 
 Generated from the native app CHANGELOG.md payload.
 
-## Unreleased · Fixed
+## 1.0.23 · Fixed
 
-Fixed a crash on ordinary prose. Any document containing a one-character word before :digits - "John 3:16", "meet at 9:30", ` a:1 ` - fatally trapped the path-token scanner during the per-keystroke reparse.
+Permission prompts, such as "Read a file from outside this document's folder?", respond to clicks again. Clicks inside the floating Tasks, History, and Document panels no longer land beside the button you pressed. In a short window the prompt keeps every choice visible and separate, scrolling its explanation instead of squeezing the buttons together, and long file names are shortened in the middle so their extension stays readable. ([#56](https://github.com/ezzy1630/Downright/issues/56))
 
-## Unreleased · Fixed
+## 1.0.23 · Fixed
 
-Fixed code-fence recovery. A closing fence may now carry trailing spaces or tabs (legal CommonMark) instead of being swallowed into the code content, and a same-character run shorter than the opening fence inside an unclosed longer fence is content, not a phantom closer.
+Math renders more of the LaTeX written for KaTeX, MathJax, Typora, and Obsidian instead of showing the formula's source. Newly supported: \dfrac, \tfrac, \cfrac, \operatorname, \boldsymbol, \not=, \iint, \big(, \middle|, \tag{1}, \label, and \&; align, align*, equation, gather*, gathered, multline, array, and smallmatrix blocks; and symbols such as \leqslant, \implies, \therefore, \varnothing, and \checkmark. Chinese, Japanese, and Korean text inside \text{} now appears instead of disappearing, as do typed symbols such as α and ≤. ([#55](https://github.com/ezzy1630/Downright/issues/55))
 
-## Unreleased · Fixed
+## 1.0.22 · Fixed
 
-Fixed footnote recovery inside fenced example code. The source scanner no longer ends a fence on an info string ( `ruby inside `` ), which used to leak footnote-looking lines out of code blocks.
+Completed image loads now refresh the visible text surface, replacing stuck loading placeholders. Documents with many local images load pictures when they are visible instead of during offscreen layout. Hovering no longer starts repeated loads that can evict the visible picture. Image dimensions survive pixel-cache eviction, and the cache accounts for downsampled pixels correctly. Adjacent image-only lines keep independent image fragments. Unreadable local pictures settle on a missing-image message.
 
-## Unreleased · Fixed
+## 1.0.21 · Added
 
-Fixed section moves in mixed-ending files. moveSection now recognizes terminators by width and preserves the separator's exact bytes; a CRLF blank separator used to be invisible to the walk, gluing the moved sections together. Table realigns and list looseness are width-aware for the same reason, and re-levelling a setext heading keeps its emphasis and code markers instead of the plain-text title.
+A one-time GitHub star suggestion after five document opens and ten minutes of foreground reading. It waits for idle input, leaves editing focus alone, and keeps eligibility and dismissal state entirely on your Mac.
 
-## Unreleased · Fixed
+## 1.0.21 · Added
 
-Closed a stored-XSS hole in HTML export. Wikilink targets now pass the same scheme allowlist as ordinary links: [[javascript:alert(1)//]] used to export as a live javascript: URL (the .html suffix sits behind a // comment, so it did not neutralize the payload).
+Local PlantUML rendering for plantuml and puml code fences in the Mac app, alongside existing Mermaid diagrams. No Java installation, WebView, or diagram server is required. Source Focus keeps the original diagram text editable. External includes and downloaded libraries stay disabled; Finder previews retain PlantUML fences as code.
 
-## Unreleased · Fixed
+## 1.0.21 · Fixed
 
-Fixed down export. Multi-line paragraphs and code blocks exported as one line of visible \n garbage; the writer now emits real newlines.
+Code block backgrounds no longer cover text selection. Selected text uses a contrasting foreground so syntax colours cannot disappear into the highlight.
 
-## Unreleased · Fixed
+## 1.0.21 · Fixed
 
-Fixed a main-thread freeze in the image lightbox. Remote (and large local) images now decode off the main thread; a slow server no longer hangs the app inside the click handler.
+Theme changes during an edit wait for the current parse, preventing a crash from applying the previous document revision's ranges to the new text.
 
-## Unreleased · Fixed
+## 1.0.21 · Maintenance
 
-Fixed watcher events after close. A file-watcher event already in flight when its document closed scheduled one more external-write pass on the closed document; and an in-place link hop whose target vanished mid-flight now reopens the previous document instead of leaving a window that no longer tracks external writes.
+Updated Sparkle to 2.10.1 across SwiftPM, Xcode, and release signing tools, with a consistency check that prevents partial dependency updates.
 
-## Unreleased · Fixed
+## 1.0.21 · Maintenance
 
-Hardened the release chain: the Apple API key and Developer ID certificate materialize under mktemp/RUNNER_TEMP instead of fixed /tmp paths, the Sparkle key ceremony no longer runs a binary discovered by globbing /tmp, the ephemeral signing keychain is deleted on every path, and CI/release install a checksum-pinned xcodegen (2.46.0) instead of a floating Homebrew head, shipping its SettingPresets alongside the binary so the generated project keeps ONLY_ACTIVE_ARCH=YES (a binary-only install dropped it and made the acceptance build fail on universal app extensions).
+Updated the pinned GitHub Actions cache and artifact upload actions.
 
-## Unreleased · Fixed
+## 1.0.21 · Maintenance
 
-Fixed a workspace-sidebar crash on colliding filenames. The link graph keyed files by a normalized path that folds a\b.md into a/b.md (and a hidden .x.md into x.md); uniqueKeysWithValues trapped on the first duplicate. Lookup is now collision-tolerant and prefers the already-normalized path deterministically.
+Shared release validation now runs source budgets, native acceptance, and updater acceptance concurrently and requires all three before publication. Added retained diagnostics, explicit skipped coverage, and fixed-seed source and editing checks.
 
-## Unreleased · Fixed
+## 1.0.20 · Fixed
 
-Fixed "Allow for Folder" over-granting on a directory. Consenting from a directory token stored the directory's *parent*, authorizing every sibling; a directory target now grants itself, and revoke targets the same folder.
+Editing and deleting words in document mode preserve the reading position and caret alignment, including in large documents. Stale queued repairs no longer override newer edits or selections, and repeated scroll repairs no longer accumulate fractional position errors.
 
-## Unreleased · Fixed
+## 1.0.20 · Fixed
 
-Fixed trust grants silently revoking earlier ones. A second grant for the same path replaced the first instead of extending it, so folder-read and editor-launch kept ping-ponging; grants now union their effects.
+Deferred layout repairs during typing restore the reading position before drawing, avoiding a forced repaint of the intermediate viewport.
 
-## Unreleased · Fixed
+## 1.0.19 · Fixed
 
-Fixed a hard-wrap reflow overrun on stale documents. The continuation-indent walk indexed the buffer by an unclamped paragraph range and could read one character past the end after an external rewrite; it now clamps to the buffer length.
+Editing and deleting words in document mode preserve the visible reading position, including in large documents. Queued layout repairs no longer restore stale positions after a newer edit or selection.
 
-## Unreleased · Fixed
+## 1.0.19 · Fixed
 
-Fixed agent hook install/uninstall matching the command only. A foreign PostToolUse entry that runs down notify under another matcher used to block a needed install and be deleted by an uninstall; both now match on matcher and command together.
+Scrolling keeps visible text aligned with caret placement and word deletion.
 
-## Unreleased · Added
+## 1.0.18 · Added
 
-First-run setup panel. Downright now installs itself. On first launch it offers to become the default Markdown app and to install the down command line tool, and - with no decision to make - registers its Quick Look extensions with Launch Services and pluginkit and resets Quick Look's caches so existing .md files pick up real Finder icons. Everything here previously lived only in Scripts/install.sh, which runs for people building from source and for nobody else: the shipping path of download the DMG, drag to Applications, double-click performed none of it.
+Inline Markdown images and linked HTML badge rows in the Mac reader. Remote images load only after View → Load Remote Images grants the current document; animated images start paused with Play/Pause controls.
 
-## Unreleased · Added
+## 1.0.18 · Added
 
-The panel detects an app still running from a DMG or Downloads - Gatekeeper runs those from a randomised read-only mount where no registration can stick - and offers to move it into Applications and relaunch.
+Full width and finite 60-120 character reading measures, carried through reader profiles, HTML export, and Quick Look previews.
 
-## Unreleased · Added
+## 1.0.18 · Changed
 
-Settings → General → System integration repeats every setup step, names the app currently holding the Markdown association, and opens the Quick Look pane of System Settings for the one switch macOS will not let an app throw.
+Faster parsing, diffing, syntax highlighting, and decoration. An initial Apple M4 release snapshot improved ten pipeline cases by 30-72%; later conservative comparisons exceeded 25% in seven cases, so that percentage goal is not consistently certified across all ten. [Measurements and limits](https://github.com/ezzy1630/Downright/blob/main/Docs/PERFORMANCE.md#release-pipeline-comparison-2026-10-27) include raw runs and distinguish source-edit timing from visible rendering.
 
-## Unreleased · Added
+## 1.0.18 · Changed
 
-Help → Take the Tour, so the tour outlives the start window's button.
+Lower large-document allocation and layout costs, including compact parsed spans, lazy paragraph presentation, bounded task-panel layers, and shorter lifetimes for parser and mode-transition buffers. The below-150-MB interactive session target remains uncertified; the latest 126.2 MB result covers opening the stress document only.
 
-## Unreleased · Added
+## 1.0.18 · Fixed
 
-Recent files say what they are about. Each row carries a second line with the document's first heading, so notes.md reads as "Agent output" and a folder of identically-named agent output stops being a column of interchangeable rows. The folder is shown behind it, or alone when there is no heading; neither is repeated when the two would say the same thing.
+List ornaments retain their marker and interaction metadata after editing continuation paragraphs and undoing the edit, including nested callouts.
 
-## Unreleased · Added
+## 1.0.18 · Fixed
 
-⌘1-⌘6 open the corresponding recent file, with the shortcut spelled out once in the list header and each row carrying its own ordinal.
+Source presentation keeps the text view wide enough for its text container.
 
-## Unreleased · Changed
+## 1.0.18 · Fixed
 
-Appearance now follows macOS reliably. Theme selection no longer silently disables system following, the View menu exposes separate light and dark palettes, and Light/Dark transitions rebuild cached TextKit paragraphs so old foreground colours cannot survive over the new page.
+Clicking rendered links works with hidden Markdown syntax, including links on the first line and in later paragraphs.
 
-## Unreleased · Changed
+## 1.0.18 · Fixed
 
-Find bar and Tasks panel motion pass. The find pill now opens above the document without moving the page, flows outward from the toolbar lens as one liquid-glass body before its readable controls resolve, and grows around the replace row as it expands. The match count crossfades and its tray glides open and closed, and the invalid-regex glyph pops in on a small spring instead of hard-appearing. In the Tasks panel, the empty state dissolves as a plan's first rows slide in, and the quick-add row crossfades its hint into the editing field instead of swapping them.
+Split panes retain the current document’s remote-image permission. Opening a different file revokes permission without rebuilding stale image ranges.
 
-## Unreleased · Changed
+## 1.0.18 · Maintenance
 
-The find bar's previous/next and Replace buttons park themselves while there is nothing to act on - an empty query or a settled "No matches" - and re-arm the moment the text changes, so a control that cannot do anything no longer offers a click that lands nowhere.
+CI reuses compatible build graphs while retaining source tests, release performance budgets, and packaged-app checks. Automatic CI runs on main; feature branches can run it manually.
 
-## Unreleased · Changed
+## 1.0.17 · Added
 
-Right-clicking a Tasks panel "N completed" pile offers Show/Collapse Completed and Copy Status Report - the same fold the row's click performs, plus the report every other section surface already had.
+Choose what happens when the last document closes in Settings → General → When the last document closes: Show start window, Quit Downright, or Do nothing. Show start window remains the default. ([#42](https://github.com/ezzy1630/Downright/issues/42))
 
-## Unreleased · Changed
+## 1.0.17 · Changed
 
-The floating Tasks panel's empty state was clipped at the bottom - the card was sized to a fixed minimum taller than its content, and the centered "Add task" button rode past the rounded lower edge. The panel now measures the empty chrome's full height (state, gap, button, and the bottom margin) so the card fits the whole thing.
+Reading width follows your choice. Settings → Typography → Measure (characters) now supports 60-110 characters, including reader profiles and HTML export. The default stays at 70; narrow windows fit the column to the available space without overriding the saved setting. ([#41](https://github.com/ezzy1630/Downright/issues/41))
 
-## Unreleased · Changed
+## 1.0.17 · Changed
 
-The morph flight now lands on the surface's actual resting frame instead of a freshly re-derived one, which could be a few points off and left the travelling glass resting slightly beside the card it was becoming - the "oversized grey slab" that read as a second panel behind the glass.
+Faster parsing of long Unicode-heavy lines and outline searches, with lower memory use for large documents. Hidden syntax and split panes materialize layout as needed. [Performance measurements and remaining limits](https://github.com/ezzy1630/Downright/blob/main/Docs/PERFORMANCE.md) distinguish source-edit timing from whole-app rendering and peak memory.
 
-## Unreleased · Changed
+## 1.0.17 · Fixed
 
-The start window's headline adapts: returning users get "Pick up where you left off" rather than "Open a Markdown file", which restated the button directly beneath it and kept instructing people who had long since learned.
+Local Markdown links open inside Downright. Sibling paths, encoded filenames, and heading fragments resolve correctly. Back/Forward restores the document and reading position, and failed or cancelled opens leave history unchanged. ([#43](https://github.com/ezzy1630/Downright/issues/43))
 
-## Unreleased · Changed
+## 1.0.17 · Fixed
 
-The six identical document glyphs in the recents list are gone. They said only "these are files", which the names already said; the slot now carries the ⌘-number that is the fastest way out of the window.
+Deleting an accidental edit clears the save prompt. Returning to the exact saved text by editing or undo clears the edited state without saving. Pending external-file conflicts are still protected.
 
-## Unreleased · Changed
+## 1.0.17 · Fixed
 
-The recents header shows the shortcut range instead of a file count that restated six visible rows.
+Blank document and split-pane rendering on macOS 26, split reopening and saved split-state restoration, and reading-position jumps during navigation and resizing.
 
-## Unreleased · Changed
+## 1.0.17 · Fixed
 
-The start window is 600pt tall rather than 576 to fit the two-line rows, and the no-recents placeholder is now derived from the height a full list occupies instead of a fixed 150pt that was already 100pt short of it.
+Find Next keeps moving through matches after the Find bar closes and refreshes its results when the text changes.
 
-## Unreleased · Changed
+## 1.0.17 · Fixed
 
-The start window's Take the Tour button now retires: immediately once the tour has been opened, and after three launches regardless. It was permanent, which is a standing admission that the app needs explaining and a wasted slot on the one screen where the user is trying to reach their work.
+Autosave waits for an idle period after the latest edit. Discard keeps implicit saves suppressed until a fresh edit, including after a cancelled quit.
 
-## Unreleased · Changed
+## 1.0.17 · Fixed
 
-Only .md, .markdown, .mdown, and .mkd are claimed as defaults. .mdx, .qmd, and .rmd belong to toolchains people have already chosen, and are left to them; the bundle still declares them so Downright appears under Open With.
+Exact-artifact installation reports staging failures and preserves the previous app if the replacement cannot complete.
 
-## Unreleased · Changed
+## 1.0.17 · Maintenance
 
-Finder thumbnails are drawn as pages rather than squares, from a fixed sRGB palette, with task progress shown as a bar. Below 72pt they draw ruled lines instead of text that would only be a smudge at that size.
-
-## Unreleased · Fixed
-
-The circular Find control no longer leaks a rounded-square hover plate. The Tasks panel again uses a transparent native child compositor, so it refracts the document instead of reading as an opaque grey card, and its close target now consumes the click before the editor can receive it. Density-map previews inherit the exact resolved Light/Dark appearance of their document window.
-
-## Unreleased · Fixed
-
-Opening Find and local document edits preserve the same pixel viewport after AppKit performs its delayed caret and focus scroll repairs.
-
-## Unreleased · Fixed
-
-Removed the obsolete surrogate morph vessel and inspector-unfurl pipeline; the real floating glass surface now owns its animation and resize retargeting.
-
-## Unreleased · Fixed
-
-Quick Look and the Markdown file association silently broke whenever the app was moved or renamed - Launch Services and pluginkit both record an absolute path. Downright records where it last registered and re-registers when that changes.
-
-## Unreleased · Fixed
-
-Finder thumbnails only ever showed one line of title and one line of body regardless of how much page was left. A paragraph style set to .byTruncatingTail does not wrap; it lays the whole string on one line and clips it.
-
-## Unreleased · Fixed
-
-Multi-line thumbnail text rendered in reverse line order, because NSLayoutManager lays out top-down and the glyphs were drawn into an unflipped context.
+Updated Sparkle to 2.10.0 with matching build and release-tool pins.
 
 ## 1.0.0 · Added
 
@@ -314,4 +290,4 @@ Clicking a link, footnote, task, or heading teleported the camera. Every in-docu
 
 Stray shading blocks beside and below code blocks. TextKit 2 composites each layout fragment as an independent, lazily-rendered surface, and the code block's closing fence claimed a tinted surface taller than its own band (to make room for its copy control) - a fill that reached past the block's edge and wasn't always painted over when the neighbouring fragment didn't redraw in the same pass. The band now paints exactly its own frame: header and footer round only their *outer* corners, the edges they share with code lines are square and butt flush, and the footer's copy control collapses to fit its thin band instead of forcing the fill to overhang (geometry regression-pinned).
 
-Source commit: 85964fb05a9b2a43191da667370801c78a841411
+Source commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
