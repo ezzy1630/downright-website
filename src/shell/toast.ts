@@ -57,9 +57,10 @@ export function downloadPanel(
       <h1 id="${titleId}">Thank you for downloading Downright</h1>
       <p class="download-complete__summary"><code>${artifactName}</code> is downloading to your Downloads folder.</p>
       <p class="download-complete__next">When it finishes, open the DMG and move Downright to Applications.</p>
+      ${repositoryUrl ? `<p class="download-complete__ask">Downright is free and open source. If you end up liking it, a star on GitHub is the best way to help other people find it.</p>` : ""}
       <div class="download-complete__actions">
         <a class="button button--primary download-complete__help" href="/download/#install">Installation help</a>
-        ${repositoryUrl ? `<a class="download-complete__support" href="${repositoryUrl}" target="_blank" rel="noreferrer">Star on GitHub ↗</a>` : ""}
+        ${repositoryUrl ? `<a class="button button--quiet github-star download-complete__star" href="${repositoryUrl}" target="_blank" rel="noopener" data-github-star="download-complete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3L2.9 9.6l6.3-.9Z" /></svg><span>Star on GitHub</span></a>` : ""}
         ${sponsorsUrl ? `<a class="download-complete__support" href="${sponsorsUrl}" target="_blank" rel="noreferrer">Support Downright ↗</a>` : ""}
       </div>
       <p class="download-complete__fallback">If the download does not start, <button type="button" class="download-complete__retry" data-download-retry>restart download</button> or <a href="${downloadUrl}" target="_blank" rel="noreferrer">download directly from GitHub ↗</a>.</p>

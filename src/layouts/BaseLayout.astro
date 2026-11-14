@@ -211,7 +211,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
           <a href="/themes/">Themes</a>
           <a href="/guides/quick-look-markdown/">Guides</a>
           <a href="/changelog/">Changelog</a>
-          {repository && <a href={repository} target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>}
+          {repository && <a class="site-nav__star-link" href={repository} target="_blank" rel="noopener" data-github-star="nav"><svg class="site-nav__star" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3L2.9 9.6l6.3-.9Z" /></svg>Star on GitHub</a>}
         </nav>
         <div class="site-header__actions">
           <button type="button" class="palette-trigger" data-palette-trigger data-magnet aria-label="Open the command palette (⌘K)">
@@ -228,7 +228,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         <a href="/themes/">Themes</a>
         <a href="/guides/quick-look-markdown/">Guides</a>
         <a href="/changelog/">Changelog</a>
-        {repository && <a href={repository} target="_blank" rel="noreferrer">GitHub</a>}
+        {repository && <a href={repository} target="_blank" rel="noopener" data-github-star="mobile-menu">Star on GitHub</a>}
         <div class="mobile-menu__download"><small>Free · MIT · macOS {facts.minimumMacOS}+ — the download lives on your Mac: share this page to it below.</small></div>
       </nav>
     </header>
@@ -287,7 +287,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         <nav aria-label="Footer navigation">
           <span class="site-footer__group">
             <span class="site-footer__label">Product</span>
-            {repository && <a href={repository} target="_blank" rel="noreferrer">Repository</a>}
+            {repository && <a href={repository} target="_blank" rel="noopener">Repository</a>}
             <a href="/changelog/">Changelog</a>
             {facts.sponsorsUrl && <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">Sponsor</a>}
             <a href="/themes/">Themes</a>
