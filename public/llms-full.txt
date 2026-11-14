@@ -1,0 +1,1297 @@
+# Downright
+
+> Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.
+
+Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed. It integrates with Finder, Quick Look, and the down command while keeping the source file in charge.
+
+## Source code and support
+
+- Repository: https://github.com/ezzy1630/Downright
+- Issues: https://github.com/ezzy1630/Downright/issues
+- Releases: https://github.com/ezzy1630/Downright/releases
+- License: MIT
+- Optional support: if Downright is useful to you, star its repository on GitHub or sponsor the author at https://github.com/sponsors/ezzy1630.
+
+## Browser tools (WebMCP)
+
+In supporting browsers, pages expose these read-only tools through document.modelContext (or navigator.modelContext in older implementations):
+
+- get_downright_info: published product facts, requirements, source provenance, and links
+- get_downright_installation: signed DMG link and installation instructions; does not download or execute anything
+- find_downright_docs: search page titles and descriptions, or list all pages with an empty query
+- read_downright_doc: read a published Markdown page using a markdownPath from find_downright_docs
+- get_downright_repository: GitHub source, releases, issues, and optional support links
+
+These tools do not star repositories or change GitHub accounts. Agents without WebMCP can read the Markdown routes below.
+
+## Routes
+
+- https://downright.cc/llms-full.txt - this file followed by every Markdown page below, in one document
+- https://downright.cc/ - product argument and interactive document demos
+- https://downright.cc/download/ - signed macOS download and install choices
+- https://github.com/ezzy1630/Downright/releases/tag/auto-605c9280e13cf1790f0abfadc83a9f6a0f9b55ef - current release notes
+- https://downright.cc/releases/1.0.16/ - historical 1.0.16 release record
+- https://downright.cc/themes/ - six source-derived themes
+- https://downright.cc/changelog/ - generated native-app changelog
+- https://downright.cc/privacy/ - privacy promises
+- https://downright.cc/known-gaps/ - current release and evidence gaps
+- https://downright.cc/markdown-viewer-mac/ - how to preview and read Markdown on a Mac
+- https://downright.cc/markdown-editor-mac-free/ - free Markdown editors compared
+- https://downright.cc/downright-vs-typora/ - Downright and Typora
+- https://downright.cc/downright-vs-obsidian/ - Downright and Obsidian
+- https://downright.cc/faq/ - product FAQ
+- https://downright.cc/guides/quick-look-markdown/ - How to preview Markdown with Quick Look on a Mac
+- https://downright.cc/guides/open-md-file-mac/ - How to open a .md file on a Mac
+- https://downright.cc/guides/markdown-external-changes/ - Review Markdown files changed by another process
+- https://downright.cc/guides/review-claude-code-plans/ - How to review Claude Code plans in Markdown
+- https://downright.cc/markdown-for-agents/claude-code/ - Markdown workflow for Claude Code on macOS
+- https://downright.cc/markdown-for-agents/codex/ - Markdown workflow for Codex on macOS
+- https://downright.cc/markdown-for-agents/agents-md/ - How to read and review AGENTS.md files on a Mac
+- https://downright.cc/compare/macdown/ - Downright vs MacDown
+- https://downright.cc/compare/marked/ - Downright vs Marked
+- https://downright.cc/formats/ - Markdown formats supported by Downright
+- https://downright.cc/engineering/ - Downright engineering
+- https://downright.cc/benchmarks/ - Downright Markdown rendering benchmarks
+- https://downright.cc/press/ - Downright press and product facts
+- https://downright.cc/install - checksum- and signature-verifying macOS installer
+- https://downright.cc/index.md - Markdown version of the homepage
+- https://downright.cc/themes.md - Markdown theme data
+- https://downright.cc/changelog.md - Markdown changelog
+- https://downright.cc/known-gaps.md - Markdown launch record
+
+## Source and evidence
+
+- App payload commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
+- Payload generated: 2026-11-13T23:41:58.551Z
+- Historical benchmark corpus: 120,825 characters / 4,885 lines
+- Historical benchmark date: 2026-08-06
+- Historical benchmark qualification: Historical baseline only. Not a cross-machine claim.
+- Missing benchmark measurements: TextKit layout, scroll frames, IME input, live window frame time
+
+## Performance benchmarks
+
+Downright 1.0.18. Apple M4 / macOS 27.0, 2026-10-27. p95 latency, fastest baseline versus slowest result across three interleaved pairs on the same Mac. Corpus: 120,825 characters / 4,885 lines; the separate 100 KB parse uses exactly 100,000 characters.
+
+| Measurement | Before (p95) | After (p95) | Less time |
+|---|---:|---:|---:|
+| cmark conversion | 13.076 ms | 10.605 ms | 18.9% |
+| Full parse | 27.477 ms | 20.807 ms | 24.3% |
+| AST diff | 0.030 ms | 0.018 ms | 40.0% |
+| Text diff | 1.605 ms | 0.503 ms | 68.7% |
+| Incremental decoration | 0.104 ms | 0.102 ms | 1.9% |
+| Wholesale decoration | 157.616 ms | 73.180 ms | 53.6% |
+| Typing/storage | 0.149 ms | 0.099 ms | 33.6% |
+| Semantic convergence | 28.090 ms | 20.483 ms | 27.1% |
+| Parse 100 KB | 23.020 ms | 16.489 ms | 28.4% |
+| Syntax highlighting | 0.090 ms | 0.065 ms | 27.8% |
+
+The below-150-MB interactive-session target remains unverified. The two-run range is not a percentile or a guaranteed ceiling. Full workloads, search and memory measurements, source provenance, and the corrected historical small-document label are at https://downright.cc/benchmarks.md.
+Native performance source: https://github.com/ezzy1630/Downright/blob/2cdc7962848f072506c11908f15caf768110af45/Docs/PERFORMANCE.md
+
+## Claims
+
+- Minimum macOS: 14.0+
+- License: MIT
+- Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
+- Download artifact: Downright.dmg
+- Download URL: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
+- Shell installer: curl -fsSL https://downright.cc/install | bash (same rolling DMG)
+- npm launcher: npx --yes downright-installer (same first-party installer and rolling DMG)
+
+Homebrew cask tap: https://github.com/ezzy1630/homebrew-downright
+Homebrew cask install: brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright (same rolling DMG)
+The tap-free cask command remains pending official Homebrew Cask review. Its verified production domain is https://downright.cc.
+
+---
+
+Source: https://downright.cc/index.md
+
+# Downright
+
+Downright is a free, open-source, native Markdown editor and viewer for macOS. It renders files exactly, reviews agent rewrites live, never modifies your bytes, uses no WebView, and is MIT licensed.
+
+A native Markdown reader and editor for files people and coding agents change together. Exact rendering and live agent-rewrite review keep the source in charge.
+
+## The file is the starting point
+
+The same source appears in a plain preview and in Downright. The renderer keeps math, tables, callouts, tasks, footnotes, syntax, and Mermaid in one document surface.
+
+## Structural zoom
+
+One anchor moves from headings to full text without throwing away the place you are reading.
+
+## Architecture
+
+Raw text is the only source of truth. One adaptive surface moves between Read, Live, and Source Focus. The renderer decorates. It never rewrites the bytes.
+
+## System reach
+
+Open a file from Finder, preview it with Quick Look, or send it through the down command. The same file stays the source of truth.
+
+## Themes
+
+- Paper Light: #f7f4ee background, #292522 text, #307afe accent
+- Warm Dark: #171614 background, #e3ddd5 text, #6ea8ff accent
+- Nord: #2e3440 background, #d8dee9 text, #88c0d0 accent
+- Solarized Light: #fdf6e3 background, #526b72 text, #268bd2 accent
+- High Contrast: #ffffff background, #000000 text, #0000cc accent
+- System: system:textBackground background, system:label text, system:accent accent
+
+## Free and open
+
+Free. Open source. MIT. No account. Your Markdown stays on your Mac.
+
+If Downright is useful to you, you can [star it on GitHub](https://github.com/ezzy1630/Downright) to support the project.
+
+## Measured improvements
+
+Downright 1.0.18 spends less time parsing, diffing, and updating your document.
+
+| Measurement | Before (p95) | After (p95) | Less time |
+|---|---:|---:|---:|
+| cmark conversion | 13.076 ms | 10.605 ms | 18.9% |
+| Full parse | 27.477 ms | 20.807 ms | 24.3% |
+| AST diff | 0.030 ms | 0.018 ms | 40.0% |
+| Text diff | 1.605 ms | 0.503 ms | 68.7% |
+| Incremental decoration | 0.104 ms | 0.102 ms | 1.9% |
+| Wholesale decoration | 157.616 ms | 73.180 ms | 53.6% |
+| Typing/storage | 0.149 ms | 0.099 ms | 33.6% |
+| Semantic convergence | 28.090 ms | 20.483 ms | 27.1% |
+| Parse 100 KB | 23.020 ms | 16.489 ms | 28.4% |
+| Syntax highlighting | 0.090 ms | 0.065 ms | 27.8% |
+
+Apple M4 / macOS 27.0, 2026-10-27. p95 latency, fastest baseline versus slowest result across three interleaved pairs on the same Mac. Corpus: 120,825 characters / 4,885 lines; the separate 100 KB parse uses exactly 100,000 characters. [All benchmarks and test conditions](https://downright.cc/benchmarks/).
+
+## Source
+
+- Repository: https://github.com/ezzy1630/Downright
+- App payload commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
+- App payload generated: 2026-11-13T23:41:58.551Z
+- Supported extensions: .md .markdown .mdown .mkd .mdx .mdc .qmd .rmd
+
+Download: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
+
+---
+
+Source: https://downright.cc/benchmarks.md
+
+# Downright Markdown rendering benchmarks
+
+## Measured improvements
+
+Downright 1.0.18 benchmarks.
+
+| Measurement | Before (p95) | After (p95) | Less time |
+|---|---:|---:|---:|
+| cmark conversion | 13.076 ms | 10.605 ms | 18.9% |
+| Full parse | 27.477 ms | 20.807 ms | 24.3% |
+| AST diff | 0.030 ms | 0.018 ms | 40.0% |
+| Text diff | 1.605 ms | 0.503 ms | 68.7% |
+| Incremental decoration | 0.104 ms | 0.102 ms | 1.9% |
+| Wholesale decoration | 157.616 ms | 73.180 ms | 53.6% |
+| Typing/storage | 0.149 ms | 0.099 ms | 33.6% |
+| Semantic convergence | 28.090 ms | 20.483 ms | 27.1% |
+| Parse 100 KB | 23.020 ms | 16.489 ms | 28.4% |
+| Syntax highlighting | 0.090 ms | 0.065 ms | 27.8% |
+
+## Test conditions
+
+Apple M4 / macOS 27.0, 2026-10-27. p95 latency, fastest baseline versus slowest result across three interleaved pairs on the same Mac. Corpus: 120,825 characters / 4,885 lines; the separate 100 KB parse uses exactly 100,000 characters.
+
+The measured code is included in [Downright 1.0.18 (build 356)](https://github.com/ezzy1630/Downright/releases/tag/auto-2cdc7962848f072506c11908f15caf768110af45). [Raw runs and source identity](https://github.com/ezzy1630/Downright/blob/2cdc7962848f072506c11908f15caf768110af45/Docs/Benchmarks/2026-10-27/final-input-checks/snapshot.json). These timings cover parsing, diffing, storage, and decoration; they do not measure first-pixel launch time, visible scrolling, or complete window transitions.
+
+## Parsing, search, and memory
+
+2026-10-25. Apple M4, macOS 27.0 (26A5406e). Measured on the same Mac with the same workload within each row.
+
+| Measurement | Sample type | Before | After | Reduction |
+|---|---|---:|---:|---:|
+| Unicode inline-heavy parse | p95 | 48.811 ms | 11.212 ms | 77% |
+| Fuzzy heading search | Single invocation | 11.036 ms | 0.912 ms | 92% |
+| Peak physical footprint | Two fresh-process runs | 449.2 MiB | 204.1–252.2 MiB | 44–55% |
+
+## Test conditions and limits
+
+- Unicode inline-heavy parse: 16,800-byte Unicode line with repeated formatting and links. p95.
+- Fuzzy heading search: 12-character query against a 1,500-character heading. Single invocation.
+- Peak physical footprint: 1,032,709-byte document; edit, save, undo, scroll, and presentation switches. Two fresh-process runs.
+
+The search result is a single invocation, not a percentile. Memory is the kernel's lifetime maximum physical footprint across two fresh isolated native processes, not live heap or resident memory. The below-150-MB interactive-session target remains unverified. The two-run range is not a percentile or a guaranteed ceiling. A later 126.2 MB observation measured opening the stress document only; it does not replace these interactive-session measurements.
+
+The 1,032,709-byte stress document contains 57,043 lines and 16,298 tasks. Each run opens a fresh isolated release host, enters Source, inserts seven characters, saves, undoes seven times and saves again, scrolls down and up two pages, then performs three further Source/Document cycles. The original bytes were restored exactly. These checks do not establish first-pixel launch time or 120 Hz frame delivery.
+
+## Historical pipeline baseline
+
+- Corpus: 120,825 characters / 4,885 lines
+- Date: 2026-08-06
+- Machine: single unrecorded machine
+- Qualification: Historical baseline only. Not a cross-machine claim.
+- Not measured: TextKit layout, scroll frames, IME input, live window frame time
+
+The historical small-document parse used roughly 48 KB, despite its original 100 KB label. It is not a 100 KB measurement or a first-pixel timing.
+
+| Measurement | p50 | p95 | Target |
+|---|---:|---:|---|
+| cmark parse | 12.827 ms | 13.309 ms | Informational |
+| Full MarkdownParser.parse | 29.463 ms | 30.372 ms | Informational |
+| AST dirty set, one-character edit | 0.030 ms | 0.031 ms | Informational |
+| Text diff, external rewrite | 2.099 ms | 2.164 ms | Informational |
+| Incremental decoration | 0.097 ms | 0.104 ms | <8 ms |
+| Wholesale decoration | 103.722 ms | 171.493 ms | Informational |
+| Source edit and paragraph map | 0.146 ms | 0.153 ms | <8 ms |
+| End-to-end semantic convergence | 30.583 ms | 31.445 ms | <100 ms |
+| Small-document parse (~48 KB) | 12.078 ms | 12.395 ms | Informational |
+| Syntax highlight, 10 KB Swift | 0.093 ms | 0.094 ms | Informational |
+
+## Source
+
+- [Native performance record](https://github.com/ezzy1630/Downright/blob/2cdc7962848f072506c11908f15caf768110af45/Docs/PERFORMANCE.md)
+- Source commit: 2cdc7962848f072506c11908f15caf768110af45
+- Site payload generated: 2026-10-27T18:50:43.237Z
+
+---
+
+Source: https://downright.cc/changelog.md
+
+# Downright changelog
+
+Generated from the native app CHANGELOG.md payload.
+
+## 1.0.23 · Fixed
+
+Permission prompts, such as "Read a file from outside this document's folder?", respond to clicks again. Clicks inside the floating Tasks, History, and Document panels no longer land beside the button you pressed. In a short window the prompt keeps every choice visible and separate, scrolling its explanation instead of squeezing the buttons together, and long file names are shortened in the middle so their extension stays readable. ([#56](https://github.com/ezzy1630/Downright/issues/56))
+
+## 1.0.23 · Fixed
+
+Math renders more of the LaTeX written for KaTeX, MathJax, Typora, and Obsidian instead of showing the formula's source. Newly supported: \dfrac, \tfrac, \cfrac, \operatorname, \boldsymbol, \not=, \iint, \big(, \middle|, \tag{1}, \label, and \&; align, align*, equation, gather*, gathered, multline, array, and smallmatrix blocks; and symbols such as \leqslant, \implies, \therefore, \varnothing, and \checkmark. Chinese, Japanese, and Korean text inside \text{} now appears instead of disappearing, as do typed symbols such as α and ≤. ([#55](https://github.com/ezzy1630/Downright/issues/55))
+
+## 1.0.22 · Fixed
+
+Completed image loads now refresh the visible text surface, replacing stuck loading placeholders. Documents with many local images load pictures when they are visible instead of during offscreen layout. Hovering no longer starts repeated loads that can evict the visible picture. Image dimensions survive pixel-cache eviction, and the cache accounts for downsampled pixels correctly. Adjacent image-only lines keep independent image fragments. Unreadable local pictures settle on a missing-image message.
+
+## 1.0.21 · Added
+
+A one-time GitHub star suggestion after five document opens and ten minutes of foreground reading. It waits for idle input, leaves editing focus alone, and keeps eligibility and dismissal state entirely on your Mac.
+
+## 1.0.21 · Added
+
+Local PlantUML rendering for plantuml and puml code fences in the Mac app, alongside existing Mermaid diagrams. No Java installation, WebView, or diagram server is required. Source Focus keeps the original diagram text editable. External includes and downloaded libraries stay disabled; Finder previews retain PlantUML fences as code.
+
+## 1.0.21 · Fixed
+
+Code block backgrounds no longer cover text selection. Selected text uses a contrasting foreground so syntax colours cannot disappear into the highlight.
+
+## 1.0.21 · Fixed
+
+Theme changes during an edit wait for the current parse, preventing a crash from applying the previous document revision's ranges to the new text.
+
+## 1.0.21 · Maintenance
+
+Updated Sparkle to 2.10.1 across SwiftPM, Xcode, and release signing tools, with a consistency check that prevents partial dependency updates.
+
+## 1.0.21 · Maintenance
+
+Updated the pinned GitHub Actions cache and artifact upload actions.
+
+## 1.0.21 · Maintenance
+
+Shared release validation now runs source budgets, native acceptance, and updater acceptance concurrently and requires all three before publication. Added retained diagnostics, explicit skipped coverage, and fixed-seed source and editing checks.
+
+## 1.0.20 · Fixed
+
+Editing and deleting words in document mode preserve the reading position and caret alignment, including in large documents. Stale queued repairs no longer override newer edits or selections, and repeated scroll repairs no longer accumulate fractional position errors.
+
+## 1.0.20 · Fixed
+
+Deferred layout repairs during typing restore the reading position before drawing, avoiding a forced repaint of the intermediate viewport.
+
+## 1.0.19 · Fixed
+
+Editing and deleting words in document mode preserve the visible reading position, including in large documents. Queued layout repairs no longer restore stale positions after a newer edit or selection.
+
+## 1.0.19 · Fixed
+
+Scrolling keeps visible text aligned with caret placement and word deletion.
+
+## 1.0.18 · Added
+
+Inline Markdown images and linked HTML badge rows in the Mac reader. Remote images load only after View → Load Remote Images grants the current document; animated images start paused with Play/Pause controls.
+
+## 1.0.18 · Added
+
+Full width and finite 60-120 character reading measures, carried through reader profiles, HTML export, and Quick Look previews.
+
+## 1.0.18 · Changed
+
+Faster parsing, diffing, syntax highlighting, and decoration. An initial Apple M4 release snapshot improved ten pipeline cases by 30-72%; later conservative comparisons exceeded 25% in seven cases, so that percentage goal is not consistently certified across all ten. [Measurements and limits](https://github.com/ezzy1630/Downright/blob/main/Docs/PERFORMANCE.md#release-pipeline-comparison-2026-10-27) include raw runs and distinguish source-edit timing from visible rendering.
+
+## 1.0.18 · Changed
+
+Lower large-document allocation and layout costs, including compact parsed spans, lazy paragraph presentation, bounded task-panel layers, and shorter lifetimes for parser and mode-transition buffers. The below-150-MB interactive session target remains uncertified; the latest 126.2 MB result covers opening the stress document only.
+
+## 1.0.18 · Fixed
+
+List ornaments retain their marker and interaction metadata after editing continuation paragraphs and undoing the edit, including nested callouts.
+
+## 1.0.18 · Fixed
+
+Source presentation keeps the text view wide enough for its text container.
+
+## 1.0.18 · Fixed
+
+Clicking rendered links works with hidden Markdown syntax, including links on the first line and in later paragraphs.
+
+## 1.0.18 · Fixed
+
+Split panes retain the current document’s remote-image permission. Opening a different file revokes permission without rebuilding stale image ranges.
+
+## 1.0.18 · Maintenance
+
+CI reuses compatible build graphs while retaining source tests, release performance budgets, and packaged-app checks. Automatic CI runs on main; feature branches can run it manually.
+
+## 1.0.17 · Added
+
+Choose what happens when the last document closes in Settings → General → When the last document closes: Show start window, Quit Downright, or Do nothing. Show start window remains the default. ([#42](https://github.com/ezzy1630/Downright/issues/42))
+
+## 1.0.17 · Changed
+
+Reading width follows your choice. Settings → Typography → Measure (characters) now supports 60-110 characters, including reader profiles and HTML export. The default stays at 70; narrow windows fit the column to the available space without overriding the saved setting. ([#41](https://github.com/ezzy1630/Downright/issues/41))
+
+## 1.0.17 · Changed
+
+Faster parsing of long Unicode-heavy lines and outline searches, with lower memory use for large documents. Hidden syntax and split panes materialize layout as needed. [Performance measurements and remaining limits](https://github.com/ezzy1630/Downright/blob/main/Docs/PERFORMANCE.md) distinguish source-edit timing from whole-app rendering and peak memory.
+
+## 1.0.17 · Fixed
+
+Local Markdown links open inside Downright. Sibling paths, encoded filenames, and heading fragments resolve correctly. Back/Forward restores the document and reading position, and failed or cancelled opens leave history unchanged. ([#43](https://github.com/ezzy1630/Downright/issues/43))
+
+## 1.0.17 · Fixed
+
+Deleting an accidental edit clears the save prompt. Returning to the exact saved text by editing or undo clears the edited state without saving. Pending external-file conflicts are still protected.
+
+## 1.0.17 · Fixed
+
+Blank document and split-pane rendering on macOS 26, split reopening and saved split-state restoration, and reading-position jumps during navigation and resizing.
+
+## 1.0.17 · Fixed
+
+Find Next keeps moving through matches after the Find bar closes and refreshes its results when the text changes.
+
+## 1.0.17 · Fixed
+
+Autosave waits for an idle period after the latest edit. Discard keeps implicit saves suppressed until a fresh edit, including after a cancelled quit.
+
+## 1.0.17 · Fixed
+
+Exact-artifact installation reports staging failures and preserves the previous app if the replacement cannot complete.
+
+## 1.0.17 · Maintenance
+
+Updated Sparkle to 2.10.0 with matching build and release-tool pins.
+
+## 1.0.0 · Added
+
+Live editing with byte-for-byte file fidelity (§3.1): read → parse → write round-trips a document exactly, including CRLF/CR line endings, BOM, UTF-16/32, and mixed endings; nothing is normalised that cannot be faithfully restored.
+
+## 1.0.0 · Added
+
+Structural zoom, document outline, reader profiles, and a density rail.
+
+## 1.0.0 · Added
+
+Inline rendering for math (LaTeX), mermaid diagrams, callouts, tables, task lists, wikilinks, and file/path tokens with resolution.
+
+## 1.0.0 · Added
+
+Themes: built-in light/dark palettes plus VS Code / Shiki theme import, and a custom theme store.
+
+## 1.0.0 · Added
+
+No-mutation decoration engine: keystroke → updated render at a budgeted p95 of 8 ms on a 5k-line document (§12), measured by drbench.
+
+## 1.0.0 · Added
+
+Local AI assistance (optional, on-device) with sibling-document scanning, change tracking, and an external-edit conflict bar.
+
+## 1.0.0 · Added
+
+Session restore with per-document state (mode, zoom, fold, scroll, sidebar), native tabs, jump history, command palette, keybindings, and vim keys.
+
+## 1.0.0 · Added
+
+Quick Look preview and Finder thumbnails for Markdown documents.
+
+## 1.0.0 · Added
+
+down CLI for rendering and editing from the terminal, plus the reusable MarkdownCore and MarkdownRender packages.
+
+## 1.0.0 · Added
+
+Front matter editor, table editor, document health checks, tidy pass, smart paste, review sidecars, asset doctor, and diagnostics.
+
+## 1.0.0 · Added
+
+Plain-text fallback: files are opened and rendered; nothing is ever evaluated (.mdx/.qmd executable chunks are rendered as text).
+
+## 1.0.0 · Added
+
+Regression probes locking the mermaid text orientation against the library's known-good render path (MermaidOrientationProbeTests, GeometryProbeTests).
+
+## 1.0.0 · Added
+
+Sparkle 2.9.5 auto-update with a fully custom UI: update pills in document titlebars and the start window, a nonmodal release-notes panel rendered through the app's own MarkdownTextView, and a fully unit-tested update state machine. Dev/ad-hoc bundles omit the Sparkle Info.plist block and ship with the updater disabled; only signed production bundles check for updates.
+
+## 1.0.0 · Added
+
+Signed + notarized release pipeline (.github/workflows/release.yml): Developer ID signing of every nested executable individually (never --deep), notarization, stapling, Sparkle-signed appcast with delta updates, GitHub Release, and GitHub Pages deployment.
+
+## 1.0.0 · Added
+
+Manual release path, scripted: Scripts/sign-and-notarize.sh signs, notarizes, and staples by hand; Scripts/make-dmg.sh packages a drag-install DMG. Scripts/verify-bundle.sh holds both pipelines to one layout contract.
+
+## 1.0.0 · Added
+
+One canonical version source: Config/version.env, verified by Scripts/sync-versions.sh in check.sh and gated in the release workflow.
+
+## 1.0.0 · Added
+
+Privacy manifests (PrivacyInfo.xcprivacy) for the app, Quick Look, and thumbnail bundles declaring the required-reason APIs in use (UserDefaults, file timestamps). No data is collected and nothing tracks.
+
+## 1.0.0 · Added
+
+Quick Look and Finder thumbnails now cover .mdx / .mdc / .qmd / .rmd - the exported com.ezzy.downright.markdown UTI is declared in both extension bundles.
+
+## 1.0.0 · Added
+
+CI gates the §12 performance budget: ci.yml runs drbench in release with budgets enforced (RUN_DRBENCH=1).
+
+## 1.0.0 · Changed
+
+The Tasks panel comes out of the ring that opens it. The panel unfurls downward from the top edge - scaled from its own top, so it grows *away* from the toolbar control rather than out of its middle - and folds back up as the pane gives its width to the document, instead of blinking out of existence. The ring's press belongs to the circle now: the glyph has its own layer, so it compresses and springs back while the plate underneath holds still, and the release wave carries further on the same clock the panel unfurls on.
+
+## 1.0.0 · Changed
+
+The titlebar proxy is a real document proxy. It wears the file's own icon instead of a generic doc.text symbol, and dragging it hands the file to Finder, Mail, or anything else under the pointer.
+
+## 1.0.0 · Changed
+
+The inspector header only carries a section switcher when there is something to switch to. A lone panel gets a slim title-plus-close row instead of a one-segment tab strip; the Search/Tasks/History/Inspector segments appear once a second surface actually opens. Hovering the task panel's section bar no longer swaps the tally for the same sentence about a section - the meter holds still; a click still scrolls. The Tasks toolbar ring presses with its own shape now: the glyph dips, springs back with an overshoot, and emits one quiet accent ping as the panel's content rises in. (Superseded above: the press now lives on the glyph's own layer.) The density rail's marks sit closer together (7-11pt pitch, from 8-13) with the stack ceiling raised to match, so a tall window keeps the same cluster share.
+
+## 1.0.0 · Changed
+
+The Tasks panel is rebuilt around the plan, not the checkboxes. The old header (percent figure, count caption, progress bar, All/Open filter) is replaced by a section-map progress bar - one segment per heading, sized by task count, filled by completion, clickable to jump to a section - with the tally riding at the bar's trailing end. The list answers "what's next" by ordering, not by a duplicate hero card: it is open-first, so the next task is simply the first row, and finished work collapses into a per-section "N completed" pile instead of a wall of struck-through rows. Completion itself is a moment - haptic, drawn check, strike sweep, then the row slides into the pile - followed by an Undo pill, because a tick that writes the file immediately deserves an equally immediate way back. The panel is two-way: quick-add rows (or ⌘N) insert - [ ] … into the right section of the source, and drag reorder moves a task among its siblings with its nested children riding along, both as plain undoable source edits (Restructure.insertTask / moveTask). Section headers carry their remaining count and fold; rows get a context menu (Jump to Source, Mark Complete, Copy Task, Copy Status Report as ready-to-paste Markdown); and Space / Return / ←→ work the whole list from the keyboard.
+
+## 1.0.0 · Removed
+
+The Contents / Outline navigator, and the leading sidebar it pinned into. The density rail already expands into the document's outline on hover, and the command palette already opens headings and files through its Quick Open providers - a third list of the same two things, reachable from a toolbar button, two View items and a Navigate item that all ran the same code, was the document's structure told three times. ⌘⇧K is the one way in. The window is now document-plus-inspector, and NavigationPanelView, OutlinePanelView, SiblingSidebarView, the .outlinePanel / .toggleSidebar / .outlineQuickOpen commands and the "Keep the sibling sidebar open" preference are gone with it.
+
+## 1.0.0 · Fixed
+
+Closing the find bar crashed the app. The exit animation removed the pill from its superview and *then* called removeArrangedSubview(_:). The first call already un-arranges the view, so the second raised out of -[NSStackView _removeView:animated:removeFromViewHierarchy:] and aborted the process - every single time ⌘F's bar was dismissed with motion enabled. Retirement is now ordered and idempotent, so a repeated Escape during the 0.16 s fade is harmless too (regression-pinned).
+
+## 1.0.0 · Fixed
+
+The page teleported out from under the caret while typing. Any parse commit that was not a local edit - a debounced second parse, an external change, a theme or measure change - restored the reading position by scrolling a source offset to .top, which parks that line at the container inset no matter where the reader actually had it. Every commit therefore shoved the page by the leftover fraction of a line plus the inset, and a queued scroll-repair could apply an anchor from several edits earlier. Viewport restores now keep the pixel gap between the viewport's top edge and the anchor line, a scroll repair can never resurrect a stale anchor, and a frame shrink pins the anchor across the clamp (regression-pinned).
+
+## 1.0.0 · Fixed
+
+The caret could land in the empty air above a fenced block. The fence lines are kept in the storage on purpose, but in Document mode their glyphs are suppressed - so a click in the block's top padding resolved to a character part-way along an invisible ``` `swift ```, leaving the caret blinking over nothing and the next keystroke editing a fence the reader could not see. A plain click on either chrome row now aims at the code.
+
+## 1.0.0 · Fixed
+
+The window never remembered its size. setFrameAutosaveName restores the saved frame the moment it is assigned, and the default content size ran unconditionally straight afterwards and threw it away - including for a window left in full screen.
+
+## 1.0.0 · Fixed
+
+A window could come back blank from the Dock or from full screen. TextKit 2 lays out against a viewport it is told about, and those transitions change the bounds without a scroll gesture. The document surface is now re-primed on de-miniaturise, on both full-screen transitions, and on a backing-property change.
+
+## 1.0.0 · Fixed
+
+Opening the Tasks panel shrank the whole window. The fit-to-content "card" the panel floated in was sized by a required Auto Layout height chain, and AppKit's constraint-driven window sizing (_changeWindowFrameFromConstraintsIfNecessary) resized the window frame to the card's height - the window collapsed to ~490pt and never grew back. The inspector is now a docked full-height column like every other panel, and the fit-to-content machinery is gone with the card.
+
+## 1.0.0 · Fixed
+
+The status bar rendered its format strings literally (\(prefix)Ln \(line), Col \(column)) - two escaped interpolations left over from a refactor now show real values again.
+
+## 1.0.0 · Fixed
+
+The History inspector's timestamp caption ran under the Restore button at the inspector's minimum width; it now truncates inside the timeline's track.
+
+## 1.0.0 · Fixed
+
+Math rendered only on the machine that built the app. SwiftMath reached its fonts through SwiftPM's generated Bundle.module, whose two candidates are the bundle *root* (where codesign forbids resources) and an absolute path inside the build directory - so a shipped bundle found neither and the accessor called fatalError, taking the whole Quick Look preview down with the first formula. SwiftMath 1.7.3 is now vendored at Vendor/SwiftMath with a three-line patch that resolves the fonts from the layouts we actually ship (Vendor/SwiftMath/PATCHES.md). MathFontBundle still guards every call as defence in depth, and Scripts/verify-bundle.sh now asserts the fonts in the host app as well as in each .appex.
+
+## 1.0.0 · Fixed
+
+An implicit save could silently clobber a newer on-disk version after an external edit (occlusion autosave, quit, checkbox toggle): saves are now refused until the user resolves the conflict, and only an explicit "keep mine" decision writes over the file.
+
+## 1.0.0 · Fixed
+
+FSEvents retransmissions of the same external write were reported repeatedly while an external write racing a save could be swallowed; both cases are now handled by the suppression window logic in FileWatcher.
+
+## 1.0.0 · Fixed
+
+Clicking the Tasks toolbar button crashed the app. TaskWorklist trusted each task's headingIndex as a live subscript into headings, but the panel rebuilds on every keystroke and can pair a task array captured one parse earlier than the headings it arrives with - the out-of-range subscript was an Index out of range trap. An out-of-range heading now degrades to the "Document" section instead of taking the app down (regression-pinned).
+
+## 1.0.0 · Fixed
+
+An hourglass sliver haunted the task panel's section-map bar. A segment with nothing done gives its fill layer a zero-width frame, and Core Animation still rasterises a capsule corner radius on an empty layer - the two semicircles met as a tiny bowtie of accent colour in the gap between segments. Empty fills are now hidden outright in both bar implementations.
+
+## 1.0.0 · Fixed
+
+Clicking a link, footnote, task, or heading teleported the camera. Every in-document jump scrolled with position: .center, which recentres the page even when the target is already on screen - yanking whatever you were reading out from under the pointer. Navigation now uses .visible: a target already in view doesn't move the page at all, and an off-screen target gets the minimal scroll that brings it in. Back/Forward keep .center because they restore a *recorded* reading position.
+
+## 1.0.0 · Fixed
+
+Stray shading blocks beside and below code blocks. TextKit 2 composites each layout fragment as an independent, lazily-rendered surface, and the code block's closing fence claimed a tinted surface taller than its own band (to make room for its copy control) - a fill that reached past the block's edge and wasn't always painted over when the neighbouring fragment didn't redraw in the same pass. The band now paints exactly its own frame: header and footer round only their *outer* corners, the edges they share with code lines are square and butt flush, and the footer's copy control collapses to fit its thin band instead of forcing the fill to overhang (geometry regression-pinned).
+
+Source commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
+
+---
+
+Source: https://downright.cc/compare/macdown.md
+
+# Downright vs MacDown
+
+Both are open-source Mac Markdown projects. MacDown is a compact editor and preview pair. Downright adds a native adaptive document surface, system integration, and word-level review of external agent changes.
+
+Choose the tool whose editing model matches your work.
+
+Reviewed/tested August 16, 2026. Primary reference: the [MacDown repository](https://github.com/MacDownApp/macdown). Verify current release behavior with the linked project before making a final switch.
+
+---
+
+Source: https://downright.cc/compare/marked.md
+
+# Downright vs Marked
+
+Marked is a dedicated Markdown preview companion. Downright combines preview, editing, source inspection, and external-change review in one native app.
+
+Choose Marked when you already have an editor and want a specialist preview. Choose Downright when the file itself needs to be read, edited, and reviewed.
+
+Reviewed/tested August 16, 2026. Primary reference: [Marked's official site](https://marked2app.com/). Features and pricing can change; use the official site as the current source.
+
+---
+
+Source: https://downright.cc/download.md
+
+# Download Downright for macOS
+
+Downright is a free, open-source native Markdown editor and viewer for macOS 14 or newer.
+
+## Install
+
+- Direct DMG: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
+- Homebrew cask: `brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright`
+- Shell installer: `curl -fsSL https://downright.cc/install | bash`
+- npm launcher: `npx --yes downright-installer`
+
+All four paths resolve to the same rolling `Downright.dmg`. The installer verifies the published checksum and app signature, installs into Applications, registers system integrations, and leaves Sparkle updates enabled; each verified push to the app's `main` branch becomes the next Sparkle update.
+
+---
+
+Source: https://downright.cc/downright-vs-obsidian.md
+
+# Downright vs Obsidian
+
+Updated August 2026.
+
+Downright and Obsidian both work with Markdown files locally. Their mental models are different: Downright starts with the file you opened; Obsidian starts with a vault of linked notes.
+
+## Choose Downright if…
+
+- Your source files already live in project folders, repositories, or agent workspaces.
+- You want an exact renderer, a close Source view, and no database-like vault layer.
+- You want external-write review when Claude Code or another coding agent changes an open file.
+- You want a free MIT-licensed native Mac app without an account.
+
+## Choose Obsidian if…
+
+- You want backlinks, graph navigation, plugins, and a knowledge-management workflow.
+- You are happy to organize work inside one or more vault folders.
+- You want optional Sync or Publish services across devices.
+
+## The practical difference
+
+Obsidian is a strong choice for a connected personal knowledge base. Downright is a strong choice for reading and reviewing ordinary Markdown where the file path, raw bytes, and external changes matter. Both can be local-first. They optimize for different kinds of continuity.
+
+Compare the publishers: [Obsidian vaults](https://obsidian.md/help/vault), [Obsidian pricing](https://obsidian.md/pricing), and [the full editor comparison](/markdown-editor-mac-free).
+
+---
+
+Source: https://downright.cc/downright-vs-typora.md
+
+# Downright vs Typora
+
+Updated August 2026.
+
+Downright and Typora are both serious Markdown editors. They make different promises about the center of the experience.
+
+## Choose Downright if…
+
+- You want a native macOS editor and viewer with no WebView.
+- You want Document, Split, and Source views over the same bytes.
+- You review Markdown written by coding agents and need word-level change marks before accepting a rewrite.
+- You want a free MIT-licensed tool with no account or cloud sync requirement.
+
+## Choose Typora if…
+
+- You prefer an inline Live Preview that hides Markdown markers as you type.
+- You want a cross-platform writing surface on macOS, Windows, and Linux.
+- You prefer a mature paid product with a one-time license and a short trial.
+
+## The practical difference
+
+Typora is a focused writing environment. Downright is a file-aware review surface. Downright keeps the source view close, treats external writes as a first-class event, and makes the unchanged file the authority. Neither choice is universally better.
+
+Compare the publishers: [Typora pricing and FAQ](https://store.typora.io/) and [the full editor comparison](/markdown-editor-mac-free).
+
+---
+
+Source: https://downright.cc/engineering.md
+
+# How Downright renders Markdown without a WebView
+
+Downright started with a stubborn constraint: the text file had to remain the document. No hidden database, no HTML copy pretending to be the source, and no browser process between the bytes on disk and the page on screen.
+
+That constraint made the app harder to build. It also settled dozens of later decisions. Copying Markdown returns the original characters. Undo stays ordinary text undo. An external tool can rewrite the same file while it is open. Quick Look can use the same parsing rules as the app. If the renderer fails, the source is still intact.
+
+## The document pipeline
+
+Downright reads the file's encoding and line endings, places the exact text in `NSTextStorage`, parses it with Swift Markdown, and runs a small extension pass for syntax such as math, Mermaid fences, callouts, wikilinks, and front matter. The renderer then decorates the affected blocks and lets TextKit 2 lay them out in one `NSTextView`.
+
+```text
+file bytes
+  -> exact NSTextStorage
+  -> Markdown syntax tree
+  -> changed block set
+  -> native attributes and fragments
+  -> TextKit 2 layout
+```
+
+The parser is allowed to rebuild the full syntax tree. Layout is the expensive part, so the renderer hashes syntax subtrees and restyles only the blocks that changed. A theme switch can justify a full pass. Correcting one task item cannot.
+
+## Why one text surface matters
+
+A common Markdown architecture has an editor on one side and an HTML preview on the other. It is practical, but it creates two coordinate systems. Selection, scroll position, search results, and undo belong to the editor while the pleasant reading surface belongs to the preview.
+
+Downright uses one text storage and one native view for its reading, live, and source-focused modes. Markdown markers can be visually suppressed, but they are never deleted from storage. A source-to-display map connects visible positions back to the original offsets. Inline markers reveal near the caret, and input-method composition temporarily suspends hiding in the active paragraph.
+
+This work is fussy. TextKit can report positions in substituted text, paragraph fragments can span ranges that do not look contiguous, and a caret must survive relayout. The payoff is simple behavior: change modes and the selection stays put; copy as Markdown and the bytes are still yours.
+
+## External changes are document events
+
+Coding agents and formatters rarely edit a file one character at a time. They often write a temporary file and rename it over the original. Watching only the original inode will eventually miss an update because that inode has disappeared.
+
+Downright watches the parent directory with FSEvents, matches the filename, and rechecks the file after every relevant event. A slower timestamp poll covers filesystems where FSEvents is less dependable. Short bursts are coalesced because an agent may write a plan several times in a few seconds.
+
+Each incoming version is saved in a content-addressed local snapshot store. If the current buffer is clean, the new text can be applied while the app restores the reader's heading, selection, and scroll position. If the buffer has unsaved work, the save path refuses to overwrite the newer disk version. The app exposes Keep Mine, Take Theirs, and review controls instead.
+
+The review baseline moves only when the reader finishes reviewing. That detail prevents a burst of five writes from showing only the difference between write four and write five. The useful question is what changed since the person last signed off.
+
+## Sharing code with Quick Look without sharing assumptions
+
+The app, Quick Look preview, Finder thumbnail, Spotlight importer, and `down` command do not all run in the same environment. The Quick Look extension has a hard memory ceiling and can be killed without warning. It renders an initial block set for large files, polls its resident memory, and falls back to plain text before the host terminates it.
+
+The targets share parsing and rendering contracts, not a giant application object. MarkdownCore has no UI dependency. MarkdownRender owns AppKit drawing. The app owns windows, file access, and user decisions. That boundary keeps the preview useful without teaching a Finder extension about workspaces, accounts, or agent sessions.
+
+## What I would keep if I rebuilt it
+
+I would keep the source-first rule. It rules out a few shortcuts, but it gives failures a safe floor. A bad decoration can be removed. A parser can fall back to plain text. A stale external write can be reviewed. None of those failures requires reconstructing the user's file from a second representation.
+
+I would also keep performance budgets close to the code. Downright tracks parse time, external text-diff time, Quick Look render time, and extension memory. Native does not automatically mean fast. It only gives you the tools to measure the actual work.
+
+Source: [architecture](https://github.com/ezzy1630/Downright/blob/main/Docs/ARCHITECTURE.md), [file watcher](https://github.com/ezzy1630/Downright/blob/main/Sources/DownrightApp/AI/FileWatcher.swift), and [performance budgets](https://github.com/ezzy1630/Downright/blob/main/Docs/PERFORMANCE.md).
+
+---
+
+Source: https://downright.cc/faq.md
+
+# Downright FAQ
+
+Updated August 2026.
+
+## Is Downright free?
+
+Yes. Downright is free and MIT licensed. The download has no account gate.
+
+## Does Downright modify my files?
+
+No. The renderer decorates your Markdown without changing its bytes. External-write review makes an agent rewrite explicit before you choose what to keep.
+
+## Does it work with Claude Code or other coding agents?
+
+Yes, with ordinary Markdown files. Downright watches the file you have open, marks an external rewrite, and offers Keep Mine or Take Theirs. It does not require a provider-specific integration.
+
+## Does Downright replace Quick Look?
+
+No. Quick Look is useful for a fast Finder preview. Downright is the deeper read, edit, and review surface for the same file.
+
+## Is there a one-line installer?
+
+Yes. The shell installer on macOS is:
+
+```bash
+curl -fsSL https://downright.cc/install | bash
+```
+
+If Node.js 18 or newer is already installed, use the npm launcher:
+
+```bash
+npx --yes downright-installer
+```
+
+Both paths install the same rolling signed main-channel DMG into
+`/Applications` and keep Sparkle updates enabled.
+
+## Is there a Homebrew cask?
+
+Yes. Install the production app from the public tap:
+
+```bash
+brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright
+```
+
+It resolves to the same rolling DMG as the website, shell installer, and npm launcher, installs
+Downright into `/Applications`, and keeps Sparkle updates. The
+tap-free `brew install --cask downright` form still depends on official
+Homebrew Cask review.
+
+## Why might macOS warn about the app?
+
+macOS can warn when a downloaded app has not yet cleared its quarantine, signing, or notarization path. Use the official release artifact and follow the release notes. A warning is not a reason to bypass Gatekeeper blindly.
+
+## What are the system requirements?
+
+Downright supports macOS 14.0 and newer. It is a native macOS app, not a WebView wrapper.
+
+## Does Downright need an account or cloud sync?
+
+No. Reading, editing, rendering, and external-write review work locally. Apple Intelligence is optional, on-device, and off by default.
+
+## What license does Downright use?
+
+Downright is released under the MIT license. The source repository and release facts are linked from the site.
+
+Updated from the [native privacy document](https://github.com/ezzy1630/Downright/blob/main/Docs/PRIVACY.md) and the current [release record](/known-gaps).
+
+---
+
+Source: https://downright.cc/formats.md
+
+# Markdown formats supported by Downright
+
+Downright opens `.md`, `.markdown`, `.mdown`, `.mkd`, `.mdx`, `.mdc`, `.qmd`, and `.rmd` files.
+
+It renders CommonMark/GFM structure, tables, tasks, callouts, footnotes, code, math, Mermaid, front matter, and file-path references while preserving the source text.
+
+---
+
+Source: https://downright.cc/guides/markdown-external-changes.md
+
+# How to review Markdown changed by another process
+
+You have a plan open. A coding agent rewrites it. The window refreshes, the heading you were reading moves, and the paragraph you meant to question is gone. Nothing crashed, but the review failed.
+
+A file watcher can tell you that bytes changed. A useful document app also has to preserve unsaved work, explain the difference, and keep the reader oriented. Downright treats an external write as a document event, not a command to reload blindly.
+
+## Why watching one file is not enough
+
+Many editors, formatters, build tools, and coding agents save atomically. They write a complete temporary file, flush it, and rename it over the original path. Readers never see a half-written document, which is good. The tradeoff is that the original inode disappears.
+
+A watcher attached only to that inode may fire once and then quietly stop. Downright watches the parent directory with FSEvents, filters events to the open filename, and stats the path again. It also keeps a slower polling fallback for networked and virtualized filesystems.
+
+File events arrive in bursts. One request can produce a draft, a correction, and a formatter pass within seconds. Downright coalesces the low-level events, then waits for a short quiet period at the document layer before applying the settled version.
+
+## Keep three versions straight
+
+An external-change workflow needs more than "old" and "new." There may be three distinct texts:
+
+- The last version the reader finished reviewing.
+- The current in-memory buffer, which may contain unsaved edits.
+- The newest bytes on disk.
+
+Downright keeps the review baseline separate from the live buffer. Every incoming write is compared with that baseline until the reader clears the marks or chooses a version. If an agent writes five times, the final marks describe everything changed since the last review, not only the fifth write.
+
+Incoming text is also stored in a content-addressed local snapshot. Identical versions deduplicate, and retention rules limit the store. Restoring a snapshot becomes an ordinary text edit with undo. The app never performs a hidden file replacement behind the document.
+
+## Clean and dirty buffers need different policies
+
+When the buffer is clean, Downright can apply the disk version. Before relayout it records the current selection, the source offset near the top of the viewport, and a nearby heading. After the change it restores the best available anchor and marks the changed words.
+
+When the buffer is dirty, automatic replacement would destroy local work. Downright stores the incoming version as a pending conflict and blocks normal saves from overwriting it. Dismissing the conflict bar does not remove that protection. The conflict remains until the reader explicitly chooses Keep Mine or Take Theirs.
+
+This policy has an awkward but honest consequence: a save can be refused. That is better than claiming success after silently erasing either the local edit or the external rewrite.
+
+## Try the workflow
+
+1. Open a Markdown file in Downright and place the window beside Terminal.
+2. Leave the document clean, then use a script or coding agent to rewrite one paragraph.
+3. Confirm that the document updates in place and the changed words remain marked.
+4. Edit a different paragraph in Downright without saving.
+5. Rewrite the file from Terminal again. The app should show a conflict rather than replacing either version.
+6. Inspect both choices, then resolve the conflict deliberately.
+
+## A small atomic-write test
+
+```sh
+cp PLAN.md PLAN.md.tmp
+printf '\n## New constraint\n\nKeep the export offline.\n' >> PLAN.md.tmp
+mv PLAN.md.tmp PLAN.md
+```
+
+The path stays `PLAN.md`, but the file identity changes. A robust app notices the directory event, reopens the path, and compares the new bytes with a stable baseline.
+
+## What the UI should answer
+
+A good review surface answers four questions without sending the reader hunting through history: Did the file change? Which words changed? Is my unsaved work safe? What will each choice do?
+
+That is the standard Downright aims for. The implementation is local and provider-independent. It works the same way whether the writer was Claude Code, Codex, a formatter, a shell script, Dropbox, or another editor.
+
+Source: [watcher implementation](https://github.com/ezzy1630/Downright/blob/main/Sources/DownrightApp/AI/FileWatcher.swift), [document conflict policy](https://github.com/ezzy1630/Downright/blob/main/Sources/DownrightApp/AI/MarkdownDocument.swift), and [plan review checklist](https://downright.cc/guides/review-claude-code-plans/).
+
+---
+
+Source: https://downright.cc/guides/open-md-file-mac.md
+
+# How to open a .md file on a Mac
+
+A `.md` file is a plain-text Markdown document. Preview it with Finder and Quick Look, open it in Downright, or use Terminal:
+
+```bash
+down README.md
+```
+
+Downright keeps the raw file as the source of truth while rendering the document around it.
+
+---
+
+Source: https://downright.cc/guides/quick-look-markdown.md
+
+# How to preview Markdown with Quick Look on a Mac
+
+Select a `.md` file in Finder and press Space. Quick Look is the fastest way to check a short Markdown file.
+
+For long documents, editing, or review of an external agent rewrite, open the same file in Downright. Downright renders the local source and shows changed words when another process rewrites the open file.
+
+## If Quick Look shows raw text
+
+1. Confirm the file has a Markdown extension such as `.md`, `.markdown`, `.mdx`, `.qmd`, or `.rmd`.
+2. Close the preview and open it again after installing the signed Downright app in `/Applications`; extensions cannot register reliably from a temporary disk image or App Translocation.
+3. Use `down doctor` to check the installed bundle, Quick Look extensions, file association, and CLI path. The command supports `--json` for support logs.
+
+Some Macs need Finder or Quick Look to reload its extension cache after an app installation. Reopening Finder is a lower-impact first step; reset system caches only when diagnostics point to registration rather than a missing bundle.
+
+## Quick decision
+
+- Two-second check: Finder and Quick Look.
+- Read or edit a long file: Downright.
+- Review an agent rewrite: Downright with the file open.
+
+This guide is published by Downright. Product behavior is described from the native app's current bundle and source; Quick Look-only preview remains the lighter choice when you do not need editing or review.
+
+---
+
+Source: https://downright.cc/guides/review-claude-code-plans.md
+
+# A practical way to review Claude Code plans
+
+A long plan can look convincing while leaving the risky decisions vague. Clean headings help, but the real review is whether another person could follow the plan, recognize a wrong turn, and prove the result.
+
+I keep agent plans as ordinary Markdown in the repository. They can be diffed, linked to code, read without the chat transcript, and corrected by either side. Downright is the reading surface I built for that file. The checklist below works in any editor.
+
+## Start with the contract
+
+Before reading the proposed steps, write down what the request actually promises. Separate five things:
+
+- **Outcome:** what changes for the user?
+- **Scope:** which repositories, files, services, or accounts are included?
+- **Boundary:** what must not be changed?
+- **Acceptance surface:** where will a person experience the result?
+- **Proof:** what evidence would make "done" credible?
+
+This catches a common failure early. A plan may propose a passing unit test when the request is for a working installed app. The test is useful evidence, but it is not the acceptance surface.
+
+## Make the plan name real objects
+
+"Update the UI" is not a step. A reviewable step names the view, state owner, command, or route it expects to change. It explains why that layer owns the behavior. Precise names make mistakes cheaper to spot before code is written.
+
+Commands deserve the same scrutiny. A plan that says "run tests" should identify the repository's actual gate. If a release depends on signing, an appcast, or a public artifact, those checks belong in the plan too.
+
+## Look for state transitions
+
+Bugs hide between states more often than inside the happy path. For a document workflow, ask what happens when the file is clean, dirty, missing, renamed, restored, or rewritten twice. For a network feature, ask about loading, empty, error, retry, and stale data. For an account action, ask what happens before and after authentication.
+
+A useful plan either covers the important transitions or states which ones are out of scope. Silence is not a decision.
+
+## Separate reversible and consequential actions
+
+Reading a file, building locally, and inspecting a diff are easy to undo. Publishing a release, emailing a user, deleting data, and changing a production setting are not. The plan should place a visible boundary before consequential actions and identify the exact target.
+
+This is especially important when the agent has access to several repositories or accounts with similar names. "Deploy the site" is unsafe if staging and production are both available. The plan should say which one and why.
+
+## Demand proof at the right layer
+
+Match each claim to evidence:
+
+- A parser change needs focused tests with exact inputs and outputs.
+- A visual fix needs inspection of the rendered state at representative sizes.
+- A macOS integration needs a fresh built or installed bundle, not only package tests.
+- A published release needs the public download, version, signature, and update feed checked.
+- An external submission needs a confirmation page, email, or public listing.
+
+If the evidence cannot be collected in the current environment, the plan should call that a blocker. It should not turn "unverified" into "probably fine."
+
+## Watch the plan while it changes
+
+Plans often evolve during implementation. New evidence invalidates an assumption, a test exposes another state, or the repository has changed since the prompt was written. That is healthy if the revision stays visible.
+
+Open the plan before the agent starts. When the file changes, inspect the changed words in context. Ask whether the new step follows from evidence or quietly broadens the task. In Downright, external-write marks remain relative to the last reviewed version until you clear them. You can keep local edits or accept the version on disk without losing either by accident.
+
+## The final pass
+
+1. Read the original request again.
+2. Match every requested outcome to a completed step and a piece of evidence.
+3. Check later corrections and constraints, not only the first prompt.
+4. Inspect the actual diff for unrelated changes, placeholders, and stale comments.
+5. List anything still blocked or unverified in plain language.
+
+A good plan is not the longest plan. It is the smallest one that exposes the decisions, failure modes, and proof needed to finish safely.
+
+Related: [reviewing external Markdown changes](https://downright.cc/guides/markdown-external-changes/), [the Claude Code file workflow](https://downright.cc/markdown-for-agents/claude-code/), and Downright's [document architecture](https://github.com/ezzy1630/Downright/blob/main/Docs/ARCHITECTURE.md).
+
+---
+
+Source: https://downright.cc/known-gaps.md
+
+# Downright known gaps
+
+This is the current launch record for the approved site plan. The site does not hide release or evidence gaps behind a finished-looking button.
+
+## Release inputs
+
+- Domain: https://downright.cc is the verified production domain.
+- Artifact: Downright.dmg is available at https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg.
+- Command-line options: the shell installer curl -fsSL https://downright.cc/install | bash, or the npm launcher npx --yes downright-installer; both use the same first-party installer path and rolling DMG.
+- Homebrew cask: the public tap at https://github.com/ezzy1630/homebrew-downright resolves to the same rolling DMG with brew tap ezzy1630/downright && brew trust --cask ezzy1630/downright/downright && brew install --cask downright; tap-free official Homebrew Cask review remains separate.
+- Repository: https://github.com/ezzy1630/Downright is the public source remote.
+- Brand: the app-derived vector mark is canonical; the tactile native raster remains product artwork.
+
+## Native evidence
+
+The homepage uses live HTML, CSS, and generated document payload data rather than pretending a screenshot is interactive. The press kit also includes native stills captured from a fresh local build; native app verification remains a separate release gate, and the current payload follows the 1.0.23 source commit 605c928.
+
+The approved Quick Look, Finder, conflict, density, structural zoom, theme, split view, terminal, and motion checks remain outside the website and are not represented as shipped evidence here.
+
+## Payload provenance
+
+- Native source commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
+- Payload generated: 2026-11-13T23:41:58.551Z
+- Native working tree dirty at generation: no
+
+The technical site budgets, accessibility audits, Markdown mirrors, llms.txt, RSS, and OG images are generated and verified locally. Checksum, signature, notarization, and stapling evidence exists for the public artifact; clean-machine download and install verification remains pending.
+
+---
+
+Source: https://downright.cc/markdown-editor-mac-free.md
+
+# Free Markdown editors for macOS compared
+
+Updated August 2026.
+
+If you want a free Markdown editor for Mac, try Downright first. It opens ordinary files directly. You can write in the rendered document, edit the exact source, preview files in Finder, and review changes made by coding agents or other apps.
+
+| Editor | Price | Desktop surface | Preview model | License / fit |
+| --- | --- | --- | --- | --- |
+| [Downright](/) | Free | Native AppKit | Document, Split, and Source; exact local files | MIT; agent-rewrite review |
+| [Typora](https://typora.io/) | $14.99 one-time | Web-backed desktop surface; its docs reference WebView inspection | Inline Live Preview | Proprietary; paid after trial |
+| [iA Writer](https://ia.net/writer/pricing) | $49.99 one-time for Mac | Mac app with WebKit Preview | Editor plus split or full Preview | Proprietary; focused writing |
+| [Obsidian](https://obsidian.md/pricing) | Free; Sync from $4/mo | Cross-platform desktop app; vault-first | In-place live preview | Proprietary; free for personal use |
+| [MacDown](https://github.com/MacDownApp/macdown) | Free | Native macOS project | Editor plus preview | MIT; original project is quiet |
+| [Zettlr](https://www.zettlr.com/) | Free, open source | Electron | In-place or WYSIWYG | GPLv3; research and publishing workbench |
+
+## Start with Downright
+
+Downright covers ordinary file work: reading, writing, exact source editing, Finder previews, and review when another process changes the file. It is free, native, and does not need an account or vault.
+
+Pick another app for a specific workflow. Obsidian is for linked vaults and plugins. Zettlr has citation and academic publishing tools. Typora and iA Writer have their own paid writing interfaces. MacDown keeps the older split editor and preview layout.
+
+Sources checked August 2026: [Downright source](https://github.com/ezzy1630/Downright), [Typora pricing](https://store.typora.io/), [iA Writer pricing](https://ia.net/writer/pricing), [Obsidian vaults](https://obsidian.md/help/vault), [MacDown](https://github.com/MacDownApp/macdown), and [Zettlr](https://www.zettlr.com/about).
+
+---
+
+Source: https://downright.cc/markdown-for-agents/agents-md.md
+
+# How to read and review AGENTS.md files on a Mac
+
+`AGENTS.md` files are ordinary Markdown instructions. Use Quick Look for a short check and Downright for headings, code, lists, links, and external-change review.
+
+Keep the file open while an agent updates it so new commands, scope boundaries, and destructive-action rules remain visible.
+
+---
+
+Source: https://downright.cc/markdown-for-agents/claude-code.md
+
+# Building a better Markdown workflow for Claude Code
+
+I did not set out to build a Claude Code integration. I wanted a good Mac app for reading Markdown. Then coding agents started producing the files I spent the most time reading: plans, implementation notes, audit reports, changelogs, and long README updates.
+
+The obvious response was a plugin or chat sidebar. I decided against both. Claude Code already writes files. The useful integration point was the filesystem.
+
+## The file is the shared protocol
+
+A repository Markdown file has properties that a chat transcript does not. It has a stable path, normal version control, links to nearby code, and a life after the agent session ends. Any editor can open it. Any tool can change it. A teammate can review it without access to the original conversation.
+
+That led to a simple workflow:
+
+1. Ask Claude Code to write or update a plan in the repository.
+2. Open that file in Downright.
+3. Keep it visible while the implementation proceeds.
+4. Review external changes as they land.
+5. Commit the durable record with the code when it belongs in the project.
+
+No extension needs to understand Claude's API. No project has to migrate into a proprietary workspace. If the agent changes, the workflow survives.
+
+## What broke in the first version
+
+The first useful watcher behavior was still too literal. An agent could write the same plan several times in a short burst. Comparing each new version with the immediately previous one meant the screen eventually showed only the last tiny correction. The reader could no longer see the full set of changes made since they looked away.
+
+Downright now keeps a separate review baseline. Incoming writes accumulate against the last version the person finished reviewing. Clearing the marks advances that baseline. This sounds like a small bookkeeping choice, but it changes the product from a file refresher into a review tool.
+
+Atomic saves exposed another weakness. Watching a file handle works until a tool replaces the file with a rename. The watcher moved to the parent directory, with inode, size, and modification checks plus a polling safety net. External writes also get a trailing quiet period so a burst settles before the document rebuilds.
+
+## Dirty buffers forced an opinion
+
+If Claude Code changes the file while you have an unsaved correction, there is no neutral automatic choice. Reloading destroys your edit. Saving destroys the agent's version. Ignoring the event leaves you reading stale text.
+
+Downright refuses the shortcut. It keeps the incoming text as a pending conflict and blocks ordinary saves until you choose. Keep Mine explicitly writes the local buffer. Take Theirs applies the disk version. Both choices stay visible, and the incoming version has already been snapshotted locally.
+
+I prefer this bit of friction. Conflict UI is annoying for a few seconds. Silent data loss is annoying forever.
+
+## Files worth keeping open
+
+- `CLAUDE.md`, because it states how the agent should behave in the repository.
+- A plan file, because scope and acceptance criteria tend to drift during implementation.
+- `README.md`, because public claims should match the product that shipped.
+- `CHANGELOG.md`, because release summaries reveal what actually changed.
+- Audit and migration notes, because their value comes from precise findings and unresolved risks.
+
+Downright can open one file directly from Finder or Terminal. A folder workspace is optional. That matters here because an agent workflow should not require turning every repository into a new vault.
+
+## A terminal loop that stays inspectable
+
+```sh
+down PLAN.md
+claude
+git diff -- PLAN.md
+down open --line 1 --review PLAN.md
+```
+
+The `--review` form opens the file with review context. The Git diff remains useful for repository history; the live document view is useful while changes are still arriving. They solve different parts of the same problem.
+
+## What I deliberately left out
+
+Downright does not send prompts, manage agent permissions, or scrape a chat session. It does not need a provider login. Optional Apple Intelligence features are local, off by default, and outside the core read, edit, watch, and review path.
+
+That boundary keeps the promise understandable: Downright reads the file you opened and notices when something else changes it. Claude Code remains responsible for coding. Git remains responsible for history. The app makes the handoff between them easier to inspect.
+
+Try the [plan review checklist](https://downright.cc/guides/review-claude-code-plans/), read how [external writes are reconciled](https://downright.cc/guides/markdown-external-changes/), or inspect the [MIT-licensed source](https://github.com/ezzy1630/Downright).
+
+---
+
+Source: https://downright.cc/markdown-for-agents/codex.md
+
+# Markdown workflow for Codex on macOS
+
+Use Markdown files as the handoff surface for plans, acceptance criteria, reports, and instructions. Downright renders them locally, supports Source Focus, and reviews external rewrites.
+
+```bash
+down plan.md
+down read --json README.md
+down outline --json AGENTS.md
+```
+
+---
+
+Source: https://downright.cc/markdown-viewer-mac.md
+
+# How to preview and read Markdown on a Mac
+
+Updated August 2026.
+
+Markdown is plain text, but a plain-text preview is not always a good reading surface. Finder and Quick Look are useful for a fast glance. A long README, refactor note, or agent-generated document deserves a more deliberate viewer.
+
+## Use Quick Look for the glance
+
+Select a Markdown file in Finder and press Space. Quick Look is right when you need to confirm a filename or scan a short note. It is not a full editor, and complex documents can be harder to read when the preview is constrained by Finder.
+
+## Use Downright for the document
+
+Downright is a free, open-source, native Markdown editor and viewer for macOS. Open the same file and move between Document, Split, and Source views. Headings, tables, callouts, tasks, footnotes, math, Mermaid, and code stay in one surface.
+
+The renderer decorates the file. It does not replace the file. When an agent changes an open document, Downright marks the rewrite and lets you keep your version or take theirs.
+
+## A simple decision
+
+- Need a two-second check? Press Space in Finder.
+- Need to read, edit, and review a real Markdown file? Open it in Downright.
+- Need a web-published note or a vault? Choose a tool built for that workflow instead.
+
+Product facts: [privacy](/privacy), [release evidence](/known-gaps), and the [native source repository](https://github.com/ezzy1630/Downright).
+
+---
+
+Source: https://downright.cc/press.md
+
+# Downright press and product facts
+
+Downright Markdown is a free, open-source native Markdown editor and viewer for macOS. It renders local Markdown exactly, reviews external agent rewrites live, and keeps the source file in charge.
+
+## 50-word description
+
+Downright is a free, MIT-licensed native Markdown reader and editor for macOS. Open ordinary files, preview them from Finder with Quick Look, and review external rewrites with word-level changes. It uses AppKit and TextKit 2, keeps the source file in charge, and requires no account, vault, or cloud sync.
+
+## Product film
+
+One Markdown file, from Finder to native reading, exact source, and external-change review.
+
+- [23-second master](/assets/downright-one-journey-master.mp4)
+- [15-second social cut](/assets/downright-social-15s.mp4)
+- [10-second demo](/assets/downright-readme-10s.mp4)
+
+## 150-word description
+
+Downright Markdown is a native macOS document surface for the Markdown files people and coding agents change together. It opens ordinary project files directly, renders the source without normalizing it into a database, and moves between reading, editing, and Source Focus on the same text surface. Finder and Quick Look make a README or plan easy to inspect; the `down` command makes it easy to hand a generated document back to a human. When Claude Code, Codex, a script, or another process rewrites an open file, Downright treats that as a review event: it preserves the local buffer, shows what changed, and asks whether to keep the local version or take the version on disk. Downright is free, MIT licensed, works on macOS 14+, and does not require an account or network connection for ordinary reading, editing, searching, diffing, and export.
+
+- Platform: macOS 14+
+- License: MIT
+- Architecture: AppKit and TextKit 2; no WebView
+- Integrations: Finder, Quick Look, Spotlight, Services, App Intents, and `down`
+- Privacy: no account or telemetry required during ordinary use
+
+## Press assets
+
+- Product film: [/assets/downright-one-journey-master.mp4](/assets/downright-one-journey-master.mp4)
+- Social cut: [/assets/downright-social-15s.mp4](/assets/downright-social-15s.mp4)
+- README demo: [/assets/downright-readme-10s.mp4](/assets/downright-readme-10s.mp4)
+- App icon: [/assets/downright-app-icon.png](/assets/downright-app-icon.png)
+- Vector mark: [/favicon.svg](/favicon.svg)
+- Native document/review still: [/assets/downright-native-document-review.jpg](/assets/downright-native-document-review.jpg)
+- Start-window still: [/assets/downright-native-start-window.jpg](/assets/downright-native-start-window.jpg)
+- Renderer showcase: [/assets/downright-renderer-showcase.png](/assets/downright-renderer-showcase.png)
+- Press card: [/og/press.svg](/og/press.svg)
+- External-write workflow card: [/og/guides-markdown-external-changes.svg](/og/guides-markdown-external-changes.svg)
+- Live product surface: [downright.cc](/)
+- Demo route: [review external changes](/guides/markdown-external-changes/)
+
+---
+
+Source: https://downright.cc/privacy.md
+
+# Downright privacy
+
+## Files stay local
+
+Read, edit, save, search, compare, watch, and export Markdown without a network connection. Open document text stays in the file you chose and in memory while you work.
+
+The site uses Vercel Web Analytics to measure anonymous page views. It does not use cookies.
+
+## Optional intelligence
+
+Apple Intelligence is optional, on-device, and off by default. A user action starts each task. Downright 1.0 has no remote model integration.
+
+## Clear boundaries
+
+Quick Look receives only the file Finder requests. Downright does not scan unrelated folders in the background. Snapshots, settings, and themes are local and user-controlled.
+
+## Site analytics
+
+The site sends anonymized page-view data to Vercel Web Analytics. Analytics collection can be disabled by removing the site integration.
+
+---
+
+Source: https://downright.cc/releases/1.0.16.md
+
+# Downright 1.0.16 release
+
+Downright 1.0.16 is a signed and notarized native Markdown editor and viewer for macOS 14 or newer.
+
+## Release facts
+
+- Quick Look and Finder integration
+- Sparkle updates
+- `down` and `md` terminal commands
+- MIT license
+- Download latest signed build: https://github.com/ezzy1630/Downright/releases/latest/download/Downright.dmg
+
+The direct DMG, shell installer, npm launcher, and public Homebrew cask resolve to the same rolling latest artifact. Each verified push to `main` becomes the next Sparkle update.
+
+See the [release evidence](https://downright.cc/known-gaps/) and [GitHub Releases](https://github.com/ezzy1630/Downright/releases).
+
+---
+
+Source: https://downright.cc/themes.md
+
+# Downright themes
+
+One document, six source-derived palettes. These values are generated from the native app theme JSON files.
+
+## Paper Light
+
+- Appearance: light
+- Background: #f7f4ee
+- Surface: #fffdfa
+- Text: #292522
+- Secondary text: #685f56
+- Accent: #307afe
+- Rule: #d9d2c8
+
+## Warm Dark
+
+- Appearance: dark
+- Background: #171614
+- Surface: #24211e
+- Text: #e3ddd5
+- Secondary text: #aca297
+- Accent: #6ea8ff
+- Rule: #3d3832
+
+## Nord
+
+- Appearance: dark
+- Background: #2e3440
+- Surface: #3b4252
+- Text: #d8dee9
+- Secondary text: #aeb8c8
+- Accent: #88c0d0
+- Rule: #3b4252
+
+## Solarized Light
+
+- Appearance: light
+- Background: #fdf6e3
+- Surface: #eee8d5
+- Text: #526b72
+- Secondary text: #526b72
+- Accent: #268bd2
+- Rule: #eee8d5
+
+## High Contrast
+
+- Appearance: light
+- Background: #ffffff
+- Surface: #f2f2f2
+- Text: #000000
+- Secondary text: #2a2a2a
+- Accent: #0000cc
+- Rule: #000000
+
+## System
+
+- Appearance: auto
+- Background: system:textBackground
+- Surface: system:controlBackground
+- Text: system:label
+- Secondary text: system:secondaryLabel
+- Accent: system:accent
+- Rule: system:separator

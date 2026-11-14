@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
@@ -223,6 +223,7 @@ These tools do not star repositories or change GitHub accounts. Agents without W
 
 ## Routes
 
+- https://downright.cc/llms-full.txt - this file followed by every Markdown page below, in one document
 - https://downright.cc/ - product argument and interactive document demos
 - https://downright.cc/download/ - signed macOS download and install choices
 - ${facts.repository}/releases/tag/auto-${facts.sourceCommit} - current release notes
@@ -286,4 +287,13 @@ await Promise.all([
   writeFile(join(publicRoot, "known-gaps.md"), knownGaps),
   writeFile(join(publicRoot, "llms.txt"), llms),
 ]);
-console.log("Generated Markdown mirrors and llms.txt");
+// llms-full.txt: llms.txt followed by every Markdown mirror, for agents that
+// read a whole site in one request. Runs after the mirrors above are written.
+const mirrorPaths = (await readdir(publicRoot, { recursive: true }))
+  .filter((path) => path.endsWith(".md"))
+  .sort((a, b) => (a === "index.md" ? -1 : b === "index.md" ? 1 : a.localeCompare(b)));
+const mirrors = await Promise.all(
+  mirrorPaths.map(async (path) => `\n\n---\n\nSource: https://downright.cc/${path}\n\n${(await readFile(join(publicRoot, path), "utf8")).trim()}`),
+);
+await writeFile(join(publicRoot, "llms-full.txt"), `${llms.trim()}${mirrors.join("")}\n`);
+console.log("Generated Markdown mirrors, llms.txt and llms-full.txt");

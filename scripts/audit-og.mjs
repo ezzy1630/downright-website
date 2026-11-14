@@ -28,7 +28,8 @@ async function* htmlFiles(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) yield* htmlFiles(path);
-    else if (entry.name.endsWith(".html")) yield path;
+    // google<hex>.html is Search Console's ownership token, not a page.
+    else if (entry.name.endsWith(".html") && !/^google[0-9a-f]+\.html$/.test(entry.name)) yield path;
   }
 }
 

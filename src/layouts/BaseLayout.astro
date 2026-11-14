@@ -69,6 +69,9 @@ const software = {
   license: "MIT",
   softwareVersion: facts.version,
   publisher: { "@id": `${siteRoot}#organization` },
+  // Third-party listings that describe this same app, so search and answer
+  // engines can tie them to one entity.
+  sameAs: ["https://alternativeto.net/software/downright/about/", "https://github.com/ezzy1630/homebrew-downright"],
   ...(facts.downloadUrl ? { offers: { "@type": "Offer", price: "0", priceCurrency: "USD", url: facts.downloadUrl } } : {}),
 };
 const sourceCode = repository ? {
