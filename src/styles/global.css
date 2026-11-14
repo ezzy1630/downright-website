@@ -1136,6 +1136,8 @@ ol {
 }
 
 .github-star { gap: 8px; min-height: 44px; white-space: nowrap; }
+.site-nav__star-link { display: inline-flex; align-items: center; gap: 6px; }
+.site-nav__star { flex: none; }
 .hero__copy > .github-star { margin-top: 8px; }
 
 .benchmark-comparison th small { display: block; margin-top: 6px; color: var(--text-secondary); font-size: 11px; font-weight: 400; }

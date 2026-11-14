@@ -3045,6 +3045,14 @@ html[data-download-complete="open"] { overflow: hidden; }
 
 .download-complete__help { min-width: 150px; }
 
+.download-complete__ask {
+  max-width: 40ch;
+  margin: -6px 0 18px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .download-complete__support {
   color: var(--link);
   font-size: 13px;
