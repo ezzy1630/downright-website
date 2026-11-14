@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 
 const origin = (process.env.SITE_ORIGIN || "https://downright.cc").replace(/\/$/, "");
 const endpoint = process.env.INDEXNOW_ENDPOINT || "https://api.indexnow.org/indexnow";
-const key = process.env.INDEXNOW_KEY;
+// The key is public by design: IndexNow verifies it at <origin>/<key>.txt, which is public/<key>.txt here.
+const publishedKey = (await readdir("public")).map((name) => /^([0-9a-f]{32})\.txt$/.exec(name)?.[1]).find(Boolean);
+const key = process.env.INDEXNOW_KEY || publishedKey;
 const keyLocation = process.env.INDEXNOW_KEY_LOCATION || (key ? `${origin}/${key}.txt` : undefined);
 const send = process.argv.includes("--send");
 const paths = process.argv.slice(2).filter((value) => value !== "--send");
