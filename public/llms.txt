@@ -26,6 +26,7 @@ These tools do not star repositories or change GitHub accounts. Agents without W
 
 ## Routes
 
+- https://downright.cc/llms-full.txt - this file followed by every Markdown page below, in one document
 - https://downright.cc/ - product argument and interactive document demos
 - https://downright.cc/download/ - signed macOS download and install choices
 - https://github.com/ezzy1630/Downright/releases/tag/auto-605c9280e13cf1790f0abfadc83a9f6a0f9b55ef - current release notes
