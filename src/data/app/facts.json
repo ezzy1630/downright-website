@@ -1,9 +1,9 @@
 {
-  "sourceCommit": "605c9280e13cf1790f0abfadc83a9f6a0f9b55ef",
-  "generatedAt": "2026-11-13T23:41:58.551Z",
+  "sourceCommit": "d5276cb91d208fb2d7a8f38acb960a2c35984576",
+  "generatedAt": "2026-11-18T22:12:00.464Z",
   "sourceWorkingTreeDirty": false,
-  "version": "1.0.23",
-  "currentProjectVersion": "412",
+  "version": "1.0.24",
+  "currentProjectVersion": "490",
   "minimumMacOS": "14.0",
   "license": "MIT",
   "artifactName": "Downright.dmg",
