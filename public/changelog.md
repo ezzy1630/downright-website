@@ -2,6 +2,130 @@
 
 Generated from the native app CHANGELOG.md payload.
 
+## 1.0.27 · Fixed
+
+The Downright disk image is now signed so macOS can verify the download itself.
+
+## 1.0.26 · Fixed
+
+Local photos with rotation metadata keep the correct proportions in the document.
+
+## 1.0.25 · Fixed
+
+Display math written across line breaks in a table cell, as $$ <br> … <br> $$, is typeset instead of showing its LaTeX and the <br> tags. Only a cell holding exactly one such formula changes.
+
+## 1.0.25 · Fixed
+
+\underbrace{…}_{…} draws a brace under its expression with the label centred below it, instead of the "Formula could not be typeset" box.
+
+## 1.0.25 · Fixed
+
+The Front Matter editor keeps the Add Field controls on separate rows in short windows. The field list scrolls to make room.
+
+## 1.0.25 · Fixed
+
+Block math stays sharp on Retina displays instead of drawing at half resolution.
+
+## 1.0.25 · Fixed
+
+Tables and diagrams show their Markdown when you click or arrow into them. When the caret leaves a table, diagram, image or front matter, it returns to its rendered form immediately, including after switching back from Source Focus. Clicking an image opens it. Option-clicking reveals its Markdown. ([#68](https://github.com/ezzy1630/Downright/issues/68))
+
+## 1.0.25 · Fixed
+
+Math inside table cells is typeset like math in a paragraph, in both the column and the stacked table layouts, instead of showing its LaTeX. Rows and columns size to the formula. A formula Downright can't typeset still shows its LaTeX, and so does a formula in a column heading when a narrow table shows its headings as field labels.
+
+## 1.0.24 · Added
+
+Choose any installed font for document text and headings in Settings → Typography → Font family. "Preset Default" keeps the Reading (New York) or Working (SF Pro Text) font, and code keeps its own monospace font. If a font you chose is later removed, documents go back to the preset's font, and HTML export uses your chosen font too. ([#61](https://github.com/ezzy1630/Downright/issues/61))
+
+## 1.0.24 · Added
+
+Pressing Return at the end of a bulleted, numbered, or task item starts the next item. Return on an empty item ends the list or moves it up a level.
+
+## 1.0.24 · Fixed
+
+In a narrow Quick Look window, the heading preview no longer covers the document map beside it, so every heading stays reachable. ([#62](https://github.com/ezzy1630/Downright/issues/62))
+
+## 1.0.24 · Fixed
+
+Quick Look opens empty files, shows images stored next to the document, responds to the arrow keys right away, names the right heading when you hover the map, and recolors the map when you switch between light and dark. Very large files no longer show broken characters where the preview stops, and the metadata card no longer offers an Edit button that can't work there.
+
+## 1.0.24 · Fixed
+
+Finder thumbnails show a document's opening text instead of a badge.
+
+## 1.0.24 · Fixed
+
+Clicking a display formula, including one right after a heading, reveals its LaTeX and keeps it visible while you select it, so you can select and edit the source again. Double-click selects the LaTeX and triple-click its line. Multiline and inline formulas work the same way. ([#63](https://github.com/ezzy1630/Downright/issues/63))
+
+## 1.0.24 · Fixed
+
+Copying or cutting formatted text no longer picks up stray Markdown markers, and pasting it back no longer doubles them.
+
+## 1.0.24 · Fixed
+
+Double-clicking a bold or italic word selects the word instead of a formatting marker. In Document mode, Option-double-click selects a word inside a link.
+
+## 1.0.24 · Fixed
+
+Tables stay visible after you undo an edit above them.
+
+## 1.0.24 · Fixed
+
+Copy Code appears when you hover either end of a code block, including after you scroll past its top.
+
+## 1.0.24 · Fixed
+
+Selecting a heading's # and typing replaces it as expected, multi-line pastes stay inside a focused source block, you can click and type on the last line of an unfinished code block, Copy Code keeps lines that only look like fences, and a code block that starts on a list item's line is recognized.
+
+## 1.0.24 · Fixed
+
+Keep Mine saves the text you see, even after Undo returned it to the saved version. If another change lands on disk before Keep Mine finishes, Downright keeps that change and shows the conflict again instead of overwriting it.
+
+## 1.0.24 · Fixed
+
+Recreate File no longer overwrites a version that arrives while you're recovering a damaged file.
+
+## 1.0.24 · Fixed
+
+Checking off a task, or adding or moving one in the Task panel, no longer saves the document's other unsaved edits along with it. In a document with unsaved changes, the task change waits for your next save like any other edit; in a saved document it still saves right away.
+
+## 1.0.24 · Fixed
+
+Choosing Discard when you follow a link away from unsaved changes now drops those changes, even if the linked document opens in another tab.
+
+## 1.0.24 · Fixed
+
+Go to Line lands on the right line in files with mixed line endings, and Source mode keeps each line on its own numbered row in those files.
+
+## 1.0.24 · Fixed
+
+Switching from Document to Source and back without scrolling returns to exactly the same place instead of shifting by part of a line.
+
+## 1.0.24 · Fixed
+
+Clicking a link to a document that's already open switches to its tab or window instead of opening a second copy of the same file.
+
+## 1.0.24 · Fixed
+
+down --line, --review, and --edit now work when Downright is already running, instead of opening the file at the top. If you pass more files than fit in one request, down says so instead of silently opening nothing.
+
+## 1.0.24 · Fixed
+
+Code is set in SF Mono as designed. On Macs where SF Mono isn't installed as a separate font, code had fallen back to Menlo and Settings listed SF Mono as "not available".
+
+## 1.0.24 · Fixed
+
+VoiceOver reads the name of every popup menu in Settings.
+
+## 1.0.24 · Fixed
+
+down export no longer crashes on an image link without a file path, and down watch reports changes only for the files and folders you name, including folders reached through a symlink.
+
+## 1.0.24 · Fixed
+
+When an update has downloaded in the background, resting the pointer on the title bar's "Update Now" button shows that update's release notes instead of "No release notes for this build." The fix takes effect for updates offered after you install this version.
+
 ## 1.0.23 · Fixed
 
 Permission prompts, such as "Read a file from outside this document's folder?", respond to clicks again. Clicks inside the floating Tasks, History, and Document panels no longer land beside the button you pressed. In a short window the prompt keeps every choice visible and separate, scrolling its explanation instead of squeezing the buttons together, and long file names are shortened in the middle so their extension stays readable. ([#56](https://github.com/ezzy1630/Downright/issues/56))
@@ -290,4 +414,4 @@ Clicking a link, footnote, task, or heading teleported the camera. Every in-docu
 
 Stray shading blocks beside and below code blocks. TextKit 2 composites each layout fragment as an independent, lazily-rendered surface, and the code block's closing fence claimed a tinted surface taller than its own band (to make room for its copy control) - a fill that reached past the block's edge and wasn't always painted over when the neighbouring fragment didn't redraw in the same pass. The band now paints exactly its own frame: header and footer round only their *outer* corners, the edges they share with code lines are square and butt flush, and the footer's copy control collapses to fit its thin band instead of forcing the fill to overhang (geometry regression-pinned).
 
-Source commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
+Source commit: 4b7f1280fedfeff56b0823aaf10798a274b57463

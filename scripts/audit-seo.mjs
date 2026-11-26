@@ -4,7 +4,7 @@ import { join } from "node:path";
 const root = new URL("..", import.meta.url).pathname;
 const dist = join(root, "dist");
 const routes = [
-  "/", "/download/", "/releases/1.0.16/", "/themes/", "/changelog/", "/privacy/", "/known-gaps/", "/faq/",
+  "/", "/download/", "/releases/1.0.16/", "/themes/", "/changelog/", "/privacy/", "/support/", "/known-gaps/", "/faq/",
   "/markdown-viewer-mac/", "/markdown-editor-mac-free/", "/downright-vs-typora/", "/downright-vs-obsidian/",
   "/guides/quick-look-markdown/", "/guides/open-md-file-mac/", "/guides/markdown-external-changes/", "/guides/review-claude-code-plans/",
   "/markdown-for-agents/claude-code/", "/markdown-for-agents/codex/", "/markdown-for-agents/agents-md/",

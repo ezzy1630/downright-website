@@ -109,6 +109,11 @@ export const pageMeta = {
     description: "Downright keeps Markdown files local. Learn how the native app, Quick Look extensions, optional Apple Intelligence, and website handle data.",
     markdownPath: "/privacy.md",
   },
+  support: {
+    title: "Support Downright",
+    description: "Find ways to support Downright, the free and open-source Markdown app for macOS.",
+    markdownPath: "/support.md",
+  },
   knownGaps: {
     title: "Downright release evidence and known gaps",
     description: "See the current Downright release artifact, installer, Homebrew tap, source provenance, and remaining clean-machine verification work.",
@@ -240,6 +245,7 @@ export const siteRoutes: SiteRoute[] = [
   { path: "/themes/", sourceFiles: ["src/pages/themes.astro", "src/data/app/themes.json"] },
   { path: "/changelog/", sourceFiles: ["src/pages/changelog.astro", "src/data/app/changelog.json", "public/changelog.md"] },
   { path: "/privacy/", sourceFiles: ["src/pages/privacy.astro", "public/privacy.md"] },
+  { path: "/support/", sourceFiles: ["src/pages/support.astro", "src/data/seo.ts", "public/support.md"] },
   { path: "/known-gaps/", sourceFiles: ["src/pages/known-gaps.astro", "public/known-gaps.md"] },
   { path: "/faq/", sourceFiles: ["src/pages/faq.astro", "public/faq.md"] },
   { path: "/markdown-viewer-mac/", sourceFiles: ["src/pages/markdown-viewer-mac.astro", "public/markdown-viewer-mac.md"] },

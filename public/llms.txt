@@ -29,7 +29,7 @@ These tools do not star repositories or change GitHub accounts. Agents without W
 - https://downright.cc/llms-full.txt - this file followed by every Markdown page below, in one document
 - https://downright.cc/ - product argument and interactive document demos
 - https://downright.cc/download/ - signed macOS download and install choices
-- https://github.com/ezzy1630/Downright/releases/tag/auto-605c9280e13cf1790f0abfadc83a9f6a0f9b55ef - current release notes
+- https://github.com/ezzy1630/Downright/releases/tag/auto-4b7f1280fedfeff56b0823aaf10798a274b57463 - current release notes
 - https://downright.cc/releases/1.0.16/ - historical 1.0.16 release record
 - https://downright.cc/themes/ - six source-derived themes
 - https://downright.cc/changelog/ - generated native-app changelog
@@ -61,8 +61,8 @@ These tools do not star repositories or change GitHub accounts. Agents without W
 
 ## Source and evidence
 
-- App payload commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
-- Payload generated: 2026-11-13T23:41:58.551Z
+- App payload commit: 4b7f1280fedfeff56b0823aaf10798a274b57463
+- Payload generated: 2026-11-26T21:46:37.720Z
 - Historical benchmark corpus: 120,825 characters / 4,885 lines
 - Historical benchmark date: 2026-08-06
 - Historical benchmark qualification: Historical baseline only. Not a cross-machine claim.
