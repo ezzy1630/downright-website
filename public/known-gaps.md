@@ -13,14 +13,14 @@ This is the current launch record for the approved site plan. The site does not 
 
 ## Native evidence
 
-The homepage uses live HTML, CSS, and generated document payload data rather than pretending a screenshot is interactive. The press kit also includes native stills captured from a fresh local build; native app verification remains a separate release gate, and the current payload follows the 1.0.23 source commit 605c928.
+The homepage uses live HTML, CSS, and generated document payload data rather than pretending a screenshot is interactive. The press kit also includes native stills captured from a fresh local build; native app verification remains a separate release gate, and the current payload follows the 1.0.27 source commit 4b7f128.
 
 The approved Quick Look, Finder, conflict, density, structural zoom, theme, split view, terminal, and motion checks remain outside the website and are not represented as shipped evidence here.
 
 ## Payload provenance
 
-- Native source commit: 605c9280e13cf1790f0abfadc83a9f6a0f9b55ef
-- Payload generated: 2026-11-13T23:41:58.551Z
+- Native source commit: 4b7f1280fedfeff56b0823aaf10798a274b57463
+- Payload generated: 2026-11-26T21:46:37.720Z
 - Native working tree dirty at generation: no
 
 The technical site budgets, accessibility audits, Markdown mirrors, llms.txt, RSS, and OG images are generated and verified locally. Checksum, signature, notarization, and stapling evidence exists for the public artifact; clean-machine download and install verification remains pending.

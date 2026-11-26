@@ -1,0 +1,18 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageMeta } from "../data/seo";
+import { facts } from "../data/site";
+---
+
+<BaseLayout {...pageMeta.support}>
+  <main class="subpage legal-page">
+    <section class="subpage-hero">
+      <h1>Support Downright</h1>
+      <p>Downright is free and open source.</p>
+      <p>
+        <a class="button button--primary" href={facts.sponsorsUrl} rel="noreferrer">Support on GitHub Sponsors</a>
+      </p>
+      <p>GitHub sign-in required.</p>
+    </section>
+  </main>
+</BaseLayout>

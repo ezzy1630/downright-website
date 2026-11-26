@@ -2,6 +2,54 @@
   "source": "CHANGELOG.md",
   "entries": [
     {
+      "version": "1.0.27",
+      "date": "2026-11-26",
+      "kind": "Fixed",
+      "summary": "The Downright disk image is now signed so macOS can verify the download itself."
+    },
+    {
+      "version": "1.0.26",
+      "date": "2026-11-26",
+      "kind": "Fixed",
+      "summary": "Local photos with rotation metadata keep the correct proportions in the document."
+    },
+    {
+      "version": "1.0.25",
+      "date": "2026-11-22",
+      "kind": "Fixed",
+      "summary": "Display math written across line breaks in a table cell, as $$ <br> … <br> $$, is typeset instead of showing its LaTeX and the <br> tags. Only a cell holding exactly one such formula changes."
+    },
+    {
+      "version": "1.0.25",
+      "date": "2026-11-22",
+      "kind": "Fixed",
+      "summary": "\\underbrace{…}_{…} draws a brace under its expression with the label centred below it, instead of the \"Formula could not be typeset\" box."
+    },
+    {
+      "version": "1.0.25",
+      "date": "2026-11-22",
+      "kind": "Fixed",
+      "summary": "The Front Matter editor keeps the Add Field controls on separate rows in short windows. The field list scrolls to make room."
+    },
+    {
+      "version": "1.0.25",
+      "date": "2026-11-22",
+      "kind": "Fixed",
+      "summary": "Block math stays sharp on Retina displays instead of drawing at half resolution."
+    },
+    {
+      "version": "1.0.25",
+      "date": "2026-11-22",
+      "kind": "Fixed",
+      "summary": "Tables and diagrams show their Markdown when you click or arrow into them. When the caret leaves a table, diagram, image or front matter, it returns to its rendered form immediately, including after switching back from Source Focus. Clicking an image opens it. Option-clicking reveals its Markdown. ([#68](https://github.com/ezzy1630/Downright/issues/68))"
+    },
+    {
+      "version": "1.0.25",
+      "date": "2026-11-22",
+      "kind": "Fixed",
+      "summary": "Math inside table cells is typeset like math in a paragraph, in both the column and the stacked table layouts, instead of showing its LaTeX. Rows and columns size to the formula. A formula Downright can't typeset still shows its LaTeX, and so does a formula in a column heading when a narrow table shows its headings as field labels."
+    },
+    {
       "version": "1.0.24",
       "date": "2026-11-18",
       "kind": "Added",
@@ -572,6 +620,6 @@
       "summary": "Stray shading blocks beside and below code blocks. TextKit 2 composites each layout fragment as an independent, lazily-rendered surface, and the code block's closing fence claimed a tinted surface taller than its own band (to make room for its copy control) - a fill that reached past the block's edge and wasn't always painted over when the neighbouring fragment didn't redraw in the same pass. The band now paints exactly its own frame: header and footer round only their *outer* corners, the edges they share with code lines are square and butt flush, and the footer's copy control collapses to fit its thin band instead of forcing the fill to overhang (geometry regression-pinned)."
     }
   ],
-  "sourceCommit": "d5276cb91d208fb2d7a8f38acb960a2c35984576",
-  "generatedAt": "2026-11-18T22:12:00.464Z"
+  "sourceCommit": "4b7f1280fedfeff56b0823aaf10798a274b57463",
+  "generatedAt": "2026-11-26T21:46:37.720Z"
 }
