@@ -40,7 +40,7 @@ const updated = new Date(benchmarks.generatedAt).toLocaleDateString("en-US", { d
       <caption>Historical native app baseline · {benchmarks.date}; not a cross-machine guarantee.</caption>
       <thead><tr><th scope="col">Measurement</th><th scope="col">p50</th><th scope="col">p95</th><th scope="col">Target</th></tr></thead>
       <tbody>
-        {benchmarks.rows.map((row) => <tr><th scope="row">{row.measurement}</th><td>{row.p50}</td><td>{row.p95}</td><td>{row.target}</td></tr>)}
+        {benchmarks.rows.map((row) => <tr><th scope="row">{row.measurement}</th><td data-label="p50">{row.p50}</td><td data-label="p95">{row.p95}</td><td data-label="Target">{row.target}</td></tr>)}
       </tbody>
     </table>
   </div>

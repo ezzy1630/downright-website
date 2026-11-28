@@ -16,7 +16,7 @@ const sourceUrl = `${facts.repository}/blob/${benchmarks.sourceCommit}/${benchma
     <tbody>
       {rows.map((row) => <tr>
         <th scope="row">{row.measurement}{"statistic" in row && <small>{row.statistic}</small>}</th>
-        <td>{row.before}</td><td>{row.after}</td><td>{row.reduction}</td>
+        <td data-label="Before">{row.before}</td><td data-label="After">{row.after}</td><td data-label={earlier ? "Less time / memory" : "Less time"}>{row.reduction}</td>
       </tr>)}
     </tbody>
   </table>

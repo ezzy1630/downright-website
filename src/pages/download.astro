@@ -3,7 +3,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import DownloadButton from "../components/DownloadButton.astro";
 import GitHubStar from "../components/GitHubStar.astro";
 import { brewCommand, curlCommand, facts, npmCommand } from "../data/site";
-import { pageMeta, reviewedLabel, reviewedOn } from "../data/seo";
+import { pageMeta, reviewedOn } from "../data/seo";
+import changelog from "../data/app/changelog.json";
+
+// The release date comes from the changelog entry for the shipped version.
+const releaseDate = changelog.entries.find((entry) => entry.version === facts.version)?.date;
+const releaseLabel = releaseDate
+  ? new Date(`${releaseDate}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })
+  : null;
 ---
 
 <BaseLayout {...pageMeta.download} dateModified={reviewedOn} breadcrumbs={[{ name: "Home", path: "/" }, { name: "Download" }]}>
@@ -12,11 +19,17 @@ import { pageMeta, reviewedLabel, reviewedOn } from "../data/seo";
       <p class="subpage-hero__path"><a href="/">Downright</a> / Download</p>
       <h1>Download the native Markdown app for macOS.</h1>
       <p>Downright is free, open source, and built for macOS 14 or newer. The signed release keeps Markdown local, renders it exactly, and reviews changes made by coding agents.</p>
-      <p class="answer-meta">Release {facts.version} · Reviewed {reviewedLabel}</p>
+      <p class="answer-meta">Release {facts.version}{releaseLabel && ` · ${releaseLabel}`}</p>
     </section>
 
     <article class="legal-copy answer-copy">
-      <div class="hero__actions"><DownloadButton label="Download signed DMG" /><GitHubStar placement="download" /></div>
+      {/* On a phone or tablet the DMG can't be used, so the page offers to send
+          itself to the Mac first and keeps the DMG as a plain link. */}
+      <div class="download-handoff">
+        <button type="button" class="button button--primary" data-share="share">Send to my Mac</button>
+        <p>Downright runs on your Mac. This opens your share sheet so you can AirDrop or mail the link there. {facts.downloadUrl && <a href={facts.downloadUrl}>Download the DMG anyway</a>}</p>
+      </div>
+      <div class="hero__actions download-actions"><DownloadButton label="Download signed DMG" /><GitHubStar placement="download" /></div>
 
       <h2 id="install">Install with the method you already use</h2>
       <p><strong>Direct download:</strong> open the DMG, move Downright to Applications, and launch it once to finish system integration.</p>

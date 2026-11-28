@@ -1872,7 +1872,22 @@ ol {
 .changelog-entry { padding-bottom: 38px; border-bottom: 1px solid var(--rule); }
 .changelog-entry > div { display: flex; justify-content: space-between; color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; }
 .changelog-entry h2 { max-width: 32ch; overflow-wrap: anywhere; margin-top: 10px; color: var(--heading); font-family: var(--font-display); font-size: clamp(24px, 3vw, 38px); font-weight: 400; letter-spacing: -0.018em; line-height: 1.06; }
-.changelog-entry__note { max-width: 58ch; margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--text-faint); font-family: var(--font-mono); font-size: 11px; line-height: 1.55; }
+.download-handoff { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .download-handoff { display: grid; gap: 10px; justify-items: start; }
+  .download-handoff p { max-width: 44ch; margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+  .download-handoff a { color: var(--link); }
+  .download-actions .download-button { display: none; }
+  .download-actions { display: flex; width: auto; margin-top: 8px; }
+  /* A borderless button's padding would indent the star from the text edge. */
+  .download-actions .github-star { width: auto; justify-content: flex-start; margin-inline-start: -19px; }
+}
+.changelog-older { border-top: 1px solid var(--rule); }
+.changelog-older > summary { display: flex; align-items: center; gap: 8px; min-height: 56px; color: var(--heading); font-family: var(--font-mono); font-size: 12px; cursor: pointer; list-style: none; }
+.changelog-older > summary::-webkit-details-marker { display: none; }
+.changelog-older > summary::before { content: "+"; display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--rule); border-radius: 6px; color: var(--text-secondary); }
+.changelog-older[open] > summary::before { content: "−"; }
+.changelog-older > summary span { color: var(--text-faint); }
 .legal-copy { width: min(100%, 680px); margin-top: 110px; overflow-wrap: anywhere; }
 .legal-copy h2 { margin-top: 45px; color: var(--heading); font-family: var(--font-display); font-size: 32px; font-weight: 400; letter-spacing: -0.018em; }
 .legal-copy h2:first-child { margin-top: 0; }
@@ -1996,6 +2011,11 @@ ol {
 
 @media (max-width: 900px) {
   :root { --site-header-height: 56px; scroll-padding-top: calc(var(--site-header-height) + 8px); }
+  /* The Markdown token grid and floating fragments read as stray text behind
+     content on a narrow screen; the soft colour fields stay. A hidden canvas
+     has no size, so the ambient loop skips drawing it. */
+  .ambient-backdrop__grid,
+  .ambient-backdrop__snippets { display: none; }
   .section-anchor { scroll-margin-top: 0; }
   .site-header,
   .site-header.has-scrolled {
@@ -2133,9 +2153,18 @@ ol {
   .close-section { min-height: 76svh; padding: 96px 16px 72px; }
   .site-footer__top,
   .site-footer__bottom { align-items: flex-start; flex-direction: column; }
-  .site-footer__top nav { gap: 16px; }
-  .site-footer__group,
-  .site-footer__bottom div { gap: 11px 16px; }
+  /* Phone footer: two plain columns, labels above their links, links flush
+     left. Sound and the terminal one-liner only mean something on a Mac. */
+  .site-footer__top { gap: 20px; }
+  .site-footer__top nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; width: 100%; }
+  .site-footer__group { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
+  .site-footer__label { margin-bottom: 4px; }
+  .site-footer a,
+  .site-footer button { justify-content: flex-start; padding: 0; }
+  .site-footer__license { display: inline-flex; align-items: center; min-height: 44px; }
+  .site-footer__bottom div { gap: 0 18px; }
+  .site-footer__bottom > p,
+  .site-footer [data-sound-toggle] { display: none; }
   .subpage { padding-top: 100px; }
   .theme-preview-list,
   .changelog-list,
@@ -2143,7 +2172,21 @@ ol {
   .theme-preview__heading h2 { font-size: 34px; }
   .theme-values > div { grid-template-columns: repeat(2, 1fr); }
   .changelog-group { grid-template-columns: minmax(0, 1fr); gap: 18px; padding-bottom: 54px; }
-  .changelog-entry h2 { font-size: 30px; }
+  .changelog-entry h2 { font-size: 21px; line-height: 1.25; letter-spacing: -0.01em; }
+  .changelog-group__entries { gap: 22px; }
+  .changelog-entry { padding-bottom: 22px; }
+
+  /* Tables become one card per row; each cell carries its column name. */
+  .answer-table-wrap { overflow: visible; }
+  .answer-table,
+  .benchmark-comparison .answer-table { min-width: 0; font-size: 13px; }
+  .answer-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .answer-table :is(tbody, tr) { display: block; }
+  .answer-table caption { display: block; }
+  .answer-table tr { padding: 14px 0; border-top: 1px solid var(--rule); }
+  .answer-table tbody th { display: block; width: auto; padding: 0 0 6px; border: 0; font-size: 15px; }
+  .answer-table td { display: grid; grid-template-columns: minmax(7.5em, 38%) minmax(0, 1fr); gap: 12px; padding: 3px 0; border: 0; }
+  .answer-table td::before { content: attr(data-label); color: var(--text-faint); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; line-height: 1.9; text-transform: uppercase; }
 }
 
 @media (max-width: 480px) {

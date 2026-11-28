@@ -112,6 +112,19 @@ const maxBudgetMs = Math.max(
       </div>
     </section>
 
+    {/* Phone only: film.ts swaps this template in, so the poster and video
+        are never requested on desktop. The video loads on tap. */}
+    <template data-film-video>
+      <section class="film-beat film-beat--video" id="film-video" data-rest="film-video" aria-label="The app on a Mac">
+        <p class="eyebrow">On a Mac</p>
+        <h2 class="film-beat__title">The real app, in 33 seconds.</h2>
+        <p class="film-beat__line">An agent edit landing live, Quick Look in Finder, and the built-in themes.</p>
+        <video class="film-video" controls playsinline preload="none" width="1600" height="900" poster="/assets/downright-launch-film-poster.jpg" aria-label="Downright launch film">
+          <source src="/assets/downright-launch-film.mp4" type="video/mp4" />
+        </video>
+      </section>
+    </template>
+
     {/* 8.2 — The gap, doubled */}
     <section class="gap-section section-anchor" id="gap" data-act="gap" data-rest="gap" data-band="0.5" data-rail-section data-section-label="The gap" data-section-detail="It opens badly" data-theme-zone>
       {/* The sweep: one pinned stage where the raw bytes become the page.
@@ -121,6 +134,7 @@ const maxBudgetMs = Math.max(
       <div class="sweep" data-sweep>
         <p class="eyebrow">{copy.gap.eyebrow}</p>
         <p class="sweep__lede" data-sweep-lede>{copy.gap.lede}</p>
+        <p class="film-beat__line sweep__hint">Drag the slider to see what Downright makes of the same file.</p>
         <p class="sweep__closing" data-sweep-closing aria-hidden="true">{copy.gap.closing}</p>
 
         <ul class="annotation-rail" aria-label="What renders, as it renders">

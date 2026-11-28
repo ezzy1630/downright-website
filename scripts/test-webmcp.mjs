@@ -178,7 +178,9 @@ try {
   await evaluate("document.querySelector('#film-cta').scrollIntoView(); window.scrollBy(0, -80)");
   await screenshot("mobile-home-benchmarks");
   await navigate("/benchmarks/");
-  check("mobile benchmark tables scroll inside the page", await evaluate("document.documentElement.scrollWidth <= innerWidth && document.querySelector('.benchmark-comparison').scrollWidth > document.querySelector('.benchmark-comparison').clientWidth"));
+  // Phones read the table as one labelled card per row: nothing scrolls
+  // sideways, and every value is on screen next to its column name.
+  check("mobile benchmark tables fit the page as labelled cards", await evaluate("(() => { const wrap = document.querySelector('.benchmark-comparison'); const cells = [...wrap.querySelectorAll('td')]; return document.documentElement.scrollWidth <= innerWidth && wrap.scrollWidth <= wrap.clientWidth && cells.length > 0 && cells.every((td) => td.dataset.label && td.getBoundingClientRect().right <= innerWidth); })()"));
   await evaluate("document.querySelector('h2').scrollIntoView(); window.scrollBy(0, -90)");
   await screenshot("mobile-benchmarks");
   const legacy = await send("Page.addScriptToEvaluateOnNewDocument", { source: `
