@@ -61,6 +61,7 @@ const maxBudgetMs = Math.max(
           <div class="hero__mac-handoff">
             <button type="button" class="button button--primary" data-share="share">Send to my Mac</button>
             <a href="/download/">Mac download &amp; install options</a>
+            <p class="hero__handoff-note">Downright runs on your Mac. This opens your share sheet so you can AirDrop or mail the link there.</p>
           </div>
           <div class="terminal-install" data-open="false">
             <button type="button" class="terminal-install__trigger" data-magnet data-pop aria-controls="terminal-install-menu" aria-expanded="false">
@@ -317,12 +318,16 @@ const maxBudgetMs = Math.max(
         </div>
         <small>macOS {facts.minimumMacOS}+ · signed {facts.artifactName} · {facts.version} · or <code>{brewCommand}</code></small>
         <p class="close-sponsor" data-fingerprint="sponsor">Built by one person, funded by people, not telemetry. If Downright earns its place in your dock — <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer">sponsor it</a>.</p>
-        <div class="film-handoff" data-fingerprint="handoff" aria-label="Send this page to your Mac">
+        <div class="film-handoff" data-fingerprint="handoff" role="group" aria-label="Send this page to your Mac">
+          <p class="film-handoff__line">Downright lives on your Mac. Send it there.</p>
           <button type="button" class="button button--primary film-handoff__primary" data-share="share">Send to my Mac</button>
           <div class="film-handoff__row">
             <button type="button" data-share="copy">Copy link</button>
             <button type="button" data-share="mail">Mail it to yourself</button>
+            {facts.repository && <a href={facts.repository} target="_blank" rel="noopener" data-github-star="handoff"><span aria-hidden="true">★</span> Star on GitHub</a>}
+            {facts.sponsorsUrl && <a href={facts.sponsorsUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">♥</span> Sponsor</a>}
           </div>
+          <p class="film-handoff__note">Nothing to sign up for. On iPhone, AirDrop is the first row of the share sheet.</p>
         </div>
       </div>
     </section>

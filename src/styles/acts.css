@@ -3405,6 +3405,14 @@ html[data-film="true"] {
   font-size: 13px;
   text-underline-offset: 3px;
 }
+.hero__handoff-note {
+  flex-basis: 100%;
+  max-width: 40ch;
+  margin: 2px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
 [data-film="true"] .hero__micro { margin-top: 8px; }
 [data-film="true"] .hero__window { width: 100%; margin: 0; }
 [data-film="true"] .hero__window .app-window { height: clamp(280px, 48svh, 390px); min-height: 0; }
@@ -3611,15 +3619,52 @@ html[data-film="true"] {
 [data-film="true"] .close-section h2 { font-size: clamp(34px, 9vw, 54px); text-wrap: balance; }
 [data-film="true"] .close-section .act-reveal { opacity: 1; translate: none; }
 [data-film="true"] .close-section :is(small, .close-section__actions) { display: none; }
-[data-film="true"] .film-handoff { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px; }
-.film-handoff__row { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px; }
-.film-handoff__row button {
-  min-height: 44px;
-  padding-inline: 10px;
-  border: 0;
+/* The handoff card: a phone can't install a Mac app, so the close says so
+   and gives every way to get the page to the Mac, plus star and sponsor. */
+[data-film="true"] .film-handoff {
+  display: grid;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 22px 16px 18px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-window);
+  background: var(--surface);
+}
+[data-film="true"] .close-section .film-handoff__line {
+  margin: 0 0 2px;
+  color: var(--heading);
+  font-family: var(--font-display);
+  font-size: 21px;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+[data-film="true"] .close-section .film-handoff__primary {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 0;
+  justify-content: center;
+}
+.film-handoff__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.film-handoff__row :is(button, a) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-button);
   background: transparent;
-  color: var(--text-secondary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--heading);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: none;
   cursor: pointer;
+}
+[data-film="true"] .close-section .film-handoff__note {
+  margin: 2px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+  text-wrap: balance;
 }

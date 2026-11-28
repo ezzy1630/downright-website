@@ -213,10 +213,26 @@ export function renderSampleBlocks(source = sampleMarkdown): DocumentBlock[] {
       emit(`<aside class="doc-footnote"><span>1</span><p>${inlineMarkup(text)}</p></aside>`);
       continue;
     }
+    // A paragraph runs until a blank line or another block starts; wrapped
+    // lines join with a space, as CommonMark (and the app's cmark) do.
+    const paragraph = [line];
     index += 1;
-    emit(`<p>${inlineMarkup(line)}</p>`);
+    while (index < lines.length && lines[index].trim() && !startsBlock(lines[index], lines[index + 1])) {
+      paragraph.push(lines[index++]);
+    }
+    emit(`<p>${inlineMarkup(paragraph.map((part) => part.trim()).join(" "))}</p>`);
   }
   return blocks;
+}
+
+function startsBlock(line: string, next: string | undefined): boolean {
+  return line.startsWith("```")
+    || line === "$$"
+    || /^#{1,6} /.test(line)
+    || line.startsWith(">")
+    || (line.startsWith("|") && Boolean(next?.startsWith("|")))
+    || line.startsWith("- ")
+    || line.startsWith("[^");
 }
 
 export function renderSampleMarkdown(source = sampleMarkdown): string {
