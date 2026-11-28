@@ -1,0 +1,19 @@
+---
+import changelog from "../data/app/changelog.json";
+
+type ChangelogEntry = (typeof changelog.entries)[number];
+interface Props { group: { version: string; date: ChangelogEntry["date"]; entries: ChangelogEntry[] } }
+const { group } = Astro.props;
+---
+
+<article class="changelog-group">
+  <div class="changelog-group__meta"><strong>{group.version}</strong>{group.date && <span>{group.date}</span>}</div>
+  <div class="changelog-group__entries">
+    {group.entries.slice(0, 12).map((entry) => (
+      <article class="changelog-entry">
+        <div><span>{entry.kind}</span>{entry.date && <time datetime={entry.date}>{entry.date}</time>}</div>
+        <h2>{entry.summary}</h2>
+      </article>
+    ))}
+  </div>
+</article>

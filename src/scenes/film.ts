@@ -17,6 +17,7 @@ export function initFilm(): void {
   windowEl.querySelector<HTMLButtonElement>('[data-view-button="split"]')?.setAttribute("hidden", "");
   setWindowView(windowEl, "document");
 
+  buildFilmVideoBeat();
   buildFilmAgentBeat();
   buildFilmCtaBeat();
   buildFilmThemeBeat();
@@ -46,6 +47,25 @@ export function initFilm(): void {
   });
 }
 
+/** The real app on a real Mac: the vertical launch film, loaded only on tap. */
+function buildFilmVideoBeat(): void {
+  const section = document.getElementById("gap");
+  if (!section || document.getElementById("film-video")) return;
+  const beat = document.createElement("section");
+  beat.className = "film-beat film-beat--video";
+  beat.id = "film-video";
+  beat.dataset.rest = "film-video";
+  beat.setAttribute("aria-label", "The app on a Mac");
+  beat.innerHTML = `
+    <p class="eyebrow">On a Mac</p>
+    <h2 class="film-beat__title">The real app, in 33 seconds.</h2>
+    <p class="film-beat__line">An agent edit landing live, Quick Look in Finder, and the built-in themes.</p>
+    <video class="film-video" controls playsinline preload="none" width="1600" height="900" poster="/assets/downright-launch-film-poster.jpg" aria-label="Downright launch film">
+      <source src="/assets/downright-launch-film.mp4" type="video/mp4">
+    </video>`;
+  section.before(beat);
+}
+
 function buildFilmAgentBeat(): void {
   const section = document.getElementById("agent");
   if (!section || document.getElementById("film-agent")) return;
@@ -55,8 +75,9 @@ function buildFilmAgentBeat(): void {
   beat.dataset.rest = "film-agent";
   beat.setAttribute("aria-label", "Agent visit");
   beat.innerHTML = `
+    <p class="eyebrow">Agent visit</p>
     <h2 class="film-beat__title">See the rewrite. Keep the file.</h2>
-    <p class="film-beat__line">Try an external edit to see what changed and decide which version to keep.</p>
+    <p class="film-beat__line">The document stays open while an agent writes. Every changed word is marked before you choose. Try an external edit.</p>
     <div class="film-agent-stage" data-agent-stage>
       <div class="film-preview" data-agent-document>
         <div class="film-preview__bar"><b>sample.md</b><span>Live changes</span></div>
@@ -91,6 +112,7 @@ function buildFilmCtaBeat(): void {
   beat.dataset.fingerprint = "film-cta";
   beat.setAttribute("aria-label", "Performance");
   beat.innerHTML = `
+    <p class="eyebrow">A small engine</p>
     <h2 class="film-beat__title">Less time. Less memory.</h2>
     <div class="film-compact-benchmark" aria-label="Performance benchmarks">
       ${benchmarks.pipeline.rows.filter((row) => ["Full parse", "Text diff", "Typing/storage"].includes(row.measurement)).map((row) => `<div><span>${row.measurement}</span><strong>${row.after}</strong></div>`).join("")}
@@ -108,6 +130,7 @@ function buildFilmThemeBeat(): void {
   beat.dataset.rest = "film-theme";
   beat.setAttribute("aria-label", "Theme re-ink");
   beat.innerHTML = `
+    <p class="eyebrow">Themes</p>
     <h2 class="film-beat__title">One tap re-inks the page.</h2>
     <p class="film-beat__line">Try the app’s six themes on the same Markdown file.</p>
     <div class="film-theme-stage">
@@ -166,8 +189,7 @@ function initSweepThumb(): void {
   const slot = document.querySelector<HTMLElement>("[data-window-slot=gap]");
   if (!sweep || !slot || slot.dataset.filmSweep === "built") return;
   slot.dataset.filmSweep = "built";
-  const intro = sweep.querySelector("[data-sweep-lede]");
-  if (intro) intro.textContent = "Drag to compare Quick Look with Downright.";
+  // The lede keeps the desktop's framing; the drag hint ships in the markup.
   // The desktop re-parents THE window into this slot; the film has no travel,
   // so it builds the simpler sheet inline — same chrome story (Quick Look
   // first, Downright after the line passes), lighter bones.
@@ -185,7 +207,7 @@ function initSweepThumb(): void {
   </div>`;
   const surface = slot.querySelector<HTMLElement>("[data-sweep-surface]");
   if (!surface) return;
-  const source = renderSampleBlocks(doc.current.text);
+  const source = syntaxSlice(renderSampleBlocks(doc.current.text));
   const fragment = document.createDocumentFragment();
   const blocks: { raw: HTMLElement; rendered: HTMLElement; at: number }[] = [];
   source.forEach((block, index) => {
@@ -199,7 +221,7 @@ function initSweepThumb(): void {
     rendered.innerHTML = block.html;
     element.append(raw, rendered);
     fragment.append(element);
-    blocks.push({ raw, rendered, at: 0.2 + (index / Math.max(1, source.length)) * 0.7 });
+    blocks.push({ raw, rendered, at: 0.08 + (index / Math.max(1, source.length)) * 0.84 });
   });
   surface.append(fragment);
   const windowEl = surface.closest<HTMLElement>("[data-sweep-window]");
@@ -224,6 +246,19 @@ function initSweepThumb(): void {
   };
   slider.addEventListener("input", paint);
   paint();
+}
+
+/**
+ * The opening prose looks nearly the same raw and rendered, so the slider
+ * starts at the syntax-heavy run (inline marks through the task list) where
+ * the difference is obvious. Falls back to every block if the sample changes.
+ */
+function syntaxSlice<T extends { raw: string }>(blocks: T[]): T[] {
+  const start = blocks.findIndex((block) => block.raw.startsWith("**Inline**"));
+  if (start < 0) return blocks;
+  let end = start + 1;
+  while (end < blocks.length && !blocks[end].raw.startsWith("```") && !blocks[end].raw.startsWith("**Syntax**")) end += 1;
+  return blocks.slice(start, end);
 }
 
 /* ── Beat 5: real theme controls, same theme engine as the header. ────── */

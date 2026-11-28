@@ -3414,6 +3414,7 @@ html[data-film="true"] {
   line-height: 1.45;
 }
 [data-film="true"] .hero__micro { margin-top: 8px; }
+[data-film="true"] .hero__copy > .github-star { margin-inline-start: -19px; }
 [data-film="true"] .hero__window { width: 100%; margin: 0; }
 [data-film="true"] .hero__window .app-window { height: clamp(280px, 48svh, 390px); min-height: 0; }
 [data-film="true"] .hero__annotation { display: none; }
@@ -3478,7 +3479,10 @@ html[data-film="true"] {
 }
 [data-film="true"] .sweep-stage { height: auto; }
 [data-film="true"] .sweep { position: static; display: block; height: auto; padding: 0; }
-[data-film="true"] .sweep :is(.eyebrow, .annotation-rail, .sweep__closing, .sweep__capture, .sweep__annotation) { display: none; }
+[data-film="true"] .sweep :is(.annotation-rail, .sweep__closing, .sweep__capture, .sweep__annotation) { display: none; }
+[data-film="true"] :is(.sweep, .film-beat) > .eyebrow { margin: 0 0 10px; }
+.sweep__hint { display: none; }
+[data-film="true"] .sweep__hint { display: block; }
 [data-film="true"] .sweep__lede { margin: 0; font-size: clamp(21px, 5vw, 30px); opacity: 1; }
 [data-film="true"] .sweep__slot { margin-top: 16px; }
 [data-film="true"] .sweep__surface {
@@ -3536,6 +3540,26 @@ html[data-film="true"] {
   text-wrap: balance;
 }
 .film-beat__line { max-width: 48ch; margin: 10px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.55; }
+
+/* The launch film is 16:9 and fills the column width. */
+.film-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  margin: 16px 0 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-window);
+  background: #0b0f17;
+  object-fit: contain;
+}
+
+/* A cropped preview fades out instead of cutting a line in half; once the
+   visitor picks it and it scrolls, the fade goes away. */
+[data-film="true"] :is(.hero .app-window__read, .film-preview__read, .sweep__surface):not([data-scroll-engaged]) {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+}
 
 .film-agent-stage,
 .film-theme-stage { display: grid; gap: 12px; margin-top: 16px; }
