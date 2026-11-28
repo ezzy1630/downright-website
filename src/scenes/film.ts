@@ -47,23 +47,10 @@ export function initFilm(): void {
   });
 }
 
-/** The real app on a real Mac: the vertical launch film, loaded only on tap. */
+/** The launch film ships as an inert template, so desktop never fetches it. */
 function buildFilmVideoBeat(): void {
-  const section = document.getElementById("gap");
-  if (!section || document.getElementById("film-video")) return;
-  const beat = document.createElement("section");
-  beat.className = "film-beat film-beat--video";
-  beat.id = "film-video";
-  beat.dataset.rest = "film-video";
-  beat.setAttribute("aria-label", "The app on a Mac");
-  beat.innerHTML = `
-    <p class="eyebrow">On a Mac</p>
-    <h2 class="film-beat__title">The real app, in 33 seconds.</h2>
-    <p class="film-beat__line">An agent edit landing live, Quick Look in Finder, and the built-in themes.</p>
-    <video class="film-video" controls playsinline preload="none" width="1600" height="900" poster="/assets/downright-launch-film-poster.jpg" aria-label="Downright launch film">
-      <source src="/assets/downright-launch-film.mp4" type="video/mp4">
-    </video>`;
-  section.before(beat);
+  const template = document.querySelector<HTMLTemplateElement>("template[data-film-video]");
+  if (template) template.replaceWith(template.content);
 }
 
 function buildFilmAgentBeat(): void {
