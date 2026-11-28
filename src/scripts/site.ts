@@ -69,7 +69,7 @@ const rail: RailController | null = initRail();
 
 function whenNear(sectionId: string, mount: () => void): void {
   const section = document.getElementById(sectionId);
-  if (!section) return;
+  if (!section?.getClientRects().length) return;
   let mounted = false;
   const AHEAD = 600;
 
@@ -100,7 +100,7 @@ const reportSceneLoad = (error: unknown): void => {
 whenNear("gap", () => {
   void import("../scenes/gap").then(({ initGap }) => initGap()).catch(reportSceneLoad);
 });
-whenNear("agent", () => {
+whenNear(document.documentElement.dataset.film === "true" ? "film-agent" : "agent", () => {
   void import("../scenes/agent").then(({ initAgent }) => initAgent(rail)).catch(reportSceneLoad);
 });
 whenNear("reach", () => {
@@ -146,10 +146,7 @@ function setupChrome(): void {
   if (header && toggle && menu) {
     const close = () => {
       toggle.setAttribute("aria-expanded", "false");
-      menu.classList.remove("is-open");
-      window.setTimeout(() => {
-        if (toggle.getAttribute("aria-expanded") !== "true") menu.hidden = true;
-      }, 120);
+      menu.hidden = true;
     };
     toggle.addEventListener("click", () => {
       const open = toggle.getAttribute("aria-expanded") === "true";
@@ -159,11 +156,19 @@ function setupChrome(): void {
       }
       toggle.setAttribute("aria-expanded", "true");
       menu.hidden = false;
-      requestAnimationFrame(() => menu.classList.add("is-open"));
     });
     menu.querySelectorAll("a").forEach((link) => link.addEventListener("click", close));
+    document.addEventListener("click", (event) => {
+      if (event.target instanceof Node && !header.contains(event.target)) close();
+    });
+    window.matchMedia("(max-width: 900px)").addEventListener("change", close);
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") close();
+      if (event.key !== "Escape" || menu.hidden) return;
+      close();
+      toggle.focus();
+    });
+    header.addEventListener("focusout", (event) => {
+      if (event.relatedTarget instanceof Node && !header.contains(event.relatedTarget)) close();
     });
   }
 

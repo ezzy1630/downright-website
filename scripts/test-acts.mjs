@@ -296,6 +296,67 @@ check(
   JSON.stringify(lb),
 );
 
+// ── Compact homepage: one continuous document ───────────────────────────
+// A phone reads the homepage as an ordinary page. No section that is on
+// screen may stop painting at a scroll threshold, a preview may not take the
+// page's scroll before the visitor picks it, and the conflict demo opens
+// inside its own footprint.
+console.log("\ncompact homepage continuity");
+await cdp.send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
+await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
+await freshLoad();
+// One evaluate per scroll step keeps each call far inside the CDP timeout.
+const layout = JSON.parse(await cdp.evaluate(`JSON.stringify({ film: document.documentElement.dataset.film, sections: [...document.querySelectorAll('main > section, main section[id^="film-"]')].filter((s) => s.getClientRects().length).length, max: document.documentElement.scrollHeight - innerHeight })`));
+const unpainted = [];
+for (let y = 0; y <= layout.max; y += 40) {
+  unpainted.push(...JSON.parse(await cdp.evaluate(`(async () => {
+    scrollTo(0, ${y});
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const header = document.querySelector('[data-site-header]');
+    const top = header ? header.getBoundingClientRect().bottom : 0;
+    const missing = [];
+    for (const section of document.querySelectorAll('main > section, main section[id^="film-"]')) {
+      const r = section.getBoundingClientRect();
+      const a = Math.max(r.top, top), b = Math.min(r.bottom, innerHeight);
+      if (!section.getClientRects().length || b - a <= 24) continue;
+      const hit = document.elementFromPoint(innerWidth / 2, (a + b) / 2);
+      if (getComputedStyle(section).visibility !== 'visible' || !section.contains(hit)) missing.push(section.id + '@' + ${y});
+    }
+    return JSON.stringify(missing);
+  })()`)));
+}
+const continuity = { ...layout, unpainted: unpainted.slice(0, 6), count: unpainted.length };
+check("the compact layout is active at phone width", continuity.film === "true" && continuity.sections >= 5, JSON.stringify({ film: continuity.film, sections: continuity.sections }));
+check("every on-screen section keeps painting through the whole scroll", continuity.count === 0, JSON.stringify(continuity.unpainted));
+
+const passThrough = JSON.parse(await cdp.evaluate(`(() => {
+  const pane = document.querySelector('.film-preview--theme .film-preview__read');
+  if (!pane) return JSON.stringify({ missing: '.film-preview--theme .film-preview__read' });
+  const before = getComputedStyle(pane).overflowY;
+  pane.click();
+  return JSON.stringify({ before, after: getComputedStyle(pane).overflowY });
+})()`));
+check("a preview passes the page's scroll through until the visitor picks it", passThrough.before === "hidden" && passThrough.after === "auto", JSON.stringify(passThrough));
+
+await cdp.evaluate(`(() => { document.querySelector('[data-film-insert]')?.click(); const r = document.querySelector('[data-film-rewrite]')?.getBoundingClientRect(); if (r) scrollTo(0, scrollY + r.top - 480); return true; })()`);
+for (let i = 0; i < 40 && (await cdp.evaluate(`document.querySelector('[data-film-rewrite]')?.disabled !== false`)); i++) await sleep(100);
+const footprint = JSON.parse(await cdp.evaluate(`(async () => {
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const read = () => ({ y: scrollY, height: document.documentElement.scrollHeight, next: Math.round(document.getElementById('film-cta').getBoundingClientRect().top + scrollY) });
+  const before = read();
+  const rewrite = document.querySelector('[data-film-rewrite]');
+  if (!rewrite) return JSON.stringify({ before, open: { ...before, bar: false, missing: '[data-film-rewrite]' }, resolved: { ...before, y: -1 } });
+  rewrite.click();
+  await wait(400);
+  const open = { ...read(), bar: !document.querySelector('#film-agent [data-conflict-bar]').hidden };
+  document.querySelector('#film-agent [data-conflict-action="mine"]').click();
+  await wait(400);
+  return JSON.stringify({ before, open, resolved: read() });
+})()`));
+const same = (a, b) => a.y === b.y && a.height === b.height && a.next === b.next;
+check("the conflict opens without moving the page", footprint.open.bar && same(footprint.before, footprint.open), JSON.stringify({ before: footprint.before, open: footprint.open }));
+check("resolving the conflict leaves the page where it was", same(footprint.before, footprint.resolved), JSON.stringify(footprint.resolved));
+
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} passed`);
 ws.close();

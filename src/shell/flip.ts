@@ -23,6 +23,7 @@ export function windowView(windowEl: HTMLElement): WindowView {
 }
 
 export function setWindowView(windowEl: HTMLElement, view: WindowView): void {
+  if (view === "split" && document.documentElement.dataset.film === "true") view = "document";
   if (windowView(windowEl) === view) return;
   windowEl.dataset.view = view;
   const index = ORDER.indexOf(view);
@@ -76,7 +77,7 @@ export function initWindowControls(): void {
     // Arrow keys walk the tablist; selection follows focus and activates.
     const segmented = windowEl.querySelector<HTMLElement>(".app-window__segmented");
     segmented?.addEventListener("keydown", (event) => {
-      const tabs = [...segmented.querySelectorAll<HTMLButtonElement>("[data-view-button]")];
+      const tabs = [...segmented.querySelectorAll<HTMLButtonElement>("[data-view-button]:not([hidden])")];
       const current = tabs.findIndex((tab) => tab.dataset.viewButton === windowView(windowEl));
       let next = -1;
       if (event.key === "ArrowRight") next = (current + 1) % tabs.length;

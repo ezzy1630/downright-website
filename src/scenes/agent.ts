@@ -52,13 +52,17 @@ export function initAgent(rail: RailController | null): void {
   const toastEl = stage.querySelector<HTMLElement>("[data-change-toast]");
   const conflictBar = stage.querySelector<HTMLElement>("[data-conflict-bar]");
   const contextual = document.querySelector<HTMLElement>("[data-contextual-cta]");
-  const reviewPanel = stage.querySelector<HTMLElement>("[data-review-panel]");
+  const reviewPanel = stage.querySelector<HTMLDialogElement>("[data-review-panel]");
+  const rewrite = stage.querySelector<HTMLButtonElement>("[data-film-rewrite]");
+  const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
   if (!documentHost || !toastEl || !conflictBar) return;
 
   // The rewrite lands in the traveling window's read layer — the same
   // document every act shows. Resolve lazily: the window teleports in.
-  const readLayer = (): HTMLElement | null => document.querySelector<HTMLElement>("[data-document-read]");
-  const surface = (): HTMLElement | null => document.querySelector<HTMLElement>("[data-document-read] [data-static-document]");
+  const readLayer = (): HTMLElement | null =>
+    documentHost.querySelector<HTMLElement>("[data-document-read]") ??
+    windowEl?.querySelector<HTMLElement>("[data-document-read]") ?? null;
+  const surface = (): HTMLElement | null => readLayer()?.querySelector<HTMLElement>("[data-static-document]") ?? null;
 
   let triggered = false;
   let performing = false;
@@ -79,8 +83,7 @@ export function initAgent(rail: RailController | null): void {
    *  a status line that says what is happening. Worn from the first mark
    *  until the decision (or the dwell) settles it. */
   const wearWriteState = (on: boolean): void => {
-    const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
-    if (!windowEl) return;
+    if (!windowEl || rewrite) return;
     if (on) windowEl.dataset.chrome = "agent";
     else if (windowEl.dataset.chrome === "agent") delete windowEl.dataset.chrome;
     windowEl.querySelector(".app-window__write-dot")?.toggleAttribute("hidden", !on);
@@ -101,15 +104,22 @@ export function initAgent(rail: RailController | null): void {
     const dwell = visit > 1 ? 800 : DWELL_MS;
     wearWriteState(true);
 
-    if (reducedMotion()) {
+    if (rewrite || reducedMotion()) {
       doc.stageExternalWrite(theirs);
       doc.markStreamed();
-      renderWithMarks(surface(), theirs, tokens, true);
+      const content = surface();
+      renderWithMarks(content, theirs, tokens, true);
+      const mark = content?.querySelector(".change-mark");
+      const scroller = readLayer();
+      if (rewrite && mark && scroller) {
+        scroller.scrollTop += mark.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 28;
+      }
       toastEl.querySelector("[data-change-summary]")!.textContent = `${summary.rewritten} rewritten · ${summary.added} added`;
       toastEl.classList.add("is-visible");
       if (doc.current.dirty) {
         conflictBar.removeAttribute("hidden");
         conflictBar.classList.add("is-open");
+        if (rewrite) rewrite.disabled = true;
       } else {
         wearWriteState(false);
       }
@@ -165,29 +175,6 @@ export function initAgent(rail: RailController | null): void {
    * fallback for engines or scroll jumps where the observer misses. Both
    * funnel into trigger(), which is idempotent.
    */
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) trigger();
-        // The act left: re-arm. Every entry performs — the window never
-        // sits plain. (A performance already in flight finishes untouched;
-        // the next entry after it fires fresh.)
-        else if (!entry.isIntersecting && entry.intersectionRatio === 0) triggered = false;
-      }
-    },
-    { threshold: [0, 0.5] },
-  );
-  observer.observe(documentHost);
-
-  /** The document host must be ≥50% visible before the moment lands. */
-  const hostVisible = (): boolean => {
-    const rect = documentHost.getBoundingClientRect();
-    const visibleTop = Math.max(rect.top, 0);
-    const visibleBottom = Math.min(rect.bottom, window.innerHeight);
-    const visibleHeight = Math.max(0, visibleBottom - visibleTop);
-    return visibleHeight >= rect.height * 0.5;
-  };
-
   function trigger(): void {
     if (triggered || performing) return;
     triggered = true;
@@ -201,15 +188,46 @@ export function initAgent(rail: RailController | null): void {
     stage!.dataset.agentReplay = String(visit + 1);
     fire();
   }
-  const onScroll = (): void => {
-    if (hostVisible()) trigger();
-  };
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll, { passive: true });
-  // Late-binding for hash jumps that land before listeners attach.
-  window.addEventListener("load", onScroll);
-  // One rAF sweep covers deep-link jumps that land before any scroll event.
-  requestAnimationFrame(onScroll);
+  if (rewrite) {
+    rewrite.disabled = false;
+    rewrite.addEventListener("click", () => {
+      triggered = false;
+      trigger();
+    });
+  } else {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) trigger();
+          // The act left: re-arm. Every entry performs — the window never
+          // sits plain. (A performance already in flight finishes untouched;
+          // the next entry after it fires fresh.)
+          else if (!entry.isIntersecting && entry.intersectionRatio === 0) triggered = false;
+        }
+      },
+      { threshold: [0, 0.5] },
+    );
+    observer.observe(documentHost);
+
+    /** The document host must be ≥50% visible before the moment lands. */
+    const hostVisible = (): boolean => {
+      const rect = documentHost.getBoundingClientRect();
+      const visibleTop = Math.max(rect.top, 0);
+      const visibleBottom = Math.min(rect.bottom, window.innerHeight);
+      const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+      return visibleHeight >= rect.height * 0.5;
+    };
+
+    const onScroll = (): void => {
+      if (hostVisible()) trigger();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    // Late-binding for hash jumps that land before listeners attach.
+    window.addEventListener("load", onScroll);
+    // One rAF sweep covers deep-link jumps that land before any scroll event.
+    requestAnimationFrame(onScroll);
+  }
 
   // Conflict bar: all three genuinely working.
   const resolve = (action: "mine" | "theirs"): void => {
@@ -227,14 +245,17 @@ export function initAgent(rail: RailController | null): void {
     }
     conflictBar.classList.remove("is-open");
     conflictBar.setAttribute("hidden", "");
-    reviewPanel?.classList.remove("is-open");
+    if (reviewPanel?.open) reviewPanel.close();
+    if (rewrite) {
+      rewrite.disabled = false;
+      rewrite.focus({ preventScroll: true });
+    }
     documentHost.classList.add("marks-dimmed");
     wearWriteState(false);
     performing = false;
     // The decision lands as a stamp: the window takes it with one
     // squash-settle, so the climax ends on a beat instead of a whisper.
-    if (!reducedMotion()) {
-      const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
+    if (!rewrite && !reducedMotion()) {
       if (windowEl) {
         const stamp = new SpringScalar(0.985, MOTION.durations.deliberate, 0.5);
         stamp.setTarget(1);
@@ -252,25 +273,24 @@ export function initAgent(rail: RailController | null): void {
   conflictBar.querySelectorAll<HTMLButtonElement>("[data-conflict-action]").forEach((button) => {
     button.addEventListener("click", () => {
       const action = button.dataset.conflictAction;
-      if (action === "review") openReview(reviewPanel, resolve);
+      if (action === "review") openReview(reviewPanel, resolve, button);
       else if (action === "mine" || action === "theirs") resolve(action);
     });
   });
 
   // While the conflict is open, every marked word is a door into its review:
   // the diff opens landed on the clicked phrase.
-  const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
+  const reviewTarget = rewrite ? documentHost : windowEl;
+  const reviewButton = conflictBar.querySelector<HTMLButtonElement>("[data-conflict-focus]");
   const paintReviewable = (on: boolean): void => {
-    if (!windowEl) return;
-    if (on) windowEl.dataset.reviewable = "";
-    else delete windowEl.dataset.reviewable;
+    reviewTarget?.toggleAttribute("data-reviewable", on);
   };
   const barOpened = (): boolean => !conflictBar.hidden;
-  windowEl?.addEventListener("click", (event) => {
+  reviewTarget?.addEventListener("click", (event) => {
     const mark = (event.target as Element | null)?.closest("mark[data-change-kind]");
-    if (!mark || !barOpened()) return;
+    if (!mark || !reviewButton || !barOpened()) return;
     paintReviewable(true);
-    openReview(reviewPanel, resolve, mark.textContent ?? undefined);
+    openReview(reviewPanel, resolve, reviewButton, mark.textContent ?? undefined);
   });
   // The cursor affordance tracks the bar's actual state.
   const barObserver = new MutationObserver(() => paintReviewable(barOpened()));
@@ -322,41 +342,49 @@ function renderWithMarks(surface: HTMLElement | null, theirs: string, tokens: Di
   }
 }
 
-function openReview(panel: HTMLElement | null, resolve: (action: "mine" | "theirs") => void, phrase?: string): void {
-  if (!panel) return;
+function openReview(
+  panel: HTMLDialogElement | null,
+  resolve: (action: "mine" | "theirs") => void,
+  trigger: HTMLButtonElement,
+  phrase?: string,
+): void {
+  if (!panel || panel.open) return;
   const revision = doc.current.revision;
   if (!revision) return;
   const tokens = diffWords(revision.mine, revision.theirs);
-  const mineHtml = tokens.map((token) => (token.kind === "added" ? "" : escapeHtml(token.text))).join("");
-  const theirsHtml = tokens
-    .map((token) => (token.kind === "removed" ? "" : escapeHtml(token.text)))
-    .join("");
+  const mineHtml = tokens.map((token) => {
+    if (token.kind === "added") return "";
+    const text = escapeHtml(token.text);
+    return token.kind === "removed" ? `<mark class="review-diff__removed">${text}</mark>` : text;
+  }).join("");
+  const theirsHtml = tokens.map((token) => {
+    if (token.kind === "removed") return "";
+    const text = escapeHtml(token.text);
+    return token.kind === "added" ? `<mark class="review-diff__added">${text}</mark>` : text;
+  }).join("");
   panel.innerHTML = `
-    <div class="review-diff" role="dialog" aria-label="Review the external write">
-      <header><strong>Review</strong><span>word diff · yours | theirs</span>
-        <button type="button" data-review-close aria-label="Close review">Esc</button></header>
+    <div class="review-diff">
+      <header><strong>Review changes</strong>
+        <button type="button" data-review-close autofocus>Close</button></header>
       <div class="review-diff__panes">
-        <pre aria-label="Your words">${mineHtml}</pre>
-        <pre aria-label="The agent's words">${theirsHtml}</pre>
+        <section><h3>Your version</h3><pre>${mineHtml}</pre></section>
+        <section><h3>External version</h3><pre>${theirsHtml}</pre></section>
       </div>
       <footer>
         <button type="button" data-review-keep>Keep Mine</button>
         <button type="button" data-review-take>Take Theirs</button>
       </footer>
     </div>`;
-  panel.classList.add("is-open");
-  // The review is born from its Review button — the same pinned-rect flight
-  // the Quick Look sheet gets, so every summons on this page grows from the
-  // control that made it.
+  const triggerRect = trigger.getBoundingClientRect();
+  panel.showModal();
   const dialog = panel.querySelector<HTMLElement>(".review-diff");
-  const trigger = document.querySelector<HTMLElement>("[data-conflict-focus]");
-  if (dialog && trigger && document.documentElement.dataset.reducedMotion !== "true") {
+  if (dialog && !reducedMotion() && document.documentElement.dataset.film !== "true") {
     const to = dialog.getBoundingClientRect();
-    const from = trigger.getBoundingClientRect();
-    pinRect(dialog, from);
-    flyPinnedRect(dialog, from, to);
+    pinRect(dialog, triggerRect);
+    flyPinnedRect(dialog, triggerRect, to);
   }
-  panel.querySelector<HTMLButtonElement>("[data-review-close]")?.addEventListener("click", () => panel.classList.remove("is-open"));
+  panel.onclick = (event) => { if (event.target === panel) panel.close(); };
+  panel.querySelector<HTMLButtonElement>("[data-review-close]")?.addEventListener("click", () => panel.close());
   panel.querySelector<HTMLButtonElement>("[data-review-keep]")?.addEventListener("click", () => resolve("mine"));
   panel.querySelector<HTMLButtonElement>("[data-review-take]")?.addEventListener("click", () => resolve("theirs"));
   // Arrived through a marked word: land the diff on that phrase.

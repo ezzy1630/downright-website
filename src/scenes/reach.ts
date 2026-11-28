@@ -387,15 +387,24 @@ function initTerminal(): void {
 
   let typed = false;
   let running = false;
+  const replayHint = (): HTMLElement => {
+    const hint = document.createElement("div");
+    hint.className = "terminal-replay";
+    hint.textContent = "↻ replay";
+    return hint;
+  };
+  // Reserve the finished session, replay hint included, at this width so the
+  // type-in never pushes the acts below while the reader is past it.
+  render();
+  code.append(replayHint());
+  code.style.minHeight = `${code.offsetHeight}px`;
+  code.replaceChildren();
   const armReplay = (): void => {
     terminal.dataset.replay = "ready";
     terminal.tabIndex = 0;
     terminal.setAttribute("role", "button");
     terminal.setAttribute("aria-label", "Replay the terminal session");
-    const hint = document.createElement("div");
-    hint.className = "terminal-replay";
-    hint.textContent = "↻ replay";
-    code.append(hint);
+    code.append(replayHint());
   };
   const replay = (): void => {
     if (running || typed === false) return;

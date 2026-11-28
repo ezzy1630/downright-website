@@ -223,7 +223,7 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
           <ThemeControl />
           <div class="header-download"><DownloadButton compact /></div>
         </div>
-        <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+        <button class="menu-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
           <span></span><span></span>
         </button>
       </div>
@@ -232,7 +232,8 @@ const inlineStyles = `${tokensCss}\n${globalCss}\n${actsCss}`;
         <a href="/guides/quick-look-markdown/">Guides</a>
         <a href="/changelog/">Changelog</a>
         {repository && <a href={repository} target="_blank" rel="noopener" data-github-star="mobile-menu">Star on GitHub</a>}
-        <div class="mobile-menu__download"><small>Free · MIT · macOS {facts.minimumMacOS}+ — the download lives on your Mac: share this page to it below.</small></div>
+        <a href="/support/">Support Downright</a>
+        <a href="/download/">Mac download &amp; install options</a>
       </nav>
     </header>
 

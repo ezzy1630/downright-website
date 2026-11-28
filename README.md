@@ -14,9 +14,9 @@ runs every act: you type into it in the hero (a real CodeMirror 6 editor with
 the app's Live-mode decorations), scroll it through the render act, collapse
 it through five semantic levels, watch an agent rewrite it and resolve the
 conflict if you had edited it, spill six themes across it in OKLab, flip the
-window to its own source (⌘⇧E), or drop your own `.md` on the page. Below
-900px on a phone, the same URL becomes the mobile film with the AirDrop
-handoff. No frameworks; one spring kernel carrying the app's Motion.swift
+window to its own source (⌘⇧E), or drop your own `.md` on the page. At 900px and below, the homepage keeps the
+editor in the hero and shows separate previews of the same Markdown. Visitors
+can share the page to their Mac or open the install guide. No frameworks; one spring kernel carrying the app's Motion.swift
 constants; every token traces to the theme JSONs; the budget gate
 (`npm run audit:budgets`) enforces §12 in CI.
 

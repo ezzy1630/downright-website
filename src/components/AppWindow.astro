@@ -56,9 +56,9 @@ const sampleHtml = renderSampleMarkdown();
           <button type="button" class="app-window__ql-action" data-ql-open aria-label="Open with Downright">Open with…</button>
           {flip && (
             <div class="app-window__segmented" role="tablist" aria-label="Window mode">
-              <button type="button" role="tab" aria-selected={view === "document" ? "true" : "false"} data-view-button="document" data-pop>Document</button>
-              <button type="button" role="tab" aria-selected={view === "split" ? "true" : "false"} data-view-button="split" data-pop>Split</button>
-              <button type="button" role="tab" aria-selected={view === "source" ? "true" : "false"} data-view-button="source" data-pop>Source</button>
+              <button type="button" role="tab" aria-label="Document" aria-selected={view === "document" ? "true" : "false"} data-view-button="document" data-pop>Document</button>
+              <button type="button" role="tab" aria-label="Split" aria-selected={view === "split" ? "true" : "false"} data-view-button="split" data-pop>Split</button>
+              <button type="button" role="tab" aria-label="Source" aria-selected={view === "source" ? "true" : "false"} data-view-button="source" data-pop>Source</button>
               <i class="app-window__segmented-indicator" aria-hidden="true"></i>
             </div>
           )}

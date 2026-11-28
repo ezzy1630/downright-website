@@ -1,9 +1,4 @@
-/**
- * Handoff without a server: navigator.share where it exists (on iOS the
- * share sheet's first target is AirDrop — the page opens on the Mac with the
- * download button waiting), copy-link and prefilled mailto elsewhere. No
- * URL shortener, no social pixel, no network request at all.
- */
+/** Native sharing with a clipboard fallback and an explicit email option. */
 
 import { toast } from "./toast";
 
@@ -14,9 +9,13 @@ export interface ShareTargets {
 
 export function initShare(): void {
   for (const button of document.querySelectorAll<HTMLButtonElement>("[data-share]")) {
+    button.dataset.shareLabel = button.textContent ?? "";
     button.addEventListener("click", async () => {
       const kind = button.dataset.share;
-      const url = window.location.href.split("#")[0];
+      const page = new URL(window.location.href);
+      page.hash = "";
+      page.searchParams.delete("film");
+      const url = page.href;
       const payload: ShareTargets = {
         title: "Downright — the native Markdown app for macOS",
         text: "Downright renders Markdown exactly, reviews agent writes live, and never touches your bytes.",
@@ -25,11 +24,11 @@ export function initShare(): void {
         try {
           await navigator.share({ ...payload, url });
           return;
-        } catch {
-          /* user dismissed the sheet; nothing to do */
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") return;
         }
       }
-      if (kind === "copy" || (kind === "share" && typeof navigator.share !== "function")) {
+      if (kind === "copy" || kind === "share") {
         if (!navigator.clipboard) {
           note(button, "Copy unavailable");
           toast("<strong>Copy link unavailable.</strong><span>Use your browser's address bar instead.</span>");
@@ -51,10 +50,14 @@ export function initShare(): void {
   }
 }
 
+const noteTimers = new WeakMap<HTMLButtonElement, number>();
+
 function note(button: HTMLButtonElement, text: string): void {
   const label = button.dataset.shareLabel ?? button.textContent ?? "";
   button.textContent = text;
-  window.setTimeout(() => {
+  window.clearTimeout(noteTimers.get(button));
+  noteTimers.set(button, window.setTimeout(() => {
     button.textContent = label;
-  }, 1600);
+    noteTimers.delete(button);
+  }, 1600));
 }
