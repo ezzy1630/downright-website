@@ -148,7 +148,7 @@ export function mountEditor(
   windowEl.dataset.editorSurface = "source";
 
   const view = new EditorView({
-    state: EditorState.create({ doc: doc.current.text, extensions: editorExtensions(report, reportCaret, reportRate) }),
+    state: EditorState.create({ doc: doc.editableText, extensions: editorExtensions(report, reportCaret, reportRate) }),
     parent: editorLayer,
   });
   editorLayer.dataset.editorMounted = "true";
@@ -161,10 +161,12 @@ export function mountEditor(
     // An edited source must remain the same document when the visitor flips
     // to Document or Split. During an agent stream the scene owns this layer
     // so its word-level marks are not erased by the external-write update.
-    if (state.agent !== "streaming" && state.agent !== "conflict") paintReadLayer(state.text);
-    if (state.text === view.state.doc.toString()) return;
+    const compact = document.documentElement.dataset.film === "true";
+    if (compact || (state.agent !== "streaming" && state.agent !== "conflict")) paintReadLayer(doc.editableText);
+    const editableText = doc.editableText;
+    if (editableText === view.state.doc.toString()) return;
     // External changes (agent resolution, dropped file, reset) land here.
-    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: state.text } });
+    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: editableText } });
   });
 
   return {

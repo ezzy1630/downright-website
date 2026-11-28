@@ -1,70 +1,49 @@
-/**
- * The mobile film. It is a seven-beat reading sequence, not a shrunken
- * desktop: hero, raw-to-render sweep, agent visit, compact benchmark CTA,
- * theme re-ink, free/open close, and the AirDrop handoff.
- *
- * The hero's single `.app-window` travels into the agent and theme slots.
- * The gap uses its own raw/rendered sweep surface because that is the point
- * of the beat; it never creates a second app window. Desktop scenes remain in
- * the document for progressive enhancement but are hidden by the film CSS.
- */
+/** Phone layout for the live Markdown demo and its companion previews. */
 
 import { doc } from "../kernel/store";
-import { benchmarks, themes, facts } from "../data/site";
-import { renderSampleMarkdown, renderSampleBlocks } from "../kernel/renderer";
-import { reducedMotion } from "../kernel/switchboard";
+import { benchmarks, themes } from "../data/site";
+import { renderSampleMarkdown, renderSampleBlocks, renderSourceMarkdown } from "../kernel/renderer";
+import { setWindowView } from "../shell/flip";
 import { switchTheme, currentTheme } from "../shell/spill";
-
-const FILM_QUERY = "(max-width: 900px) and (pointer: coarse)";
-
-export function isFilm(): boolean {
-  if (new URLSearchParams(window.location.search).has("film")) return true;
-  return window.matchMedia(FILM_QUERY).matches;
-}
 
 export function initFilm(): void {
   const forcedFilm = new URLSearchParams(window.location.search).has("film");
-  if (!forcedFilm) initFilmBreakpointGuard();
-  if (!isFilm()) return;
+  const compact = window.matchMedia("(max-width: 900px)").matches;
+  const windowEl = document.querySelector<HTMLElement>(".hero [data-editor-window]");
+  if (!windowEl || (!compact && !forcedFilm)) return;
   document.documentElement.dataset.film = "true";
+
+  windowEl.dataset.slot = "hero";
+  windowEl.querySelector<HTMLButtonElement>('[data-view-button="split"]')?.setAttribute("hidden", "");
+  setWindowView(windowEl, "document");
 
   buildFilmAgentBeat();
   buildFilmCtaBeat();
   buildFilmThemeBeat();
-  buildFilmHandoffBeat();
-  initFilmActiveBeat();
-  initFilmWindowTravel();
-  initTapToType();
   initInsertEditChip();
   initSweepThumb();
   initFilmSpill();
-}
+  initDeliberateScroll();
 
-function initFilmBreakpointGuard(): void {
-  const query = window.matchMedia(FILM_QUERY);
-  const initialMatch = query.matches;
-  query.addEventListener("change", (event) => {
-    if (event.matches !== initialMatch) window.location.reload();
-  }, { once: true });
-}
-
-function initFilmActiveBeat(): void {
-  const beats = ["hero", "gap", "film-agent", "film-cta", "film-theme", "close", "film-handoff"]
-    .map((id) => document.getElementById(id))
-    .filter((element): element is HTMLElement => Boolean(element));
-  if (!beats.length) return;
-  const paint = (): void => {
-    const reference = window.scrollY + window.innerHeight * 0.46;
-    let active = beats[0];
-    for (const beat of beats) {
-      const top = beat.offsetTop;
-      if (top <= reference) active = beat;
+  // Each preview reads the same store as the hero. The agent scene owns its
+  // own marks while a rewrite or review is in progress.
+  const theme = document.querySelector("[data-film-theme-preview]");
+  const agent = document.querySelector("#film-agent [data-static-document]");
+  const hero = windowEl.querySelector("[data-static-document]");
+  const source = windowEl.querySelector("[data-static-source]");
+  let lastText: string | undefined;
+  doc.subscribe((state) => {
+    const text = doc.editableText;
+    if (text === lastText) return;
+    lastText = text;
+    const html = renderSampleMarkdown(text);
+    if (theme) theme.innerHTML = html;
+    if (agent && state.agent !== "conflict" && state.agent !== "streaming") agent.innerHTML = html;
+    if (hero && !windowEl.querySelector('[data-editor-mounted="true"]')) {
+      hero.innerHTML = html;
+      if (source) source.innerHTML = renderSourceMarkdown(text);
     }
-    for (const beat of beats) beat.dataset.filmActive = String(beat === active);
-  };
-  window.addEventListener("scroll", paint, { passive: true });
-  window.addEventListener("resize", paint, { passive: true });
-  paint();
+  });
 }
 
 function buildFilmAgentBeat(): void {
@@ -76,21 +55,28 @@ function buildFilmAgentBeat(): void {
   beat.dataset.rest = "film-agent";
   beat.setAttribute("aria-label", "Agent visit");
   beat.innerHTML = `
-    <p class="film-beat__kicker">Agent visit</p>
     <h2 class="film-beat__title">See the rewrite. Keep the file.</h2>
-    <p class="film-beat__line">The document stays open while an agent writes. Every changed word is marked before you choose.</p>
+    <p class="film-beat__line">Try an external edit to see what changed and decide which version to keep.</p>
     <div class="film-agent-stage" data-agent-stage>
-      <div class="film-agent-stage__window" data-agent-document data-film-window-slot="agent"></div>
-      <div class="conflict-bar" data-conflict-bar role="region" aria-label="External write needs review" hidden>
-        <strong>Agent changed this file.</strong>
-        <button type="button" data-conflict-action="review" data-conflict-focus>Review</button>
-        <button type="button" data-conflict-action="mine">Keep Mine</button>
-        <button type="button" data-conflict-action="theirs">Take Theirs</button>
+      <div class="film-preview" data-agent-document>
+        <div class="film-preview__bar"><b>sample.md</b><span>Live changes</span></div>
+        <div class="film-preview__body">
+          <div class="film-preview__read" data-document-read tabindex="0" aria-label="External edit preview">
+            <div class="document-content" data-static-document></div>
+          </div>
+          <div class="conflict-bar" data-conflict-bar role="region" aria-label="External write needs review" hidden>
+            <strong>You have edits in this file.</strong>
+            <button type="button" data-conflict-action="review" data-conflict-focus>Review</button>
+            <button type="button" data-conflict-action="mine">Keep Mine</button>
+            <button type="button" data-conflict-action="theirs">Take Theirs</button>
+          </div>
+        </div>
       </div>
-      <div class="change-toast glass" data-change-toast role="status" aria-live="polite">
-        <strong>External write</strong><span data-change-summary>…</span>
+      <div class="film-agent-stage__actions">
+        <button type="button" class="film-chip" data-film-rewrite disabled>Try an external edit</button>
+        <span class="film-agent-stage__summary" data-change-toast role="status" aria-live="polite"><span data-change-summary></span></span>
       </div>
-      <div class="review-panel" data-review-panel aria-hidden="true"></div>
+      <dialog class="review-panel" data-review-panel aria-label="Review the external edit"></dialog>
     </div>`;
   section.before(beat);
 }
@@ -103,19 +89,13 @@ function buildFilmCtaBeat(): void {
   beat.id = "film-cta";
   beat.dataset.rest = "film-cta";
   beat.dataset.fingerprint = "film-cta";
-  beat.setAttribute("aria-label", "Send Downright to your Mac");
+  beat.setAttribute("aria-label", "Performance");
   beat.innerHTML = `
-    <p class="film-beat__kicker">A small engine</p>
     <h2 class="film-beat__title">Less time. Less memory.</h2>
     <div class="film-compact-benchmark" aria-label="Performance benchmarks">
       ${benchmarks.pipeline.rows.filter((row) => ["Full parse", "Text diff", "Typing/storage"].includes(row.measurement)).map((row) => `<div><span>${row.measurement}</span><strong>${row.after}</strong></div>`).join("")}
     </div>
-    <p class="film-beat__line">p95 latency on Apple M4. <a href="/benchmarks/">All benchmarks and test conditions</a>.</p>
-    <div class="film-handoff film-cta__handoff" data-fingerprint="film-cta-handoff">
-      <p class="film-handoff__line">On iPhone? Send the page to your Mac, then download there.</p>
-      <button type="button" class="film-handoff__primary" data-share="share">Send it to your Mac</button>
-      <p class="film-handoff__note">The macOS download stays on the Mac where it belongs.</p>
-    </div>`;
+    <p class="film-beat__line">p95 latency on Apple M4. <a href="/benchmarks/">All benchmarks and test conditions</a>.</p>`;
   section.before(beat);
 }
 
@@ -128,140 +108,55 @@ function buildFilmThemeBeat(): void {
   beat.dataset.rest = "film-theme";
   beat.setAttribute("aria-label", "Theme re-ink");
   beat.innerHTML = `
-    <p class="film-beat__kicker">Themes</p>
     <h2 class="film-beat__title">One tap re-inks the page.</h2>
-    <p class="film-beat__line">The same document, six source-derived palettes. Tap a swatch and watch the ink travel from the point of your thumb.</p>
+    <p class="film-beat__line">Try the app’s six themes on the same Markdown file.</p>
     <div class="film-theme-stage">
       <div class="film-spill" role="group" aria-label="Choose a theme">
-        ${themes.filter((theme) => theme.id !== "system").map((theme) => `<button type="button" data-film-theme="${theme.id}" aria-pressed="${theme.id === currentTheme()}"><span class="swatch" style="background:${theme.palette.background};border-color:${theme.palette.accent}"></span>${theme.name}</button>`).join("")}
+        ${themes.map((theme) => `<button type="button" data-film-theme="${theme.id}" aria-pressed="${theme.id === currentTheme()}"><span class="swatch" style="background:${theme.palette.background};border-color:${theme.palette.accent}"></span>${theme.name}</button>`).join("")}
       </div>
-      <div class="film-theme-window" data-film-window-slot="theme" aria-label="Re-inked document window"></div>
+      <div class="film-preview film-preview--theme">
+        <div class="film-preview__bar"><b>sample.md</b><span>Theme preview</span></div>
+        <div class="film-preview__read" tabindex="0" aria-label="Theme preview">
+          <div class="document-content" data-film-theme-preview></div>
+        </div>
+      </div>
     </div>`;
   section.before(beat);
 }
 
-function buildFilmHandoffBeat(): void {
-  const footer = document.querySelector(".site-footer");
-  if (!footer || document.getElementById("film-handoff")) return;
-  const beat = document.createElement("section");
-  beat.className = "film-beat film-beat--handoff";
-  beat.id = "film-handoff";
-  beat.dataset.rest = "film-handoff";
-  beat.setAttribute("aria-label", "Send this page to your Mac");
-  beat.innerHTML = `
-    <p class="film-beat__kicker">AirDrop handoff</p>
-    <h2 class="film-beat__title">The page comes with you.</h2>
-    <div class="film-handoff" data-fingerprint="handoff">
-      <p class="film-handoff__line">Downright lives on your Mac. Send it there.</p>
-      <button type="button" class="film-handoff__primary" data-share="share">AirDrop this page to your Mac</button>
-      <div class="film-handoff__row">
-        <button type="button" data-share="copy">Copy link</button>
-        <button type="button" data-share="mail">Mail it to yourself</button>
-        ${facts.repository ? `<a href="${facts.repository}" target="_blank" rel="noreferrer">★ Star</a>` : ""}
-        ${facts.sponsorsUrl ? `<a href="${facts.sponsorsUrl}" target="_blank" rel="noreferrer">♥ Sponsor</a>` : ""}
-      </div>
-      <p class="film-handoff__note">No email, no server. On iPhone the first option in the share sheet is AirDrop.</p>
-    </div>`;
-  footer.before(beat);
-}
-
-/* ── The living window travels through beats 1, 3, and 5. ─────────────── */
-
-function initFilmWindowTravel(): void {
-  const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
-  if (!windowEl) return;
-  const slots = [
-    { id: "hero", section: "hero", host: () => document.querySelector<HTMLElement>(".hero__window") },
-    { id: "agent", section: "film-agent", host: () => document.querySelector<HTMLElement>("[data-film-window-slot=agent]") },
-    { id: "theme", section: "film-theme", host: () => document.querySelector<HTMLElement>("[data-film-window-slot=theme]") },
-  ] as const;
-  type FilmSlot = (typeof slots)[number];
-  let current: (typeof slots)[number]["id"] = "hero";
-
-  const setWindowMode = (mode: "split" | "document"): void => {
-    windowEl.dataset.view = mode;
-    windowEl.style.setProperty("--segment-index", mode === "split" ? "1" : "0");
-    for (const button of windowEl.querySelectorAll<HTMLButtonElement>("[data-view-button]")) {
-      button.setAttribute("aria-selected", String(button.dataset.viewButton === mode));
-    }
-  };
-
-  const moveTo = (target: (typeof slots)[number]): void => {
-    const host = target.host();
-    if (!host || current === target.id) return;
-    const before = windowEl.getBoundingClientRect();
-    host.append(windowEl);
-    windowEl.dataset.slot = target.id;
-    setWindowMode(target.id === "hero" ? "split" : "document");
-    const after = windowEl.getBoundingClientRect();
-    windowEl.style.removeProperty("transform");
-    if (!reducedMotion() && before.width && after.width) {
-      windowEl.dataset.filmFlying = "true";
-      windowEl.style.opacity = "0";
-      requestAnimationFrame(() => {
-        windowEl.style.transition = "opacity 180ms cubic-bezier(.22,.82,.28,1)";
-        windowEl.style.opacity = "1";
-        window.setTimeout(() => {
-          delete windowEl.dataset.filmFlying;
-          windowEl.style.removeProperty("transition");
-          windowEl.style.removeProperty("opacity");
-        }, 220);
-      });
-    }
-    current = target.id;
-  };
-
-  const settle = (): void => {
-    const reference = window.scrollY + window.innerHeight * 0.44;
-    let target: FilmSlot = slots[0];
-    for (const slot of slots) {
-      const section = document.getElementById(slot.section);
-      if (section && section.offsetParent !== null && section.offsetTop <= reference) target = slot;
-    }
-    moveTo(target);
-  };
-  window.addEventListener("scroll", settle, { passive: true });
-  window.addEventListener("resize", settle, { passive: true });
-  requestAnimationFrame(settle);
-}
-
-/* ── Beat 1: type into the real hero window. ──────────────────────────── */
-
-function initTapToType(): void {
-  const windowEl = document.querySelector<HTMLElement>("[data-editor-window]");
-  const body = windowEl?.querySelector<HTMLElement>("[data-window-body]");
-  if (!windowEl || !body) return;
-  const caption = document.querySelector<HTMLElement>("[data-film-invite]");
-  if (caption) {
-    caption.textContent = "This window is real. Type in it.";
-    caption.classList.add("is-settled");
+/**
+ * A preview pane scrolls on its own only after the visitor picks it: a tap,
+ * focus, or one of its controls. Until then a thumb resting on a preview
+ * moves the page, like on any other document.
+ */
+function initDeliberateScroll(): void {
+  const demos: [demo: string, scroller: string][] = [
+    [".hero__window", ".app-window__read"],
+    ["[data-agent-stage]", ".film-preview__read"],
+    [".film-theme-stage", ".film-preview__read"],
+    [".gap-section .sweep", ".sweep__surface"],
+  ];
+  for (const [demoSelector, scrollerSelector] of demos) {
+    const demo = document.querySelector<HTMLElement>(demoSelector);
+    if (!demo) continue;
+    const engage = (): void => {
+      for (const scroller of demo.querySelectorAll<HTMLElement>(scrollerSelector)) scroller.dataset.scrollEngaged = "true";
+    };
+    for (const type of ["click", "focusin", "input"]) demo.addEventListener(type, engage, { once: true });
   }
-  let loading = false;
-  const isMounted = (): boolean => body.querySelector<HTMLElement>("[data-document-editor]")?.dataset.editorMounted === "true";
-  document.querySelector<HTMLButtonElement>("[data-film-type]")?.addEventListener("click", () => {
-    if (isMounted() || loading) return;
-    loading = true;
-    void import("../editor/mount").then(({ mountEditor }) => {
-      if (isMounted()) return;
-      const mounted = mountEditor(windowEl, body);
-      requestAnimationFrame(() => mounted.view.focus());
-    }).finally(() => {
-      loading = false;
-    });
-  });
 }
 
 function initInsertEditChip(): void {
   const chip = document.querySelector<HTMLButtonElement>("[data-film-insert]");
   if (!chip) return;
   chip.addEventListener("click", () => {
-    doc.edit(`${doc.current.text}\n\n- [ ] tapped from the phone - the Mac gets the real thing`);
-    const surface = document.querySelector<HTMLElement>("[data-document-read] [data-static-document]");
-    if (surface) surface.innerHTML = renderSampleMarkdown(doc.current.text);
-    const label = chip.textContent ?? "";
-    chip.textContent = "inserted ✓";
-    window.setTimeout(() => { chip.textContent = label; }, 1600);
-  });
+    doc.edit(`${doc.editableText}
+
+- [ ] Try Downright on my Mac`);
+    chip.textContent = "Edit inserted";
+    const read = document.querySelector<HTMLElement>(".hero [data-document-read]");
+    if (read && read.getClientRects().length) read.scrollTop = read.scrollHeight;
+  }, { once: true });
 }
 
 /* ── Beat 2: the raw-to-render sweep, driven by a thumb. ──────────────── */
@@ -271,6 +166,8 @@ function initSweepThumb(): void {
   const slot = document.querySelector<HTMLElement>("[data-window-slot=gap]");
   if (!sweep || !slot || slot.dataset.filmSweep === "built") return;
   slot.dataset.filmSweep = "built";
+  const intro = sweep.querySelector("[data-sweep-lede]");
+  if (intro) intro.textContent = "Drag to compare Quick Look with Downright.";
   // The desktop re-parents THE window into this slot; the film has no travel,
   // so it builds the simpler sheet inline — same chrome story (Quick Look
   // first, Downright after the line passes), lighter bones.
@@ -279,8 +176,8 @@ function initSweepThumb(): void {
       <span class="traffic-lights traffic-lights--ql" aria-hidden="true"><i></i></span>
       <span class="traffic-lights traffic-lights--app" aria-hidden="true"><i></i><i></i><i></i></span>
       <span class="sweep__title">sample.md</span>
-      <span class="sweep__action sweep__action--ql">Open with…</span>
-      <span class="sweep__action sweep__action--app">Downright · Live</span>
+      <span class="sweep__action sweep__action--ql">Quick Look</span>
+      <span class="sweep__action sweep__action--app">Downright</span>
     </div>
     <div class="sweep__surface" data-sweep-surface>
       <i class="sweep__line" data-sweep-line aria-hidden="true"></i>
@@ -309,56 +206,24 @@ function initSweepThumb(): void {
   if (windowEl) windowEl.dataset.chrome = "ql";
   const track = document.createElement("div");
   track.className = "film-scrub";
-  track.innerHTML = `<div class="film-scrub__track" role="slider" tabindex="0" aria-label="Scrub the render" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="film-scrub__fill"></div><div class="film-scrub__thumb"></div></div><div class="film-scrub__label"><span>raw bytes</span><span>rendered</span></div>`;
+  track.innerHTML = `<input class="film-scrub__track" type="range" min="0" max="100" value="0" aria-label="Markdown rendering"><div class="film-scrub__label" aria-hidden="true"><span>Markdown</span><span>Rendered</span></div>`;
   sweep.append(track);
-  const slider = track.querySelector<HTMLElement>(".film-scrub__track")!;
-  const paint = (progress: number): void => {
-    track.style.setProperty("--scrub", progress.toFixed(4));
-    slider.setAttribute("aria-valuenow", String(Math.round(progress * 100)));
+  const slider = track.querySelector<HTMLInputElement>("input")!;
+  const paint = (): void => {
+    const progress = slider.valueAsNumber / 100;
+    slider.style.setProperty("--scrub", slider.value + "%");
+    slider.setAttribute("aria-valuetext", progress === 0 ? "Markdown" : progress === 1 ? "Rendered" : `${slider.value}% rendered`);
     if (windowEl) windowEl.dataset.chrome = progress >= 0.86 ? "app" : "ql";
     for (const block of blocks) {
-      const turn = Math.min(1, Math.max(0, (progress - block.at) / 0.08));
-      const handedOff = turn >= 0.5;
-      block.raw.style.opacity = handedOff ? "0" : "1";
-      block.rendered.style.opacity = handedOff ? "1" : "0";
-      block.rendered.style.transform = `translateY(${handedOff ? "0" : "7"}px)`;
-      block.raw.style.transform = `translateY(${handedOff ? "-7" : "0"}px)`;
+      const handedOff = progress >= block.at;
+      block.raw.toggleAttribute("inert", handedOff);
+      block.raw.style.visibility = handedOff ? "hidden" : "visible";
+      block.rendered.toggleAttribute("inert", !handedOff);
+      block.rendered.style.visibility = handedOff ? "visible" : "hidden";
     }
-    const total = surface.scrollHeight - surface.clientHeight;
-    if (total > 0) surface.scrollTop = Math.min(1, Math.max(0, (progress - 0.18) / 0.82)) * total;
   };
-  let scrubbing = false;
-  const setFromClient = (clientX: number): void => {
-    const rect = slider.getBoundingClientRect();
-    paint(Math.min(1, Math.max(0, (clientX - rect.left) / rect.width)));
-  };
-  slider.addEventListener("pointerdown", (event) => { scrubbing = true; slider.setPointerCapture(event.pointerId); setFromClient(event.clientX); });
-  slider.addEventListener("pointermove", (event) => { if (scrubbing) setFromClient(event.clientX); });
-  const end = (): void => { scrubbing = false; };
-  slider.addEventListener("pointerup", end);
-  slider.addEventListener("pointercancel", end);
-  slider.addEventListener("keydown", (event) => {
-    const current = Number(slider.getAttribute("aria-valuenow") ?? "0") / 100;
-    if (event.key === "ArrowRight" || event.key === "ArrowUp") { event.preventDefault(); paint(Math.min(1, current + 0.05)); }
-    if (event.key === "ArrowLeft" || event.key === "ArrowDown") { event.preventDefault(); paint(Math.max(0, current - 0.05)); }
-  });
-  if (reducedMotion()) paint(1);
-  else {
-    let played = false;
-    const observer = new IntersectionObserver((entries) => {
-      if (played || !entries.some((entry) => entry.isIntersecting)) return;
-      played = true;
-      observer.disconnect();
-      const start = performance.now();
-      const run = (now: number): void => {
-        const t = Math.min(1, (now - start) / 1600);
-        paint(1 - Math.pow(1 - t, 3));
-        if (t < 1 && !scrubbing) requestAnimationFrame(run);
-      };
-      requestAnimationFrame(run);
-    }, { threshold: 0.35 });
-    observer.observe(surface);
-  }
+  slider.addEventListener("input", paint);
+  paint();
 }
 
 /* ── Beat 5: real theme controls, same theme engine as the header. ────── */
@@ -373,8 +238,4 @@ function initFilmSpill(): void {
       beat.querySelectorAll<HTMLButtonElement>("[data-film-theme]").forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
     });
   });
-}
-
-export function filmShareMounted(): boolean {
-  return Boolean(document.querySelector("#film-handoff [data-share]"));
 }

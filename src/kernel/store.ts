@@ -37,6 +37,10 @@ class DocumentStore {
     return this.state;
   }
 
+  get editableText(): string {
+    return this.state.agent === "conflict" && this.state.revision ? this.state.revision.mine : this.state.text;
+  }
+
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
     listener(this.state);
@@ -52,7 +56,11 @@ class DocumentStore {
 
   /** A visitor edit (hero typing, mobile "insert an edit" chip). */
   edit(text: string): void {
-    if (text === this.state.text) return;
+    if (text === this.editableText) return;
+    if (this.state.agent === "conflict" && this.state.revision) {
+      this.commit({ revision: { ...this.state.revision, mine: text } });
+      return;
+    }
     this.commit({ text, dirty: true });
   }
 
